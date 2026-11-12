@@ -1,10 +1,10 @@
-# MSHV-IC8TEM - build all distributions and publish a GitHub Release on tags v*
+# MSHV-IC8TEM - build all distributions; when a GitHub Release is published, attach every package to it
 name: Build all distributions
 
 on:
   workflow_dispatch:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
 
 env:
   MSHV_VERSION: 2.76.7-ic8tem.1
@@ -320,7 +320,7 @@ jobs:
   # ---------------------------------------------------------------- Release
   release:
     name: GitHub Release
-    if: startsWith(github.ref, 'refs/tags/') && always()
+    if: github.event_name == 'release' && always()
     needs: [windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, freebsd, openbsd, macos]
     runs-on: ubuntu-24.04
     steps:
@@ -332,6 +332,7 @@ jobs:
       - run: ls -la dist && (cd dist && sha256sum * > SHA256SUMS.txt)
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.release.tag_name }}
           name: MSHV-IC8TEM ${{ env.MSHV_VERSION }}
           body_path: packaging/RELEASE_NOTES.md
           files: dist/*
