@@ -15,7 +15,7 @@
 #ifndef MSHV_MAC_COMPLEX_SHIM_H
 #define MSHV_MAC_COMPLEX_SHIM_H
 
-#if defined(_MACOS_)
+#if defined(_MACOS_) || defined(_LIBCPP_VERSION) //IC8TEM: any clang/libc++ build (FreeBSD, Windows ARM64, OpenBSD)
 
 #ifndef _Complex_I
 #define _Complex_I ((double _Complex)__builtin_complex(0.0, 1.0))

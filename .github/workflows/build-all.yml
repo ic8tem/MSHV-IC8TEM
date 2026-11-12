@@ -51,14 +51,18 @@ jobs:
         shell: pwsh
         run: |
           $env:PATH = "$env:QT_ROOT_DIR\bin;$env:IQTA_TOOLS\${{ matrix.mingw }}\bin;$env:PATH"
-          & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --qmake "$env:QT_ROOT_DIR\bin\qmake.exe" --release --no-translations --compiler-runtime bin\MSHV-IC8TEM.exe
-          if (-not (Test-Path bin\platforms\qwindows.dll)) {
-            New-Item -ItemType Directory -Force bin\platforms, bin\styles, bin\imageformats | Out-Null
-            Copy-Item "$env:QT_ROOT_DIR\plugins\platforms\qwindows.dll" bin\platforms\
-            Copy-Item "$env:QT_ROOT_DIR\plugins\styles\qwindowsvistastyle.dll" bin\styles\ -ErrorAction SilentlyContinue
-            Copy-Item "$env:QT_ROOT_DIR\plugins\imageformats\*.dll" bin\imageformats\ -ErrorAction SilentlyContinue
-            foreach ($d in 'Qt5Core','Qt5Gui','Qt5Network','Qt5WebSockets','Qt5Widgets') { Copy-Item "$env:QT_ROOT_DIR\bin\$d.dll" bin\ }
-            foreach ($d in 'libgcc_s_seh-1','libgcc_s_dw2-1','libstdc++-6','libwinpthread-1') { Copy-Item "$env:QT_ROOT_DIR\bin\$d.dll" bin\ -ErrorAction SilentlyContinue }
+          & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --release --no-translations --compiler-runtime bin\MSHV-IC8TEM.exe
+          $global:LASTEXITCODE = 0
+          New-Item -ItemType Directory -Force bin\platforms, bin\styles, bin\imageformats | Out-Null
+          Copy-Item "$env:QT_ROOT_DIR\plugins\platforms\qwindows.dll" bin\platforms\ -Force
+          Copy-Item "$env:QT_ROOT_DIR\plugins\styles\qwindowsvistastyle.dll" bin\styles\ -Force -ErrorAction SilentlyContinue
+          Copy-Item "$env:QT_ROOT_DIR\plugins\imageformats\*.dll" bin\imageformats\ -Force -ErrorAction SilentlyContinue
+          Remove-Item bin\imageformats\*d.dll -ErrorAction SilentlyContinue
+          foreach ($d in 'Qt5Core','Qt5Gui','Qt5Network','Qt5WebSockets','Qt5Widgets','libEGL','libGLESv2','d3dcompiler_47','opengl32sw') {
+            if (Test-Path "$env:QT_ROOT_DIR\bin\$d.dll") { Copy-Item "$env:QT_ROOT_DIR\bin\$d.dll" bin\ -Force }
+          }
+          foreach ($d in 'libgcc_s_seh-1','libgcc_s_dw2-1','libstdc++-6','libwinpthread-1') {
+            if (Test-Path "$env:QT_ROOT_DIR\bin\$d.dll") { Copy-Item "$env:QT_ROOT_DIR\bin\$d.dll" bin\ -Force }
           }
           if (-not (Test-Path bin\platforms\qwindows.dll)) { throw "qwindows.dll missing" }
           Get-ChildItem bin -Recurse -Force -Filter .gitkeep | Remove-Item -Force
@@ -281,7 +285,7 @@ jobs:
       matrix:
         include:
           - arch: apple-silicon
-            runner: macos-14
+            runner: macos-15
           - arch: intel
             runner: macos-15-intel
     steps:

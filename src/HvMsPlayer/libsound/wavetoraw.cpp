@@ -4,7 +4,11 @@
 
 // Wavetoraw.cc
 // Server which strips wave header.
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) //VU2CPL + IC8TEM
+#include <stdlib.h>
+#else
 #include <malloc.h>
+#endif
 
 #include "mpegsound.h"
 #include <QMessageBox>

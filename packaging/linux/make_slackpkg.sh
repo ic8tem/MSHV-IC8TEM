@@ -2,7 +2,7 @@
 # Slackware package (.txz) from the staged tree.
 # usage: make_slackpkg.sh <outdir> <slack-arch>
 set -e
-OUT="$1"; SA="$2"; V="${MSHV_VERSION:-0.0}"
+OUT="$(mkdir -p "$1" && cd "$1" && pwd)"; SA="$2"; V="${MSHV_VERSION:-0.0}"
 SV="$(echo "$V" | tr '-' '_')"
 T="$(mktemp -d)"; R="$T/root"
 sh packaging/linux/stage_root.sh "$R"
