@@ -7,15 +7,15 @@
     <key>CFBundleIconFile</key>
     <string>MSHV.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>org.lz2hv.MSHV</string>
+    <string>org.ic8tem.MSHV-IC8TEM</string>
     <key>CFBundleName</key>
-    <string>MSHV</string>
+    <string>MSHV-IC8TEM</string>
     <key>CFBundleDisplayName</key>
-    <string>MSHV</string>
+    <string>MSHV-IC8TEM</string>
     <key>CFBundleVersion</key>
-    <string>2.76.6</string>
+    <string>2.76.7.1</string>
     <key>CFBundleShortVersionString</key>
-    <string>2.76.6</string>
+    <string>2.76.7</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleSignature</key>
