@@ -1,0 +1,21 @@
+# build output
+build/
+release/
+debug/
+Makefile
+Makefile.*
+*.o
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+.qmake.stash
+object_script.*
+bin/*.exe
+bin/*.dll
+bin/platforms/
+bin/styles/
+bin/imageformats/
+bin/iconengines/
+bin/bearer/
+bin/translations/

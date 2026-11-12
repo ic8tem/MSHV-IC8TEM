@@ -1,2 +1,44 @@
 # MSHV-IC8TEM
-EME modifies + LoTW verification addendum's
+
+Modified version of **MSHV 2.76.7** by Hrisimir Hristov, LZ2HV, with additions by **Costantino, IC8TEM**.
+
+> This is **not** the official MSHV. Please report problems with this version to IC8TEM, not to LZ2HV.
+> Official MSHV: <https://sourceforge.net/projects/mshv/>
+
+## What is added
+
+| Area | Addition |
+|---|---|
+| Astronomical Data | **Doppler tracking** panel like WSJT-X: Full Doppler to DX Grid, Own Echo, **Constant Frequency on Moon (CFOM)**, On DX Echo, Call DX, None. Sked frequency, Set kHz, live Rx/Tx frequencies, **Tx Shift up to ±999.999 MHz**. Frequencies are sent to the rig via CAT (TX frequency set before PTT, RX frequency after PTT off). |
+| LoTW | Options → Network Configuration → **Page 3**: load `lotw-user-activity.csv` from ARRL, choose the minimum last-upload date. A **black dot** at the right edge of the message column marks decodes from LoTW users. |
+| Decode List Filters | New **Show LoTW Users Only** option (messages addressed to you are always shown). |
+| Log | **Fictitious log reset YYYYMMDDHHmmSS (UTC)**: QSOs before that time are ignored for worked-before calls/locators (new squares) and dupe check. The log is not modified. |
+| Multi Answer | Optional **Unlock TX Slots** checkbox, **OFF by default** (original LZ2HV limits apply unless you enable it). |
+| Mode switcher | Default mode buttons: FT8, FT4, Q65B, Q65C, Q65A, MSK144, JT65B. |
+| Fix | `astro()` used a non-initialized local array for the DX Doppler (`xdop[2]`); now `static`. |
+
+Every change in the source is marked with the comment `IC8TEM mod`. The full list is in [CHANGES_IC8TEM.md](CHANGES_IC8TEM.md).
+
+## Downloads
+
+Ready-made packages for Windows (x64, x86, ARM64), Linux (AppImage, tar.gz, .deb, .rpm; x86_64, i686, aarch64, armhf/armv7l), Raspberry Pi OS 32/64 bit, Slackware ARM64, FreeBSD and macOS are on the [Releases](../../releases) page.
+
+## Building
+
+* **GitHub Actions**: *Actions* → *Build all distributions* → *Run workflow* builds every package; pushing a tag `v*` also publishes a release.
+* **Windows, local**: run `compila.bat` (installs MSYS2 + Qt5 in `C:\msys64` the first time, then builds into `bin\`).
+* **Linux / BSD, local**: install Qt5 (widgets, network, websockets), ALSA, PulseAudio, FFTW3 development packages, then `sh packaging/linux/build_unix.sh MSHV_x86_64.pro`.
+* Original instructions by LZ2HV: `README_HOW_TO_COMPILE.txt`.
+
+## License
+
+MSHV is free software released under the **GNU General Public License v3** (see [COPYING.txt](COPYING.txt)); this modified version is distributed under the same license.
+
+* MSHV — Copyright © Hrisimir Hristov, LZ2HV.
+* JT6M, JT9, JT65, JTMS, QRA64, ISCAT, MSK144, FT8, FT4, Q65 algorithms and code — Copyright © 2001-2025 Joseph Taylor, K1JT, and the WSJT Development Group (GPLv3).
+* FFTW — GPL; qextserialport — MIT; Qt — LGPLv3 (dynamically linked).
+* Modifications — Copyright © 2026 Costantino, IC8TEM, released under GPLv3.
+
+This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Contact: IC8TEM — <https://www.qrz.com/db/ic8tem>

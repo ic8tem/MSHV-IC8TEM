@@ -1,0 +1,1818 @@
+diff -ruN orig/MSHV_2767/src/HvDecodeList/decodelist.cpp src/MSHV_2767/src/HvDecodeList/decodelist.cpp
+--- orig/MSHV_2767/src/HvDecodeList/decodelist.cpp	2026-11-03 16:00:03.262807624 +0100
++++ src/MSHV_2767/src/HvDecodeList/decodelist.cpp	2026-11-12 11:26:41.013314892 +0100
+@@ -3,6 +3,8 @@
+  * May be used under the terms of the GNU General Public License (GPL)
+  */
+ #include "decodelist.h"
++#include "../mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
++#include "../HvTxW/HvRadioNetW/hvlotwusers.h"//IC8TEM mod LoTW
+ #include "../config.h"
+ #include "../config_str_all.h"
+ //#include <QtGui>
+@@ -87,7 +89,7 @@
+ /*HvHeader::HvHeader( Qt::Orientation orientation, QWidget *parent )
+         : QHeaderView(orientation, parent)
+ {
+-    QString App_Path = (QCoreApplication::applicationDirPath());
++    QString App_Path = (MshvAppPath());
+     //int nFont = QFontDatabase::addApplicationFont (App_Path+"/settings/font/arial.ttf");//registriram fonta//  xsuni
+        //int nFont = QFontDatabase::addApplicationFont (App_Path+"/settings/font/times.ttf");
+        int nFont = QFontDatabase::addApplicationFont (App_Path+"/settings/font/xsuni.ttf");
+@@ -128,6 +130,7 @@
+     f_hide_c[7]=false;//usefudpdectxt
+     f_hide_c[8]=false;//b4qso
+     f_hide_c[9]=false;//filtered_answer
++    f_hide_c[10]=false;//IC8TEM mod LoTW only
+     show_customf_list = false;
+     list_customf.clear();
+     show_cufspec_list = false;
+@@ -984,7 +987,7 @@
+     {
+         RefreshFastDcml();
+         RefreshFiltHeadColor(show_filter_list,hide_filter_list,show_customf_list,show_cufspec_list,
+-                             show_cufend_list,show_cnyf_list,show_pfxf_list,hide_cnyf_list,f_hide_c[8]);
++                             show_cufend_list,show_cnyf_list,show_pfxf_list,hide_cnyf_list,(f_hide_c[8] || f_hide_c[10]));
+     }
+ }
+ void DecodeList::SetActivityId(QString myloc)
+@@ -1240,6 +1243,7 @@
+     f_hide_c[7]=fh[7];//usefudpdectxt
+     f_hide_c[8]=fh[8];//b4qso
+     f_hide_c[9]=fh[9];//filtered_answer
++    f_hide_c[10]=fh[10];//IC8TEM mod LoTW only
+     if (f_hide_c[0] || f_hide_c[1] || f_hide_c[2] || f_hide_c[3] || f_hide_c[4] || f_hide_c[5] || f_hide_c[6]) hide_filter_list = true;
+     else hide_filter_list =false;
+ 
+@@ -1252,7 +1256,7 @@
+     SetFilterParms(lc5,list_hidcnyf,hide_cnyf_list);
+ 
+     RefreshFiltHeadColor(show_filter_list,hide_filter_list,show_customf_list,show_cufspec_list,
+-                         show_cufend_list,show_cnyf_list,show_pfxf_list,hide_cnyf_list,f_hide_c[8]);
++                         show_cufend_list,show_cnyf_list,show_pfxf_list,hide_cnyf_list,(f_hide_c[8] || f_hide_c[10]));
+     /*qDebug()<<is_filters_active<<"F="<<f_hide_c[0]<<f_hide_c[1]<<f_hide_c[2]<<f_hide_c[3]<<f_hide_c[4]<<f_hide_c[5]<<
+     f_hide_c[6]<<list_filter<<list_cnyf<<list_pfxf<<list_cufend<<list_customf<<list_cufspec<<f_hide_c[7];*/
+     //qDebug()<<"f_hide_c[9]"<<f_hide_c[9];
+@@ -1519,8 +1523,9 @@
+             //QString call = "";
+             bool f_b4qso = false;
+             if (f_hide_c[8] && !list_b4qso.isEmpty()) f_b4qso = true; //qDebug()<<"f_b4qso="<<f_b4qso;//2.69
++            bool f_nolotw = (f_hide_c[10] && HvLotwUsersW::HasList());//IC8TEM mod (no list loaded = no hiding)
+             if (hide_filter_list || show_customf_list || show_cufspec_list || show_cnyf_list ||
+-                    show_pfxf_list || hide_cnyf_list || f_b4qso) call = FindHisCall(list.at(4));
++                    show_pfxf_list || hide_cnyf_list || f_b4qso || f_nolotw) call = FindHisCall(list.at(4));
+ 
+             QString pfx,coy,cot;
+             bool ispfx  = false;
+@@ -1562,6 +1567,7 @@
+                 if (hide_cnyf_list && f_sho0) f_sho0 = THvCty->HideCountry(call,list_hidcnyf,coy);//Hide Country //ispfx,
+                 if (f_b4qso && f_sho0) f_sho0 = HideB4Qso(call);//Hide B4QSO
+             }
++            if (f_nolotw && f_sho0) f_sho0 = HvLotwUsersW::IsLotwValid(call);//IC8TEM mod LoTW users only
+         }
+         if (is_filters_active && !freply) freply = f_sho0;
+         //if (is_filters_active && !forme ) freply = false;
+@@ -1874,6 +1880,30 @@
+     ///painter->setOpacity(0.5);
+     QTreeView::drawRow(painter, opt, index);
+ 
++    //IC8TEM mod: black dot at the right of the decoded line if the sender is a LoTW user
++    if (HvLotwUsersW::IsShowActive() && msg_column < model.columnCount() && model.item(index.row(),msg_column))
++    {
++        QString msg = model.item(index.row(),msg_column)->text();
++        QString call = const_cast<DecodeList*>(this)->FindHisCall(msg.split("\n").last().trimmed());
++        if (!call.isEmpty() && HvLotwUsersW::IsLotwUser(call))
++        {
++            QFontMetrics fmd(opt.font);
++            int nlines = msg.count("\n");
++            int d = fmd.height()/2;
++            if (d < 6) d = 6;
++            // aligned at the right edge of the decoded-message column (same x for every row)
++            int xcol = header()->sectionPosition(msg_column) + opt.rect.x();
++            int xd = xcol + header()->sectionSize(msg_column) - d - 6;
++            int yd = opt.rect.y() + nlines*fmd.height() + (fmd.height()-d)/2;
++            painter->save();
++            painter->setRenderHint(QPainter::Antialiasing,true);
++            painter->setPen(dsty ? QPen(QColor(220,220,220),1) : Qt::NoPen);
++            painter->setBrush(QColor(0,0,0));
++            painter->drawEllipse(QRect(xd,yd,d,d));
++            painter->restore();
++        }
++    }
++
+     if (!s_mark_txt.isEmpty())
+     {
+         painter->setFont(opt.font);
+diff -ruN orig/MSHV_2767/src/HvDecodeList/decodelist.h src/MSHV_2767/src/HvDecodeList/decodelist.h
+--- orig/MSHV_2767/src/HvDecodeList/decodelist.h	2026-11-03 16:00:03.263031181 +0100
++++ src/MSHV_2767/src/HvDecodeList/decodelist.h	2026-11-05 23:23:01.550388836 +0100
+@@ -117,7 +117,7 @@
+     bool f_otp_show_msg;
+ 	bool dsty;
+ 	bool is_filters_active;	
+-	bool f_hide_c[10];
++	bool f_hide_c[11];//IC8TEM mod [10]=LoTW users only
+ 	bool hide_filter_list;
+ 	QStringList list_filter;
+     bool is_filter_dec;
+diff -ruN orig/MSHV_2767/src/HvDecodeList/hvcty.cpp src/MSHV_2767/src/HvDecodeList/hvcty.cpp
+--- orig/MSHV_2767/src/HvDecodeList/hvcty.cpp	2026-11-03 16:00:03.263092172 +0100
++++ src/MSHV_2767/src/HvDecodeList/hvcty.cpp	2026-11-12 11:26:41.012722004 +0100
+@@ -3,6 +3,7 @@
+  * May be used under the terms of the GNU General Public License (GPL)
+  */
+ #include "hvcty.h"
++#include "../mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
+ #include <QTextStream>
+ 
+ //#include <QtGui>
+@@ -52,7 +53,7 @@
+ }
+ void HvCty::ReadCtyDat()
+ {
+-    QString path = (QCoreApplication::applicationDirPath());
++    QString path = (MshvAppPath());
+     path.append("/settings/database/cty.dat");
+     QFile file(path);
+     if (!file.open(QIODevice::ReadOnly)) return;
+diff -ruN orig/MSHV_2767/src/HvDecodeList/hvfilterdialog.cpp src/MSHV_2767/src/HvDecodeList/hvfilterdialog.cpp
+--- orig/MSHV_2767/src/HvDecodeList/hvfilterdialog.cpp	2026-11-03 16:00:03.263249778 +0100
++++ src/MSHV_2767/src/HvDecodeList/hvfilterdialog.cpp	2026-11-05 23:23:01.550144693 +0100
+@@ -36,6 +36,10 @@
+     //GB_HIDE->setContentsMargins(0, 15, 0, 0);
+ 
+ 	cb_hide_b4qso = new QCheckBox(tr("Hide QSO B4 Messages"));
++	cb_hide_nolotw = new QCheckBox(tr("Show LoTW Users Only"));//IC8TEM mod
++	cb_hide_nolotw->setToolTip(tr("Hide stations that are not in the LoTW list (no black dot)")+"\n"+
++	                           tr("LoTW list: Options, Network Configuration, Page 3")+"\n"+
++	                           tr("Messages addressed to you are always shown"));
+ 	//cb_hide_b4qso->setToolTip(tr("Filtered By: Call, Band, Mode")+"\n"
+ 							 //+tr("Activated in Menu Options, Text Highlight, Section 2"));
+ 
+@@ -207,6 +211,7 @@
+     hbcq->setContentsMargins(7, 5, 5, 5);
+     hbcq->setSpacing(5);
+     hbcq->addWidget(cb_hide_b4qso);
++    hbcq->addWidget(cb_hide_nolotw);//IC8TEM mod
+     hbcq->addWidget(cb_cq);
+     hbcq->addWidget(cb_cq73);
+ 
+@@ -533,6 +538,7 @@
+     cb_usefudpdectxt->setChecked(false);
+     cb_gonoff->setChecked(false); 
+     cb_hide_b4qso->setChecked(false);
++    cb_hide_nolotw->setChecked(false);//IC8TEM mod
+     cb_usebtflonoff->setChecked(false);
+     cb_filtered_answer->setChecked(false);
+ 
+@@ -562,7 +568,7 @@
+     QStringList lc3;
+     QStringList lc4;
+     QStringList lc5;
+-    bool fh[10];
++    bool fh[11];
+     fh[0]=false;
+     fh[1]=false;
+     fh[2]=false;
+@@ -573,6 +579,7 @@
+     fh[7]=false;
+     fh[8]=false;
+     fh[9]=false;
++    fh[10]=false;//IC8TEM mod LoTW only
+     lc.clear();
+     lc0.clear();
+     lc1.clear();
+@@ -587,6 +594,7 @@
+         fh[7]=cb_usefudpdectxt->isChecked(); //usefudpdectxt
+         fh[8]=cb_hide_b4qso->isChecked();
+         fh[9]=cb_filtered_answer->isChecked();
++        fh[10]=cb_hide_nolotw->isChecked();//IC8TEM mod
+         if (cb_cq->isChecked())   lc.append("CQ ");
+         if (cb_cq73->isChecked()) lc << "CQ " << " RR73" << " 73";
+         if (cb_ccq->isChecked())
+@@ -622,7 +630,7 @@
+     		break;
+    		}
+    	}
+- 	if (fh[8] || !lc.isEmpty() || !lc0.isEmpty() || !lc1.isEmpty()|| !lc2.isEmpty()|| !lc3.isEmpty() ||
++ 	if (fh[8] || fh[10] || !lc.isEmpty() || !lc0.isEmpty() || !lc1.isEmpty()|| !lc2.isEmpty()|| !lc3.isEmpty() ||
+  		 !lc4.isEmpty() || !lc5.isEmpty()) f = true;
+     RefreshPbSetOnOff(f);
+ }
+@@ -661,6 +669,7 @@
+         if (lts.at(12)=="1") cb_hide_b4qso->setChecked(true);
+         if (lts.at(13)=="1") cb_usebtflonoff->setChecked(true);
+         if (lts.at(14)=="1") cb_filtered_answer->setChecked(true);
++        if (lts.count()>15 && lts.at(15)=="1") cb_hide_nolotw->setChecked(true);//IC8TEM mod
+ 		/*if (f) cb_filtered_answer->setHidden(false);
+ 		else 
+ 		{
+@@ -725,6 +734,8 @@
+     res.append(QString("%1").arg(cb_usebtflonoff->isChecked()));
+     res.append("#");
+     res.append(QString("%1").arg(cb_filtered_answer->isChecked()));
++    res.append("#");
++    res.append(QString("%1").arg(cb_hide_nolotw->isChecked()));//IC8TEM mod
+     return res.trimmed();
+ }
+ QString HvFilterDialog::GetSettings0()
+diff -ruN orig/MSHV_2767/src/HvDecodeList/hvfilterdialog.h src/MSHV_2767/src/HvDecodeList/hvfilterdialog.h
+--- orig/MSHV_2767/src/HvDecodeList/hvfilterdialog.h	2026-11-03 16:00:03.263369467 +0100
++++ src/MSHV_2767/src/HvDecodeList/hvfilterdialog.h	2026-11-05 23:23:01.549721631 +0100
+@@ -66,6 +66,7 @@
+     QLabel *ltext;    
+     QCheckBox *cb_hacontt[7];
+     QCheckBox *cb_hide_b4qso;
++    QCheckBox *cb_hide_nolotw;//IC8TEM mod
+     QCheckBox *cb_cq;
+     QCheckBox *cb_ccq;
+     QCheckBox *cb_cq73;
+diff -ruN orig/MSHV_2767/src/HvMsCore/mscore.cpp src/MSHV_2767/src/HvMsCore/mscore.cpp
+--- orig/MSHV_2767/src/HvMsCore/mscore.cpp	2026-11-03 16:00:03.270935885 +0100
++++ src/MSHV_2767/src/HvMsCore/mscore.cpp	2026-11-12 11:24:47.758380579 +0100
+@@ -98,6 +98,7 @@
+     rad_sound_state.interupts = 0;
+ 
+     FFT1 = FFT2 = ptWriteFft = NULL;
++    fft_avg = fft_window = NULL;//IC8TEM mod, fix by VU2CPL: record_app() frees both before the first allocation
+     count_ftt_window = 0;
+ 
+     bool p_read_snd = true;
+diff -ruN orig/MSHV_2767/src/HvRigControl/HvRigCat/network/flexpanel.cpp src/MSHV_2767/src/HvRigControl/HvRigCat/network/flexpanel.cpp
+--- orig/MSHV_2767/src/HvRigControl/HvRigCat/network/flexpanel.cpp	2026-11-03 16:00:03.283455334 +0100
++++ src/MSHV_2767/src/HvRigControl/HvRigCat/network/flexpanel.cpp	2026-11-12 11:24:47.758702106 +0100
+@@ -145,6 +145,11 @@
+                                "The radio TRANSMITS while it tunes -\n"
+                                "put an amplifier in standby first."));
+     pb_atu_bypass->setToolTip(tr("Takes the tuner out of the antenna path (atu bypass)."));
++    //IC8TEM mod, fix by VU2CPL: never the dialog's default button, Enter in a power box must not start a tune (TX)
++    pb_atu_tune->setAutoDefault(false);
++    pb_atu_tune->setDefault(false);
++    pb_atu_bypass->setAutoDefault(false);
++    pb_atu_bypass->setDefault(false);
+     cb_atu_mem->setToolTip(tr("Use the tuner's stored settings\n"
+                               "(atu set memories enabled)."));
+     T->addWidget(new QLabel(tr("Status")), 0, 0); T->addWidget(l_atu, 0, 1);
+diff -ruN orig/MSHV_2767/src/HvRigControl/hvrigcontrol.cpp src/MSHV_2767/src/HvRigControl/hvrigcontrol.cpp
+--- orig/MSHV_2767/src/HvRigControl/hvrigcontrol.cpp	2026-11-03 16:00:03.286310613 +0100
++++ src/MSHV_2767/src/HvRigControl/hvrigcontrol.cpp	2026-11-03 16:02:23.148184245 +0100
+@@ -504,6 +504,12 @@
+     //// qrg /////
+     f_qrg_tx = false;
+     f_qso7tx = false;
++    dop_active = false;//Doppler tracking (IC8TEM mod)
++    dop_in_tx = false;
++    dop_rx = 0;
++    dop_tx = 0;
++    dop_last_set = -1;
++    dop_off_pending = false;
+     prev_qrg = "";
+     rx_qrg = 0;
+     //// end qrg /////
+@@ -900,7 +906,7 @@
+     	l_static_tx->setText(tr("Select  Audio Frequency")+":");
+     	sb_static_tx->setHidden(false);    	
+    	} 
+-    if (rb_static_tx->isChecked() && gb_static_tx->isEnabled())//no move RIG static freq -> || rig_cat_active_and_read
++    if (rb_static_tx->isChecked() && gb_static_tx->isEnabled() && !dop_active)//no move RIG static freq -> || rig_cat_active_and_read //IC8TEM !dop_active
+     {
+         emit EmitStaticTxFrq(true,fst);
+         f_static_tx = true;
+@@ -964,7 +970,7 @@
+         if (!f) end_rs0 = 0;//2.55 reset
+     }
+     rig_cat_active_and_read = f; //2.30
+-    gb_static_tx->setEnabled(f); //qDebug()<<f;
++    gb_static_tx->setEnabled(f && !dop_active); //qDebug()<<f; //IC8TEM !dop_active
+ 
+     if (f && (s_mode==0 || s_mode==2 || s_mode==3 || s_mode==12)) emit EmitQrgActive(1);
+     else emit EmitQrgActive(0);
+@@ -2008,8 +2014,108 @@
+         }
+     }
+ }
++/////////////////// Doppler tracking (IC8TEM mod) ///////////////////
++#define DOP_SET_MS 60  // ms between CAT frequency set and PTT change
++void HvRigControl::SetDopplerFreqs(bool active,double rx_hz,double tx_hz)
++{
++    long long int rxi = (long long int)floor(rx_hz+0.5);
++    long long int txi = (long long int)floor(tx_hz+0.5);
++    if (!active)
++    {
++        if (!dop_active) return;
++        if (dop_in_tx)//switched off during TX: finish at PTT off (back to sked)
++        {
++            dop_rx = rxi;
++            dop_off_pending = true;
++            return;
++        }
++        dop_active = false;
++        dop_rx = rxi;
++        dop_tx = rxi;
++        if (rig_cat_active_and_read && rxi>0 && !dop_in_tx) SetFreq(QString("%1").arg(rxi),3);//back to sked
++        dop_last_set = -1;
++        if (rig_cat_active_and_read && !dop_in_tx)
++        {
++            gb_static_tx->setEnabled(true);
++            RbSetStaticTxF(false);//restore Static TX if it was selected
++        }
++        return;
++    }
++    dop_off_pending = false;
++    if (!dop_active)
++    {
++        dop_active = true;
++        dop_last_set = -1;
++        if (f_static_tx)//Static TX moves the dial on TX -> not compatible with Doppler tracking
++        {
++            int fst = sb_static_tx->value();
++            if (s_mode==11 && f_msf) fst = 750;
++            emit EmitStaticTxFrq(false,fst);
++            f_static_tx = false;
++            corr_app_ind_tx_frq = 0;
++        }
++        gb_static_tx->setEnabled(false);
++    }
++    dop_rx = rxi;
++    dop_tx = txi;
++    if (!rig_cat_active_and_read) return;
++    long long int want = dop_in_tx ? dop_tx : dop_rx;//also during TX (CFOM etc. need TX tracking)
++    if (want>0 && want!=dop_last_set)
++    {
++        SetFreq(QString("%1").arg(want),3);//3=frq,no mod
++        dop_last_set = want;
++    }
++}
++void HvRigControl::DopResendRx()
++{
++    //some rigs ignore a frequency command sent just after PTT off -> send again
++    if (!dop_in_tx && rig_cat_active_and_read && dop_rx>0 && dop_last_set==dop_rx)
++    {
++        SetFreq(QString("%1").arg(dop_rx),3);
++        dop_last_set = dop_rx;
++    }
++}
++/////////////////// END Doppler tracking (IC8TEM mod) ///////////////////
+ void HvRigControl::SetPtt(bool flag, int id)//id 0=All 1=p1 2=p2
+ {   
++    if (dop_active && rig_cat_active_and_read && !f_static_tx_active && !timer_try_static_tx_isActive)//Doppler tracking (IC8TEM mod)
++    {
++        if (flag)
++        {
++            dop_in_tx = true;
++            if (dop_tx>0 && dop_tx!=dop_last_set)
++            {
++                SetFreq(QString("%1").arg(dop_tx),3);//TX frequency before PTT
++                dop_last_set = dop_tx;
++                usleep(DOP_SET_MS*1000);
++            }
++            SetPtt_p(true,id);
++            gb_static_tx->setEnabled(false);
++            emit EmitTxActive(1);//0=off TX, 1=normal TX, 2=Static TX
++        }
++        else
++        {
++            SetPtt_p(false,id);
++            dop_in_tx = false;
++            if (dop_rx>0 && dop_rx!=dop_last_set)
++            {
++                usleep(DOP_SET_MS*1000);
++                SetFreq(QString("%1").arg(dop_rx),3);//RX frequency after PTT off
++                dop_last_set = dop_rx;
++                QTimer::singleShot(350, this, SLOT(DopResendRx()));
++            }
++            if (dop_off_pending)//tracking was switched off during TX
++            {
++                dop_off_pending = false;
++                dop_active = false;
++                gb_static_tx->setEnabled(true);
++                RbSetStaticTxF(false);
++            }
++            emit EmitTxActive(0);//0=off TX, 1=normal TX, 2=Static TX
++        }
++        return;
++    }
++    if (!flag) dop_in_tx = false;//IC8TEM
+ 	//if (flag) qDebug()<<"SetPtt====== TO TX"<<flag<<id;
+ 	//else  qDebug()<<"SetPtt=RX"<<flag<<id;	
+     bool all_sttx = false;  //ft8  ft4 q65
+@@ -2106,7 +2212,7 @@
+         }
+         else
+         {
+-            if (rig_cat_active_and_read) gb_static_tx->setEnabled(true);//2.30
++            if (rig_cat_active_and_read && !dop_active) gb_static_tx->setEnabled(true);//2.30 //IC8TEM !dop_active
+             emit EmitTxActive(0);//0=off TX, 1=normal TX, 2=Static TX
+         }
+     }
+diff -ruN orig/MSHV_2767/src/HvRigControl/hvrigcontrol.h src/MSHV_2767/src/HvRigControl/hvrigcontrol.h
+--- orig/MSHV_2767/src/HvRigControl/hvrigcontrol.h	2026-11-03 16:00:03.286383882 +0100
++++ src/MSHV_2767/src/HvRigControl/hvrigcontrol.h	2026-11-03 16:02:16.988753103 +0100
+@@ -215,6 +215,10 @@
+     void SetTciSelect(int,int,bool);
+     void SetRigModeFreq();
+     void SetFullRigInfo(QString);//2.76.1
++public slots:
++    void SetDopplerFreqs(bool active,double rx_hz,double tx_hz);//Doppler tracking (IC8TEM mod)
++private slots:
++    void DopResendRx();//Doppler tracking (IC8TEM mod)
+     
+ private:
+ 	bool f_msf;//2.76sf
+@@ -331,6 +335,13 @@
+ 	bool f_qso7tx;
+ 	QString prev_qrg;
+ 	long long int rx_qrg; 
++	// Doppler tracking (IC8TEM mod)
++	bool dop_active;
++	bool dop_in_tx;
++	long long int dop_rx;
++	long long int dop_tx;
++	long long int dop_last_set;
++	bool dop_off_pending;
+     
+     QGroupBox *gb_troffs;
+     int s_id_band;
+diff -ruN orig/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.cpp src/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.cpp
+--- orig/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.cpp	2026-11-03 16:00:03.311443545 +0100
++++ src/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.cpp	2026-11-12 11:26:41.014248924 +0100
+@@ -11,6 +11,7 @@
+  * May be used under the terms of the GNU General Public License (GPL)
+  */
+ #include <stdio.h>
++#include "../../mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
+ #include <stdlib.h>
+ #include <math.h>
+ 
+@@ -581,7 +582,7 @@
+     setWindowIcon(QPixmap(":pic/ms_ico.png"));
+ 
+ 
+-	azel_path = (QCoreApplication::applicationDirPath())+"/settings/azel.dat";
++	azel_path = (MshvAppPath())+"/settings/azel.dat";
+ 	f_txrx = false;
+ 	
+     //setFixedSize(240,390);
+@@ -877,7 +878,7 @@
+     //V_lss2->setAlignment(Qt::AlignTop);*/
+ 
+ 
+-    QVBoxLayout *V_l = new QVBoxLayout(this);
++    QVBoxLayout *V_l = new QVBoxLayout();
+     V_l->setContentsMargins ( 8, 8, 8, 8);
+     V_l->setSpacing(0);
+     V_l->addLayout(H_l0);
+@@ -893,7 +894,147 @@
+ 
+     //V_l->setAlignment(Qt::AlignCenter);
+ 
+-    this->setLayout(V_l);
++    /////////////////// Doppler tracking (IC8TEM mod) ///////////////////
++    dop_method = DOP_NONE;
++    sked_hz = 0.0;
++    rig_hz = 0.0;
++    dop_full_raw = 0.0;
++    dop_self_raw = 0.0;
++    dop_nfreq_raw = 0;
++    dop_valid = false;
++    dop_dxecho_frozen = 0.0;
++    dop_frozen_valid = false;
++    last_rx_cmd = 0.0;
++    prev_rx_cmd = 0.0;
++    last_tx_cmd = 0.0;
++    dop_emit_active = false;
++    t_last_cmd = QDateTime::currentDateTimeUtc();
++
++    QString st_small = "font-size:10pt;font-weight:normal;";
++
++    QGroupBox *gb_dop = new QGroupBox(tr("Doppler tracking"));
++    gb_dop->setStyleSheet("QGroupBox{"+st_small+"} QRadioButton{"+st_small+"}");
++    const char *dop_names[DOP_COUNT] =
++        {
++            "Full Doppler to DX Grid","Own Echo","Constant frequency on Moon",
++            "On DX Echo","Call DX","None"
++        };
++    const char *dop_tips[DOP_COUNT] =
++        {
++            "RX = Sked + Dop(Me-Moon-DX)\nTX = Sked - Dop(Me-Moon-DX)\nThe DX station needs no correction: he hears you and transmits on Sked.",
++            "RX = Sked + Self echo Doppler\nTX = Sked\nYou hear your own echo on Sked.",
++            "CFOM:  RX = Sked + Self/2,  TX = Sked - Self/2\nYour signal arrives on the Moon on Sked, and you hear\nany CFOM station that transmits toward the Moon on Sked.",
++            "DX transmits on Sked without correction and listens to his own echo.\nRX = Sked + Dop(Me-Moon-DX)\nTX = Sked + DX echo Doppler(at start) - Dop(Me-Moon-DX)\nThe DX hears you on the frequency of his own echo (constant).",
++            "Use after finding the DX: Sked becomes the DX Tx frequency\n(current RX dial - Dop(Me-Moon-DX)), then works as On DX Echo.",
++            "No Doppler correction: RX = TX = Sked (TX Shift still applied if enabled)."
++        };
++    QVBoxLayout *V_dop = new QVBoxLayout();
++    V_dop->setContentsMargins(6,4,6,4);
++    V_dop->setSpacing(2);
++    for (int i = 0; i < DOP_COUNT; ++i)
++    {
++        rb_dop[i] = new QRadioButton(dop_names[i]);
++        rb_dop[i]->setToolTip(dop_tips[i]);
++        V_dop->addWidget(rb_dop[i]);
++    }
++    rb_dop[DOP_NONE]->setChecked(true);
++    gb_dop->setLayout(V_dop);
++    for (int i = 0; i < DOP_COUNT; ++i)
++        connect(rb_dop[i], SIGNAL(toggled(bool)), this, SLOT(DopplerMethodChanged(bool)));
++
++    QGroupBox *gb_sked = new QGroupBox(tr("Sked frequency"));
++    gb_sked->setStyleSheet("QGroupBox{"+st_small+"} QSpinBox{"+st_small+"} QDoubleSpinBox{"+st_small+"} "
++                           "QPushButton{"+st_small+"} QCheckBox{"+st_small+"}");
++    sb_sked_khz = new HvKhzSpinBox();
++    sb_sked_khz->setRange(0,999);
++    sb_sked_khz->setSuffix(" kHz");
++    sb_sked_khz->setValue(90);
++    sb_sked_khz->setToolTip(tr("kHz part of the Sked frequency (MHz part is the current band)"));
++    pb_set_khz = new QPushButton(tr("Set kHz"));
++    pb_set_khz->setToolTip(tr("Sked = current MHz + selected kHz"));
++    connect(pb_set_khz, SIGNAL(clicked()), this, SLOT(SetSkedKhz()));
++    QHBoxLayout *H_khz = new QHBoxLayout();
++    H_khz->setContentsMargins(0,0,0,0);
++    H_khz->setSpacing(4);
++    H_khz->addWidget(sb_sked_khz);
++    H_khz->addWidget(pb_set_khz);
++
++    QString st_frq = "QLabel{font-family:\"Courier New\",Courier,monospace;font-size:14pt;font-weight:bold;}";
++    QLabel *l_rx_t = new QLabel("Rx:");
++    l_rx_t->setStyleSheet(st_frq);
++    QLabel *l_tx_t = new QLabel("Tx:");
++    l_tx_t->setStyleSheet(st_frq);
++    l_rx_frq = new QLabel("---");
++    l_rx_frq->setStyleSheet(st_frq);
++    l_rx_frq->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
++    l_tx_frq = new QLabel("---");
++    l_tx_frq->setStyleSheet(st_frq);
++    l_tx_frq->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
++    QHBoxLayout *H_rx = new QHBoxLayout();
++    H_rx->setContentsMargins(0,4,0,0);
++    H_rx->addWidget(l_rx_t);
++    H_rx->addWidget(l_rx_frq);
++    QHBoxLayout *H_tx = new QHBoxLayout();
++    H_tx->setContentsMargins(0,0,0,4);
++    H_tx->addWidget(l_tx_t);
++    H_tx->addWidget(l_tx_frq);
++
++    sb_tx_shift = new QDoubleSpinBox();
++    sb_tx_shift->setRange(-999.999,999.999);//at least +/-90 MHz requested
++    sb_tx_shift->setDecimals(3);
++    sb_tx_shift->setSingleStep(1.0);
++    sb_tx_shift->setPrefix("Tx Shift ");
++    sb_tx_shift->setSuffix(" MHz");
++    sb_tx_shift->setValue(0.0);
++    sb_tx_shift->setToolTip(tr("TX = TX + Shift (only when Enable is checked). Range +/-999.999 MHz"));
++    cb_tx_shift = new QCheckBox(tr("Enable"));
++    connect(sb_tx_shift, SIGNAL(valueChanged(double)), this, SLOT(DopplerParmsChanged()));
++    connect(cb_tx_shift, SIGNAL(toggled(bool)), this, SLOT(DopplerParmsChanged()));
++    QHBoxLayout *H_shift = new QHBoxLayout();
++    H_shift->setContentsMargins(0,0,0,0);
++    H_shift->setSpacing(4);
++    H_shift->addWidget(sb_tx_shift);
++    H_shift->addWidget(cb_tx_shift);
++
++    QVBoxLayout *V_sked = new QVBoxLayout();
++    V_sked->setContentsMargins(6,4,6,4);
++    V_sked->setSpacing(2);
++    V_sked->addLayout(H_khz);
++    V_sked->addLayout(H_rx);
++    V_sked->addLayout(H_tx);
++    V_sked->addLayout(H_shift);
++    gb_sked->setLayout(V_sked);
++
++    gb_echo = new QGroupBox(tr("Echo Mode"));
++    gb_echo->setStyleSheet("QGroupBox{"+st_small+"} QSpinBox{"+st_small+"} QCheckBox{"+st_small+"}");
++    sb_rit = new QSpinBox();
++    sb_rit->setRange(-5000,5000);
++    sb_rit->setPrefix("RIT ");
++    sb_rit->setSuffix(" Hz");
++    cb_dither = new QCheckBox(tr("Dither"));
++    QHBoxLayout *H_echo = new QHBoxLayout();
++    H_echo->setContentsMargins(6,4,6,4);
++    H_echo->addWidget(sb_rit);
++    H_echo->addWidget(cb_dither);
++    gb_echo->setLayout(H_echo);
++    gb_echo->setEnabled(false);
++    gb_echo->setToolTip(tr("Echo mode is not available in MSHV"));
++
++    QVBoxLayout *V_right = new QVBoxLayout();
++    V_right->setContentsMargins(8,8,8,8);
++    V_right->setSpacing(6);
++    V_right->addWidget(gb_dop);
++    V_right->addWidget(gb_sked);
++    V_right->addWidget(gb_echo);
++    V_right->addStretch(1);
++
++    QHBoxLayout *H_main = new QHBoxLayout(this);
++    H_main->setContentsMargins(0,0,0,0);
++    H_main->setSpacing(0);
++    H_main->addLayout(V_l);
++    H_main->addLayout(V_right);
++    this->setLayout(H_main);
++    /////////////////// END Doppler tracking (IC8TEM mod) ///////////////////
+ 
+     //this->setMaximumSize(300,600);
+     //this->setMinimumSize(230,465);
+@@ -955,6 +1096,7 @@
+         strfreq.remove(" GHz");
+         frq_mhz = strfreq.toDouble()*1000.0;
+     }
++    if (s_nfreq != frq_mhz) dop_frozen_valid = false;//IC8TEM band changed (Doppler is rescaled to the sked in DopScale())
+     s_nfreq = frq_mhz;
+     //qDebug()<<"SF="<<s_mygrid<<s_hisgrid<<s_nfreq<<strfreq;
+ }
+@@ -1520,7 +1662,7 @@
+     integer*2 nt144(180)
+     common/echo/xdop(2),techo,AzMoon,ElMoon,mjd
+     data rad/57.2957795/*/
+-    double xdop[3];
++    static double xdop[3] = {0.0,0.0,0.0};//IC8TEM fix: was a non-initialized local, xdop[2] (DX) must survive between the 2 calls
+     int nt144[180]={
+                        234, 246, 257, 267, 275, 280, 283, 286, 291, 298,
+                        305, 313, 322, 331, 341, 351, 361, 369, 376, 381,
+@@ -1663,7 +1805,195 @@
+ void HvAstroDataW::SetTx(bool f)
+ {
+ 	f_txrx = f;
++	t_last_cmd = QDateTime::currentDateTimeUtc();//IC8TEM ignore rig read-back around TX/RX switching
++}
++/////////////////// Doppler tracking (IC8TEM mod) ///////////////////
++// Sign convention (same as MSHV/WSJT-X astro): a signal sent on F is received on F + Doppler.
++// dop_full = one-way Doppler Me->Moon->DX  (xdop1 + xdop2)
++// dop_self = own echo Doppler              (2 * xdop1)
++void HvAstroDataW::closeEvent(QCloseEvent*)
++{
++    if (dop_emit_active)//stop tracking, return the rig to the sked frequency
++    {
++        dop_emit_active = false;
++        emit EmitDopplerFreqs(false,sked_hz,sked_hz);
++    }
++    emit EmitAstroWIsClosed();
++}
++double HvAstroDataW::DopScale()
++{
++    // astro() works with integer MHz of the band (e.g. 432 or 1200 for "1.2 GHz"),
++    // Doppler is proportional to frequency -> scale to the real sked frequency
++    if (dop_nfreq_raw<=0 || sked_hz<=0.0) return 1.0;
++    return sked_hz/((double)dop_nfreq_raw*1.0e6);
++}
++void HvAstroDataW::ComputeDoppler(double &rx,double &tx)
++{
++    double k = DopScale();
++    double full = dop_full_raw*k;
++    double self = dop_self_raw*k;
++    double x1 = 0.5*self;       // one-way Me <-> Moon
++    double x2 = full - x1;      // one-way Moon <-> DX
++    rx = sked_hz;
++    tx = sked_hz;
++    if (dop_valid)
++    {
++        switch (dop_method)
++        {
++        case DOP_FULL:
++            rx = sked_hz + full;
++            tx = sked_hz - full;
++            break;
++        case DOP_OWN_ECHO:
++            rx = sked_hz + self;
++            tx = sked_hz;
++            break;
++        case DOP_CFOM:
++            rx = sked_hz + x1;
++            tx = sked_hz - x1;
++            break;
++        case DOP_ON_DX_ECHO:
++        case DOP_CALL_DX:
++            if (!dop_frozen_valid)
++            {
++                dop_dxecho_frozen = 2.0*x2;// DX echo Doppler at QSO start
++                dop_frozen_valid = true;
++            }
++            rx = sked_hz + full;
++            tx = sked_hz + dop_dxecho_frozen - full;
++            break;
++        default:
++            break;
++        }
++    }
++    if (cb_tx_shift->isChecked()) tx += sb_tx_shift->value()*1.0e6;
++}
++QString HvAstroDataW::FormatHz(double hz)
++{
++    if (hz<=0.0) return "---";
++    long long int f = (long long int)floor(hz+0.5);
++    long long int mhz = f/1000000;
++    int khz = (int)((f/1000)%1000);
++    int h = (int)(f%1000);
++    return QString("%1,%2 %3").arg(mhz).arg(khz,3,10,QChar('0')).arg(h,3,10,QChar('0'));
++}
++void HvAstroDataW::UpdateDoppler(bool force_emit)
++{
++    double rx = sked_hz;
++    double tx = sked_hz;
++    if (sked_hz>0.0) ComputeDoppler(rx,tx);
++
++    l_rx_frq->setText(FormatHz(rx));
++    l_tx_frq->setText(FormatHz(tx));
++
++    // tracking only while this window is open and the sked frequency is known
++    bool want_active = isVisible() && sked_hz>0.0 && dop_valid &&
++                       (dop_method!=DOP_NONE || cb_tx_shift->isChecked());
++    if (want_active)
++    {
++        if (force_emit || !dop_emit_active || fabs(rx-last_rx_cmd)>=1.0 || fabs(tx-last_tx_cmd)>=1.0)
++        {
++            if (!dop_emit_active || force_emit) t_last_cmd = QDateTime::currentDateTimeUtc();
++            prev_rx_cmd = dop_emit_active ? last_rx_cmd : floor(rx+0.5);
++            last_rx_cmd = floor(rx+0.5);
++            last_tx_cmd = floor(tx+0.5);
++            dop_emit_active = true;
++            emit EmitDopplerFreqs(true,last_rx_cmd,last_tx_cmd);
++        }
++    }
++    else if (dop_emit_active)
++    {
++        dop_emit_active = false;
++        last_rx_cmd = sked_hz;
++        last_tx_cmd = sked_hz;
++        t_last_cmd = QDateTime::currentDateTimeUtc();
++        emit EmitDopplerFreqs(false,sked_hz,sked_hz);
++    }
++}
++void HvAstroDataW::SetRigFreq(QString shz)
++{
++    double hz = shz.toDouble();
++    if (hz<=0.0) return;
++    rig_hz = hz;
++    if (!dop_emit_active)
++    {
++        // no tracking: the sked frequency simply follows the dial
++        if (fabs(sked_hz-hz)>=1.0)
++        {
++            sked_hz = hz;
++            dop_frozen_valid = false;
++            UpdateDoppler(false);
++        }
++        return;
++    }
++    // tracking active: the operator turned the VFO knob ?
++    if (f_txrx) return;// during TX the rig reports the TX frequency
++    if (t_last_cmd.msecsTo(QDateTime::currentDateTimeUtc())<3000) return;// wait for the rig to settle
++    double diff = hz - last_rx_cmd;
++    // our own commands (last or previous, the rig may report late) +/- rig rounding (10 Hz steps etc.)
++    double tol = 50.0 + fabs(last_rx_cmd - prev_rx_cmd);
++    if (fabs(diff)<=tol || fabs(hz - prev_rx_cmd)<=50.0) return;
++    if (fabs(diff)>1.0e6) sked_hz = hz;// other band
++    else sked_hz += diff;// keep the same correction, move the sked
++    dop_frozen_valid = false;
++    UpdateDoppler(true);
++}
++void HvAstroDataW::SetAppSetFreq(QString shz)
++{
++    double hz = shz.toDouble();
++    if (hz<=0.0) return;
++    sked_hz = hz;// MSHV commanded a new dial frequency -> new sked
++    dop_frozen_valid = false;
++    UpdateDoppler(true);
++}
++void HvAstroDataW::DopplerMethodChanged(bool f)
++{
++    if (!f) return;// handle only the button that became checked
++    int prev = dop_method;
++    for (int i = 0; i < DOP_COUNT; ++i)
++    {
++        if (rb_dop[i]->isChecked()) dop_method = i;
++    }
++    if (prev == dop_method) return;
++    dop_frozen_valid = false;
++    if (dop_method==DOP_CALL_DX && sked_hz>0.0 && dop_valid)
++    {
++        // the DX is heard on the present RX dial: his TX frequency = RX dial - Dop(Me-Moon-DX)
++        double rx_now = dop_emit_active ? last_rx_cmd : (rig_hz>0.0 ? rig_hz : sked_hz);
++        sked_hz = floor(rx_now - dop_full_raw*DopScale() + 0.5);
++    }
++    UpdateDoppler(true);
++}
++void HvAstroDataW::SetSkedKhz()
++{
++    double base = sked_hz;
++    if (base<=0.0) base = rig_hz;
++    if (base<=0.0) return;
++    double mhz = floor(base/1.0e6);
++    sked_hz = mhz*1.0e6 + (double)sb_sked_khz->value()*1.0e3;
++    dop_frozen_valid = false;
++    UpdateDoppler(true);
++}
++void HvAstroDataW::DopplerParmsChanged()
++{
++    UpdateDoppler(true);
+ }
++QString HvAstroDataW::GetDopplerSettings()
++{
++    return QString("%1").arg(dop_method)+"#"+QString("%1").arg(sb_sked_khz->value())+"#"+
++           QString("%1").arg(sb_tx_shift->value(),0,'f',3)+"#"+QString("%1").arg((int)cb_tx_shift->isChecked());
++}
++void HvAstroDataW::SetDopplerSettings(QString s)
++{
++    QStringList l = s.split("#");
++    if (l.count()<4) return;
++    int m = l.at(0).toInt();
++    if (m>=0 && m<DOP_COUNT && m!=DOP_CALL_DX) rb_dop[m]->setChecked(true);// Call DX is never restored
++    sb_sked_khz->setValue(l.at(1).toInt());
++    sb_tx_shift->setValue(l.at(2).toDouble());
++    cb_tx_shift->setChecked(l.at(3)=="1");
++}
++/////////////////// END Doppler tracking (IC8TEM mod) ///////////////////
+ void HvAstroDataW::astro0()
+ {
+     //QString hisgrid = "JO90NH";
+@@ -1755,6 +2085,13 @@
+     emit EmitAstroData(AzMoon,ElMoon,ndop,Dgrd);
+     //qDebug()<<"NO ALLLL";
+ 
++    // Doppler tracking (IC8TEM mod)
++    dop_full_raw = doppler;    // Me -> Moon -> DX (one-way sum)
++    dop_self_raw = doppler00;  // own echo
++    dop_nfreq_raw = s_nfreq;
++    dop_valid = true;
++    UpdateDoppler(false);
++
+     if (!isVisible()) return;
+ 
+     //qDebug()<<"xlat1="<<xlon1<<xlat1<<xlon2<<xlat2<<day;
+diff -ruN orig/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.h src/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.h
+--- orig/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.h	2026-11-03 16:00:03.312000371 +0100
++++ src/MSHV_2767/src/HvTxW/HvAstroDataW/hvastrodataw.h	2026-11-03 16:01:44.215971028 +0100
+@@ -13,6 +13,24 @@
+ #include <QDateTime>
+ #include <QTimer>
+ #include <QLineEdit>
++#include <QRadioButton>
++#include <QGroupBox>
++#include <QSpinBox>
++#include <QDoubleSpinBox>
++#include <QCheckBox>
++#include <QPushButton>
++
++// Doppler tracking (IC8TEM mod): spin box that shows the kHz value with leading zeros, e.g. "090 kHz"
++class HvKhzSpinBox : public QSpinBox
++{
++public:
++    HvKhzSpinBox(QWidget *parent = 0) : QSpinBox(parent) {}
++protected:
++    QString textFromValue(int v) const
++    {
++        return QString("%1").arg(v,3,10,QChar('0'));
++    }
++};
+ 
+ class HvAstroDataW : public QWidget
+ {
+@@ -32,15 +50,24 @@
+ 	}
+ 	void SetPosXY(QString);
+ 	void SetTx(bool f);
++    // Doppler tracking (IC8TEM mod)
++    void SetRigFreq(QString hz);     // dial frequency read back from the rig via CAT (Hz, app side)
++    void SetAppSetFreq(QString hz);  // dial frequency commanded by MSHV (band / frequency list)
++    QString GetDopplerSettings();
++    void SetDopplerSettings(QString);
+ 
+ signals:
+     void EmitAstroWIsClosed();
+     void EmitAstroData(double my_za,double my_el,int his_dop,double dgrd);
++    void EmitDopplerFreqs(bool active,double rx_hz,double tx_hz);// Doppler tracking (IC8TEM mod)
+ 
+ public slots: 
+ 
+ private slots:
+     void astro0();
++    void DopplerMethodChanged(bool);
++    void SetSkedKhz();
++    void DopplerParmsChanged();
+ 
+ private:
+ 	QString azel_path;
+@@ -86,6 +113,37 @@
+     double doppler00z;
+     double poloffset1;
+     double poloffset2;
++
++    // Doppler tracking (IC8TEM mod)
++    enum {DOP_FULL=0,DOP_OWN_ECHO,DOP_CFOM,DOP_ON_DX_ECHO,DOP_CALL_DX,DOP_NONE,DOP_COUNT};
++    QRadioButton *rb_dop[DOP_COUNT];
++    HvKhzSpinBox *sb_sked_khz;
++    QPushButton *pb_set_khz;
++    QLabel *l_rx_frq;
++    QLabel *l_tx_frq;
++    QDoubleSpinBox *sb_tx_shift;
++    QCheckBox *cb_tx_shift;
++    QGroupBox *gb_echo;
++    QSpinBox *sb_rit;
++    QCheckBox *cb_dither;
++    int dop_method;
++    double sked_hz;          // sked (nominal dial) frequency, 0 = not yet known
++    double rig_hz;           // last frequency read back from the rig
++    double dop_full_raw;     // one-way Doppler Me->Moon->DX (Hz at dop_nfreq_raw MHz)
++    double dop_self_raw;     // own echo Doppler (Hz at dop_nfreq_raw MHz)
++    int dop_nfreq_raw;
++    bool dop_valid;
++    double dop_dxecho_frozen;// On DX Echo / Call DX: Tx term frozen at QSO start (Hz)
++    bool dop_frozen_valid;
++    double last_rx_cmd;
++    double prev_rx_cmd;
++    double last_tx_cmd;
++    bool dop_emit_active;
++    QDateTime t_last_cmd;
++    void UpdateDoppler(bool force_emit);
++    void ComputeDoppler(double &rx,double &tx);
++    double DopScale();
++    QString FormatHz(double hz);
+     
+     void tm2(double day,double xlat4,double xlon4,double &xl4,double &b4);
+     double dot(double *x,double *y);
+@@ -108,9 +166,6 @@
+                double &lon,double &lat,double &LST);
+     //void astro0();
+ 
+-    void closeEvent(QCloseEvent*)
+-    {
+-        emit EmitAstroWIsClosed();
+-    };
++    void closeEvent(QCloseEvent*);
+ };
+ #endif
+diff -ruN orig/MSHV_2767/src/HvTxW/HvLogW/hvlogw.cpp src/MSHV_2767/src/HvTxW/HvLogW/hvlogw.cpp
+--- orig/MSHV_2767/src/HvTxW/HvLogW/hvlogw.cpp	2026-11-03 16:00:03.312791372 +0100
++++ src/MSHV_2767/src/HvTxW/HvLogW/hvlogw.cpp	2026-11-04 00:57:58.311308431 +0100
+@@ -1095,6 +1095,8 @@
+     s_band = "";
+     FREQ_GLOBAL = "70230000";
+     f_off_auto_comm = false;//2.76.3
++    f_fict_reset = false;//IC8TEM mod
++    s_fict_reset = "";
+ 
+     addtolog_comment = "";
+     addtolog_freq = "";
+@@ -1863,12 +1865,31 @@
+     H_l_top->addWidget(le_find);
+     H_l_top->addWidget(b_find);
+ 
++    //IC8TEM mod: fictitious log reset
++    cb_fict_reset = new QCheckBox(tr("Fictitious log reset")+"  YYYYMMDDHHmmSS (UTC):");
++    cb_fict_reset->setToolTip(tr("QSOs logged before this UTC date/time are ignored\n"
++                                 "when marking worked-before calls and locators (new squares)\n"
++                                 "and for the dupe check. The log itself is not changed."));
++    le_fict_reset = new QLineEdit();
++    le_fict_reset->setInputMask("99999999999999");
++    le_fict_reset->setMaximumWidth(150);
++    le_fict_reset->setText(QDateTime::currentDateTimeUtc().toString("yyyyMMdd")+"000000");
++    connect(cb_fict_reset, SIGNAL(toggled(bool)), this, SLOT(FictResetChanged()));
++    connect(le_fict_reset, SIGNAL(textChanged(const QString &)), this, SLOT(FictResetChanged()));
++    QHBoxLayout *H_fict = new QHBoxLayout();
++    H_fict->setContentsMargins(4,0,2,1);
++    H_fict->setSpacing(6);
++    H_fict->addWidget(cb_fict_reset);
++    H_fict->addWidget(le_fict_reset);
++    H_fict->addStretch(1);
++
+     //HvLogList *THvLogList1 = new HvLogList();
+     QVBoxLayout *V_l = new QVBoxLayout(this);
+     V_l->setContentsMargins ( 1, 1, 1, 1);
+     V_l->setSpacing(1);
+     //V_l->addWidget(b_dell_selected);
+     V_l->addLayout(H_l_top);
++    V_l->addLayout(H_fict);//IC8TEM mod
+     V_l->addWidget(THvLogList);
+     //V_l->addWidget(THvLogList1);
+     //V_l->addWidget(b_edit_qso);
+@@ -2638,6 +2659,7 @@
+             {
+                 if (THvLogList->model.item(i,9)->text()!=band) continue;
+             }
++            if (isBeforeFictReset(i)) continue;//IC8TEM mod
+             QString s = THvLogList->model.item(i,4)->text();
+             if (s.isEmpty()) continue;
+             if (isDuplicate(l,s,0)) continue;
+@@ -2657,6 +2679,7 @@
+             {
+                 if (THvLogList->model.item(i,9)->text()!=band) continue;
+             }
++            if (isBeforeFictReset(i)) continue;//IC8TEM mod
+             QString s = THvLogList->model.item(i,5)->text();
+             if (s.isEmpty()) continue;
+ 
+@@ -2691,6 +2714,7 @@
+     for (int i = 0; i<l_count; ++i)
+     {
+         if (THvLogList->model.item(i,4)->text()!=call) continue;
++        if (isBeforeFictReset(i)) continue;//IC8TEM mod
+         if (f_isCheck[2]) // mod
+         {
+             if (THvLogList->model.item(i,8)->text()!=mod)  continue;
+@@ -4208,6 +4232,42 @@
+     out.remove(out.size()-1,1);//remove last \n
+     emit EmitUploadSelected(out);
+ }
++//IC8TEM mod: fictitious log reset ////////////////////////////////
++bool HvLogW::isBeforeFictReset(int row)
++{
++    if (!f_fict_reset) return false;
++    QString d = THvLogList->model.item(row,0)->text();// yyyyMMdd
++    QString t = THvLogList->model.item(row,1)->text();// hh:mm
++    t.remove(":");
++    QString dt = (d+t+"000000").left(14);
++    return dt < s_fict_reset;
++}
++void HvLogW::FictResetChanged()
++{
++    QString t = le_fict_reset->text();
++    bool valid = (t.count()==14 && QDateTime::fromString(t,"yyyyMMddhhmmss").isValid());
++    if (valid) le_fict_reset->setStyleSheet("");
++    else le_fict_reset->setStyleSheet("QLineEdit{color:rgb(220,0,0);}");
++    bool nf = cb_fict_reset->isChecked() && valid;
++    QString ns = valid ? t : "";
++    if (nf == f_fict_reset && ns == s_fict_reset) return;
++    f_fict_reset = nf;
++    s_fict_reset = ns;
++    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
++}
++QString HvLogW::GetFictResetSettings()
++{
++    return QString("%1").arg((int)cb_fict_reset->isChecked())+"#"+le_fict_reset->text();
++}
++void HvLogW::SetFictResetSettings(QString s)
++{
++    QStringList l = s.split("#");
++    if (l.count()<2) return;
++    le_fict_reset->setText(l.at(1));
++    cb_fict_reset->setChecked(l.at(0)=="1");
++    FictResetChanged();
++}
++//IC8TEM mod end ////////////////////////////////
+ void HvLogW::SetSettings(QString s)
+ {
+     if (!s.isEmpty())
+diff -ruN orig/MSHV_2767/src/HvTxW/HvLogW/hvlogw.h src/MSHV_2767/src/HvTxW/HvLogW/hvlogw.h
+--- orig/MSHV_2767/src/HvTxW/HvLogW/hvlogw.h	2026-11-03 16:00:03.313682320 +0100
++++ src/MSHV_2767/src/HvTxW/HvLogW/hvlogw.h	2026-11-04 00:57:58.306771380 +0100
+@@ -235,6 +235,8 @@
+ 	QString GetMaxLogQsoCount();
+ 	void SetAutoLogInfo();//2.75
+ 	QString GetPropSettings();//2.75
++	QString GetFictResetSettings();//IC8TEM mod  enabled#YYYYMMDDHHmmSS
++	void SetFictResetSettings(QString);//IC8TEM mod
+ 	void SetPropSettings(QString);//2.75
+ 	void SetLogAutoComm(bool f);//2.76.3
+ 
+@@ -251,6 +253,8 @@
+    void EmitCBEnableAliChanged(bool);
+ 
+ private slots:
++    void FictResetChanged();//IC8TEM mod
++
+     void DeleteSelected();
+     void End_Edit();
+     //void SetEditText();
+@@ -281,6 +285,13 @@
+     void PropChanged(QString);
+ 
+ private:
++    //IC8TEM mod: fictitious log reset, QSOs before this UTC time are ignored for worked-before calls/locators
++    QCheckBox *cb_fict_reset;
++    QLineEdit *le_fict_reset;
++    bool f_fict_reset;
++    QString s_fict_reset;// "YYYYMMDDHHmmSS"
++    bool isBeforeFictReset(int row);
++
+ 	//QDialog *DStatistic;
+ 	//QTextBrowser *TBStatistic;
+ 	//QWidget * w_parent;
+diff -ruN orig/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.cpp src/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.cpp
+--- orig/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.cpp	1970-01-01 01:00:00.000000000 +0100
++++ src/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.cpp	2026-11-05 23:23:01.549474645 +0100
+@@ -0,0 +1,257 @@
++/* MSHV HvLotwUsersW  (IC8TEM mod)
++ * May be used under the terms of the GNU General Public License (GPL)
++ */
++#include "hvlotwusers.h"
++#include <QVBoxLayout>
++#include <QHBoxLayout>
++#include <QGroupBox>
++#include <QFile>
++#include <QFileInfo>
++#include <QDir>
++#include <QTextStream>
++#include <QFileDialog>
++#include <QMessageBox>
++#include <QApplication>
++#include <QAbstractScrollArea>
++#include <QStringList>
++
++static QHash<QString,int> g_lotw_calls;  // call -> julian day of the last LoTW upload
++static int  g_lotw_min_jd = 0;           // valid if last upload >= this day
++static bool g_lotw_show = true;
++
++static QString LotwBaseCall(const QString &c)
++{
++    // "EA8/IK2ABC/P" -> "IK2ABC": the longest part that contains a digit and a letter
++    QStringList l = c.split("/");
++    QString res;
++    for (int i = 0; i < l.count(); ++i)
++    {
++        const QString &p = l.at(i);
++        bool hd = false, hl = false;
++        for (int j = 0; j < p.count(); ++j)
++        {
++            if (p.at(j).isDigit()) hd = true;
++            else if (p.at(j).isLetter()) hl = true;
++        }
++        if (hd && hl && p.count() > res.count()) res = p;
++    }
++    return res;
++}
++bool HvLotwUsersW::HasList()
++{
++    return !g_lotw_calls.isEmpty();
++}
++bool HvLotwUsersW::IsLotwUser(const QString &call0)
++{
++    if (!g_lotw_show) return false;
++    return IsLotwValid(call0);
++}
++bool HvLotwUsersW::IsLotwValid(const QString &call0)
++{
++    if (g_lotw_calls.isEmpty() || call0.count() < 3) return false;
++    QString call = call0.toUpper();
++    QHash<QString,int>::const_iterator it = g_lotw_calls.constFind(call);
++    if (it == g_lotw_calls.constEnd() && call.contains("/"))
++        it = g_lotw_calls.constFind(LotwBaseCall(call));
++    if (it == g_lotw_calls.constEnd()) return false;
++    return it.value() >= g_lotw_min_jd;
++}
++bool HvLotwUsersW::IsShowActive()
++{
++    return g_lotw_show && !g_lotw_calls.isEmpty();
++}
++
++HvLotwUsersW::HvLotwUsersW(QString app_path,QWidget *parent)
++        : QWidget(parent)
++{
++    f_block_save = true;
++    s_app_path = app_path;
++    s_csv_path = app_path+"/settings/database/lotw-user-activity.csv";
++    s_set_path = app_path+"/settings/ms_lotw";
++
++    QGroupBox *gb = new QGroupBox(tr("LoTW Users (Logbook of The World)"));
++    QLabel *l_info = new QLabel(tr("Download the file from ARRL:")+"\n"
++                                "https://lotw.arrl.org/lotw-user-activity.csv\n"+
++                                tr("then load it here. A copy is kept in settings/database."));
++    l_info->setTextInteractionFlags(Qt::TextSelectableByMouse);
++    l_info->setWordWrap(true);
++
++    QPushButton *pb_load = new QPushButton(" "+tr("Load LoTW CSV File")+" ... ");
++    connect(pb_load, SIGNAL(clicked()), this, SLOT(LoadCsvFile()));
++
++    QLabel *l_date = new QLabel(tr("Valid if last LoTW upload is on or after")+":");
++    de_min_date = new QDateEdit();
++    de_min_date->setCalendarPopup(true);
++    de_min_date->setDisplayFormat("yyyy-MM-dd");
++    de_min_date->setDate(QDate::currentDate().addYears(-1));
++    connect(de_min_date, SIGNAL(dateChanged(const QDate &)), this, SLOT(MinDateChanged(const QDate &)));
++    QHBoxLayout *H_date = new QHBoxLayout();
++    H_date->setContentsMargins(0,0,0,0);
++    H_date->addWidget(l_date);
++    H_date->addWidget(de_min_date);
++    H_date->addStretch(1);
++
++    cb_show = new QCheckBox(tr("Show a black dot at the right of decoded lines from LoTW users"));
++    cb_show->setChecked(true);
++    connect(cb_show, SIGNAL(toggled(bool)), this, SLOT(ShowChanged(bool)));
++
++    l_status = new QLabel();
++    l_status->setWordWrap(true);
++
++    QHBoxLayout *H_load = new QHBoxLayout();
++    H_load->setContentsMargins(0,0,0,0);
++    H_load->addWidget(pb_load);
++    H_load->addStretch(1);
++
++    QVBoxLayout *V_gb = new QVBoxLayout();
++    V_gb->setContentsMargins(6,6,6,6);
++    V_gb->setSpacing(8);
++    V_gb->addWidget(l_info);
++    V_gb->addLayout(H_load);
++    V_gb->addLayout(H_date);
++    V_gb->addWidget(cb_show);
++    V_gb->addWidget(l_status);
++    gb->setLayout(V_gb);
++
++    QVBoxLayout *V_l = new QVBoxLayout(this);
++    V_l->setContentsMargins(4,4,4,4);
++    V_l->addWidget(gb);
++    V_l->addStretch(1);
++    setLayout(V_l);
++
++    ReadSettings();
++    QDate last;
++    QHash<QString,int> tmp;
++    if (QFile::exists(s_csv_path) && ParseCsv(s_csv_path,tmp,last) > 0) g_lotw_calls = tmp;
++    g_lotw_min_jd = (int)de_min_date->date().toJulianDay();
++    g_lotw_show = cb_show->isChecked();
++    f_block_save = false;
++    RefreshStatus();
++}
++HvLotwUsersW::~HvLotwUsersW()
++{}
++int HvLotwUsersW::ParseCsv(QString path,QHash<QString,int> &out,QDate &last)
++{
++    QFile file(path);
++    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return -1;
++    out.clear();
++    out.reserve(200000);
++    last = QDate();
++    QTextStream in(&file);
++    while (!in.atEnd())
++    {
++        QString line = in.readLine().trimmed();
++        if (line.isEmpty()) continue;
++        QStringList l = line.split(",");
++        if (l.count() < 2) continue;
++        QString call = l.at(0).trimmed().toUpper();
++        call.remove("\"");
++        QString sd = l.at(1).trimmed();
++        sd.remove("\"");
++        QDate d = QDate::fromString(sd,"yyyy-MM-dd");
++        if (call.isEmpty() || !d.isValid()) continue;// header or bad line
++        int jd = (int)d.toJulianDay();
++        QHash<QString,int>::iterator it = out.find(call);
++        if (it == out.end()) out.insert(call,jd);
++        else if (jd > it.value()) it.value() = jd;
++        if (!last.isValid() || d > last) last = d;
++    }
++    file.close();
++    return out.count();
++}
++void HvLotwUsersW::LoadCsvFile()
++{
++    QString fn = QFileDialog::getOpenFileName(this,tr("Open LoTW CSV File"),QDir::homePath(),
++                 "LoTW CSV (*.csv);;All files (*.*)");
++    if (fn.isEmpty()) return;
++    QHash<QString,int> tmp;
++    QDate last;
++    int n = ParseCsv(fn,tmp,last);
++    if (n <= 0)
++    {
++        QMessageBox::warning(this,"MSHV",tr("No valid lines found in this file.")+"\n"+
++                             tr("Expected format")+": CALL,YYYY-MM-DD,HH:MM:SS");
++        return;
++    }
++    if (QFileInfo(fn).absoluteFilePath() != QFileInfo(s_csv_path).absoluteFilePath())
++    {
++        QDir().mkpath(s_app_path+"/settings/database");
++        QFile::remove(s_csv_path);
++        QFile::copy(fn,s_csv_path);
++    }
++    g_lotw_calls = tmp;
++    RefreshStatus();
++    RefreshDecodeLists();
++}
++void HvLotwUsersW::MinDateChanged(const QDate &d)
++{
++    g_lotw_min_jd = (int)d.toJulianDay();
++    SaveSettings();
++    RefreshStatus();
++    RefreshDecodeLists();
++}
++void HvLotwUsersW::ShowChanged(bool f)
++{
++    g_lotw_show = f;
++    SaveSettings();
++    RefreshDecodeLists();
++}
++void HvLotwUsersW::RefreshStatus()
++{
++    if (g_lotw_calls.isEmpty())
++    {
++        l_status->setText(tr("No LoTW list loaded."));
++        return;
++    }
++    int valid = 0;
++    int last_jd = 0;
++    for (QHash<QString,int>::const_iterator it = g_lotw_calls.constBegin(); it != g_lotw_calls.constEnd(); ++it)
++    {
++        if (it.value() >= g_lotw_min_jd) valid++;
++        if (it.value() > last_jd) last_jd = it.value();
++    }
++    l_status->setText(tr("Calls in the list")+": "+QString("%1").arg(g_lotw_calls.count())+"     "+
++                      tr("Valid from the selected date")+": "+QString("%1").arg(valid)+"\n"+
++                      tr("Most recent upload in the file")+": "+QDate::fromJulianDay(last_jd).toString("yyyy-MM-dd"));
++}
++void HvLotwUsersW::RefreshDecodeLists()
++{
++    // repaint every decode list (DecodeList is a QTreeView)
++    QWidgetList all = QApplication::allWidgets();
++    for (int i = 0; i < all.count(); ++i)
++    {
++        if (all.at(i)->inherits("DecodeList"))
++        {
++            QAbstractScrollArea *sa = qobject_cast<QAbstractScrollArea*>(all.at(i));
++            if (sa) sa->viewport()->update();
++        }
++    }
++}
++void HvLotwUsersW::ReadSettings()
++{
++    QFile file(s_set_path);
++    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
++    QTextStream in(&file);
++    while (!in.atEnd())
++    {
++        QString line = in.readLine().trimmed();
++        if (line.startsWith("lotw_min_date="))
++        {
++            QDate d = QDate::fromString(line.mid(14),"yyyy-MM-dd");
++            if (d.isValid()) de_min_date->setDate(d);
++        }
++        else if (line.startsWith("lotw_show_dot="))
++            cb_show->setChecked(line.mid(14)=="1");
++    }
++    file.close();
++}
++void HvLotwUsersW::SaveSettings()
++{
++    if (f_block_save) return;
++    QFile file(s_set_path);
++    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
++    QTextStream out(&file);
++    out << "lotw_min_date=" << de_min_date->date().toString("yyyy-MM-dd") << "\n";
++    out << "lotw_show_dot=" << (cb_show->isChecked() ? "1" : "0") << "\n";
++    file.close();
++}
+diff -ruN orig/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.h src/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.h
+--- orig/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.h	1970-01-01 01:00:00.000000000 +0100
++++ src/MSHV_2767/src/HvTxW/HvRadioNetW/hvlotwusers.h	2026-11-05 23:23:01.171402176 +0100
+@@ -0,0 +1,50 @@
++/* MSHV HvLotwUsersW  (IC8TEM mod)
++ * LoTW users list from the ARRL file lotw-user-activity.csv
++ * ("CALL,YYYY-MM-DD,HH:MM:SS" = last upload to LoTW).
++ * Shown as page 3 of "Network Configuration".
++ * May be used under the terms of the GNU General Public License (GPL)
++ */
++#ifndef HVLOTWUSERS_H
++#define HVLOTWUSERS_H
++
++#include <QWidget>
++#include <QLabel>
++#include <QPushButton>
++#include <QCheckBox>
++#include <QDateEdit>
++#include <QHash>
++#include <QString>
++
++class HvLotwUsersW : public QWidget
++{
++    Q_OBJECT
++public:
++    HvLotwUsersW(QString app_path,QWidget *parent = 0);
++    virtual ~HvLotwUsersW();
++
++    // true = the call (or its base call without prefix/suffix) uploaded to LoTW on/after the selected date
++    static bool IsLotwUser(const QString &call);
++    static bool IsShowActive();
++    static bool HasList();                           // a list is loaded
++    static bool IsLotwValid(const QString &call);    // like IsLotwUser() but ignores the "show dot" checkbox
++
++private slots:
++    void LoadCsvFile();
++    void MinDateChanged(const QDate &);
++    void ShowChanged(bool);
++
++private:
++    QString s_app_path;
++    QString s_csv_path;
++    QString s_set_path;
++    QLabel *l_status;
++    QDateEdit *de_min_date;
++    QCheckBox *cb_show;
++    bool f_block_save;
++    int ParseCsv(QString path,QHash<QString,int> &out,QDate &last);
++    void RefreshStatus();
++    void ReadSettings();
++    void SaveSettings();
++    void RefreshDecodeLists();
++};
++#endif
+diff -ruN orig/MSHV_2767/src/HvTxW/HvRadioNetW/radionetw.cpp src/MSHV_2767/src/HvTxW/HvRadioNetW/radionetw.cpp
+--- orig/MSHV_2767/src/HvTxW/HvRadioNetW/radionetw.cpp	2026-11-03 16:00:03.316482745 +0100
++++ src/MSHV_2767/src/HvTxW/HvRadioNetW/radionetw.cpp	2026-11-04 00:56:39.810058462 +0100
+@@ -16,6 +16,7 @@
+ // Reports will be sent in batch mode every 5 minutes.
+ 
+ #include "radionetw.h"
++#include "hvlotwusers.h"//IC8TEM mod
+ 
+ //#include <QHostInfo>//HV is here QtGui
+ //#include <QTimer>
+@@ -1669,6 +1670,7 @@
+     T1->setLayout(V_2);
+     TW->addTab(T0," "+tr("Page")+"  1");
+     TW->addTab(T1," "+tr("Page")+"  2");    
++    TW->addTab(new HvLotwUsersW(path)," "+tr("Page")+"  3");//IC8TEM mod: LoTW users
+     
+     QVBoxLayout *V_0 = new QVBoxLayout(this);
+     V_0->setContentsMargins(2,2,2,2);
+diff -ruN orig/MSHV_2767/src/HvTxW/hvmultianswermodw.cpp src/MSHV_2767/src/HvTxW/hvmultianswermodw.cpp
+--- orig/MSHV_2767/src/HvTxW/hvmultianswermodw.cpp	2026-11-03 16:00:03.314947539 +0100
++++ src/MSHV_2767/src/HvTxW/hvmultianswermodw.cpp	2026-11-12 10:51:22.844613797 +0100
+@@ -516,6 +516,14 @@
+     V_sb->addWidget(SBqueueLimit);
+     V_sb->addWidget(SBslots);
+     V_sb->addWidget(SBmaxTP);
++    //IC8TEM mod: optional unlock, default OFF
++    f_unlock_slots = false;
++    cb_unlock_slots = new QCheckBox(tr("Unlock TX Slots"));
++    cb_unlock_slots->setToolTip(tr("Allows more than one TX slot also in the standard FT8/FT4 HF sub-bands,")+"\n"+
++                                tr("in Q65 and in EU VHF contests (MSHV-IC8TEM option, default OFF).")+"\n"+
++                                tr("Use with care: several slots occupy more of the band."));
++    cb_unlock_slots->setChecked(false);
++    V_sb->addWidget(cb_unlock_slots);
+ 
+     Cbcqtype = new QComboBox();
+     QStringList lst_m;  //2.68 "CQ MDX" = MADX
+@@ -735,6 +743,7 @@
+     connect(LsQueue, SIGNAL(EmitClear_List()), this, SLOT(ClrQueue()));
+     connect(LsNow, SIGNAL(EmitClear_List()), this, SLOT(ClrNow()));
+     connect(SBslots, SIGNAL(valueChanged(int)), this, SLOT(SBslotsValueChanged(int)));
++    connect(cb_unlock_slots, SIGNAL(toggled(bool)), this, SLOT(UnlockSlotsChanged(bool)));//IC8TEM mod
+     connect(LeFreeCQ, SIGNAL(textChanged(QString)), this, SLOT(LeFreeCQtextChanged(QString)));
+     connect(pb_use_free_cq, SIGNAL(clicked(bool)), this, SLOT(UseFreeCq()));
+     connect(Cb_sort, SIGNAL(currentIndexChanged(int)), LsQueue, SLOT(SetAutoSort(int)));
+@@ -782,6 +791,7 @@
+ {
+     QStringList ls = s.split("#");
+     if (ls.count()<12) return;  //ls<<"0"<<"1"<<"1"<<"0"; //not possyble -> support for old ver
++    if (ls.count()>12) cb_unlock_slots->setChecked(ls.at(12)=="1");//IC8TEM mod, before TX Slots value
+     SBqueueLimit->setValue(ls.at(0).toInt());
+     SBslots->setValue(ls.at(1).toInt());
+     SBmaxTP->setValue(ls.at(2).toInt());
+@@ -1931,9 +1941,14 @@
+ static bool g_hf_b = false;
+ void MultiAnswerModW::ConfigRestrictW()
+ {
++    //IC8TEM mod: optional "Unlock TX Slots" (default OFF = original LZ2HV behaviour)
++    int max_sl = MAXSL;
++    if (s_mode==13) max_sl = 4;
++    else if (s_mode==18) max_sl = 3;
+     if (f_multi_answer_mod_std)//(s_mode==11 || s_mode==13 || s_mode==18) &&
+     {
+-        if (gg_frest || allq65) SBslots->setRange(1,1);// || s_mode==18
++        if (f_unlock_slots) SBslots->setRange(1,max_sl);//IC8TEM mod
++        else if (gg_frest || allq65) SBslots->setRange(1,1);// || s_mode==18
+         else
+         {
+             if (s_co_type==0) SBslots->setRange(1,2);
+@@ -1948,7 +1963,8 @@
+     }
+     else
+     {
+-        if (gg_frest || allq65) SBslots->setRange(1,1);// || s_mode==18
++        if (f_unlock_slots) SBslots->setRange(1,max_sl);//IC8TEM mod
++        else if (gg_frest || allq65) SBslots->setRange(1,1);// || s_mode==18
+         else
+         {
+             if (s_mode==13) SBslots->setRange(1,4);//2.71 old=3
+@@ -1973,14 +1989,15 @@
+         }
+     }
+ 
+-    if (SBslots->maximumS()==1) SBslots->setEnabled(false);
++    if (f_unlock_slots) SBslots->setEnabled(true);//IC8TEM mod
++    else if (SBslots->maximumS()==1) SBslots->setEnabled(false);
+     else if (!g_block_setx || !g_hf_b) SBslots->setEnabled(true);//2.71 added g_block_setx
+     else if (g_hf_b && g_block_setx) SBslots->setEnabled(false);
+ 
+     if (s_mode!=11 && s_mode!=13 && s_mode!=18 && !allq65) emit EmitMAFirstTX(false);//2.76.4
+     else
+     {//2.71
+-        if (g_hf_b && g_block_setx && f_multi_answer_mod_std && SBslots->valueS()>1) SBslots->setValue(1);
++        if (!f_unlock_slots && g_hf_b && g_block_setx && f_multi_answer_mod_std && SBslots->valueS()>1) SBslots->setValue(1);//IC8TEM !f_unlock_slots
+         else if (g_hf_b && f_multi_answer_mod_std && SBslots->valueS()>1/*||LsNow->GetRowCount()>1*/) emit EmitMAFirstTX(true);
+         else if (f_multi_answer_mod_std && LsNow->GetRowCount()<2) emit EmitMAFirstTX(false);
+         else emit EmitMAFirstTX(true);
+@@ -2021,13 +2038,19 @@
+     g_block_setx = f;
+     if (f)
+     {
+-        if (g_hf_b) SBslots->setEnabled(false); //SBslots->setValue(1);//moved up to ConfigRestrictW()
++        if (g_hf_b && !f_unlock_slots) SBslots->setEnabled(false); //SBslots->setValue(1);//moved up to ConfigRestrictW() //IC8TEM !f_unlock_slots
+     }
+     else
+     {
+-        if (g_hf_b && SBslots->maximumS()>1) SBslots->setEnabled(true);
++        if ((g_hf_b && SBslots->maximumS()>1) || f_unlock_slots) SBslots->setEnabled(true);//IC8TEM || f_unlock_slots
+     }
+ }
++void MultiAnswerModW::UnlockSlotsChanged(bool f)//IC8TEM mod
++{
++    f_unlock_slots = f;
++    ConfigRestrictW();
++    RestrictSeTX(g_block_setx);
++}
+ void MultiAnswerModW::setHfBand(bool f)
+ {
+     g_hf_b = f;
+@@ -2044,7 +2067,7 @@
+         bool f_msg = false;
+         if (SBslots->valueS()>1) f_msg = true;
+         ConfigRestrictW();
+-        if (f_msg && !isHidden())
++        if (f_msg && !isHidden() && !f_unlock_slots)//IC8TEM mod: no message when unlocked
+         {
+             QMessageBox msgBox(this);
+             msgBox.setWindowTitle("MSHV");
+diff -ruN orig/MSHV_2767/src/HvTxW/hvmultianswermodw.h src/MSHV_2767/src/HvTxW/hvmultianswermodw.h
+--- orig/MSHV_2767/src/HvTxW/hvmultianswermodw.h	2026-11-03 16:00:03.315330194 +0100
++++ src/MSHV_2767/src/HvTxW/hvmultianswermodw.h	2026-11-12 10:51:22.844921835 +0100
+@@ -183,7 +183,9 @@
+         out.append(QString("%1").arg(i1)+"#"+QString("%1").arg(i3)); 
+         out.append("#");
+         out.append(QString("%1").arg(cb_otp_mamd_key->isChecked()));//2.76sf        
+-        out.append("##"); //2.71 2.70 reserved            
++        out.append("#");
++        out.append(QString("%1").arg(cb_unlock_slots->isChecked()));//IC8TEM mod (was reserved)
++        out.append("#"); //2.71 2.70 reserved            
+         return out;
+     }
+     void SetFont(QFont f);
+@@ -235,6 +237,7 @@
+ 	void SetReriodTime(float);
+ 	
+ private slots:
++    void UnlockSlotsChanged(bool);//IC8TEM mod
+     void LQueueCountChange(int);
+     void LNowCountChange(int);
+     void ClrQueue();
+@@ -299,6 +302,8 @@
+     QComboBox *Cb_sort;
+     QCheckBox *cb_tx_cq_on_free_slot;//2.13
+     QCheckBox *cb_cont_ns;
++    QCheckBox *cb_unlock_slots;//IC8TEM mod
++    bool f_unlock_slots;//IC8TEM mod
+     QString format_rpt_ma(QString s);
+     //QString CalcDistance(QString,bool);
+     bool is_pfx(QString s);
+diff -ruN orig/MSHV_2767/src/HvTxW/hvtxw.cpp src/MSHV_2767/src/HvTxW/hvtxw.cpp
+--- orig/MSHV_2767/src/HvTxW/hvtxw.cpp	2026-11-03 16:00:03.317482174 +0100
++++ src/MSHV_2767/src/HvTxW/hvtxw.cpp	2026-11-04 00:58:06.826779852 +0100
+@@ -336,6 +336,7 @@
+     THvAstroDataW = new HvAstroDataW(x,y);
+     connect(THvAstroDataW, SIGNAL(EmitAstroWIsClosed()), this, SIGNAL(EmitAstroWIsClosed()));
+     connect(THvAstroDataW, SIGNAL(EmitAstroData(double,double,int,double)),this,SLOT(SetAstroData(double,double,int,double)));
++    connect(THvAstroDataW, SIGNAL(EmitDopplerFreqs(bool,double,double)),this,SIGNAL(EmitDopplerFreqs(bool,double,double)));//Doppler tracking (IC8TEM mod)
+ 
+     g_no_block_tx = 101;//101=noblock 100=blockall 6=blocktx7 1=blocktx2
+     g_ub_m_k = false;
+@@ -2964,6 +2965,7 @@
+     THvCatDispW->SetFreq(FREQ_GLOBAL);
+     TRadioAndNetW->SetFreqGlobal(FREQ_GLOBAL);
+     THvLogW->SetFreqGlobal(FREQ_GLOBAL);
++    THvAstroDataW->SetRigFreq(FREQ_GLOBAL);//Doppler tracking (IC8TEM mod)
+     RefreshLRestrict();
+ }
+ void HvTxW::SetBlockEmitFreqToRig(bool f)
+@@ -2997,6 +2999,7 @@
+         emit EmitFreqGlobalToRig(tfrq,id);//da go setva dori da ne go 4ete
+         RefreshLRestrict(); //emit EmitFreqGlobalToDec(tfrq);
+     } 
++    THvAstroDataW->SetAppSetFreq(tfrq);//Doppler tracking (IC8TEM mod) new sked frequency
+ }
+ 
+ // Native Flex VITA-49 backend (network.cpp): live TX metering off the radio.
+@@ -3628,6 +3631,8 @@
+     out << "add_to_log_prop_all=" << THvLogW->GetPropSettings() << "\n";//2.75
+     out << "mam_shf="<<QString("%1").arg(cb_msh->isChecked())<<"#"<<QString("%1").arg(cb_msf->isChecked())<<"\n";//2.76
+     out << "flex_native_last_all=" << flex_panel->GetFlexLastAll() << "\n";//frequency#rxant#txant
++    out << "def_doppler_track=" << THvAstroDataW->GetDopplerSettings() << "\n";//Doppler tracking (IC8TEM mod) method#khz#txshift#enable
++    out << "def_log_fict_reset=" << THvLogW->GetFictResetSettings() << "\n";//IC8TEM mod enabled#YYYYMMDDHHmmSS
+ 
+     //out << "auto_seq_all=" << AutoSeqLab->getautoseq_all() << "\n";
+     //out << "lock_txrx_all=" << get_lock_txrx_all() << "\n";
+@@ -3648,12 +3653,14 @@
+ }
+ void HvTxW::ReadSettings()
+ {
+-    const int c_st_id = 15;//dopalva se tuk v kraia    
++    const int c_st_id = 17;//dopalva se tuk v kraia    
+     const QString st_id[c_st_id]=
+         {
+             "his_call_tx","my_qrg_tx","tx_fi","mon_call1","mon_call2","def_radec","def_multi_answer",
+             "cont_v1_txsn","cont_v2_txsn","def_cabrillo_log_set","def_use_adif_save",
+-            "log_qsos_limit_gt9999_lt500001","add_to_log_prop_all","mam_shf","flex_native_last_all"
++            "log_qsos_limit_gt9999_lt500001","add_to_log_prop_all","mam_shf","flex_native_last_all",
++            "def_doppler_track",//Doppler tracking (IC8TEM mod)
++            "def_log_fict_reset"//IC8TEM mod
+         };
+     QString st_res[c_st_id];
+     for (int i = 0; i < c_st_id; ++i) st_res[i]="";
+@@ -3714,6 +3721,8 @@
+    		}
+    	}
+    	if (!st_res[14].isEmpty()) flex_panel->SetFlexLastAll(st_res[14].trimmed());//frequency#rxant#txant
++   	if (!st_res[15].isEmpty()) THvAstroDataW->SetDopplerSettings(st_res[15].trimmed());//Doppler tracking (IC8TEM mod)
++   	if (!st_res[16].isEmpty()) THvLogW->SetFictResetSettings(st_res[16].trimmed());//IC8TEM mod
+ }
+ void HvTxW::SetTxTextsHiden(bool f)
+ {
+diff -ruN orig/MSHV_2767/src/HvTxW/hvtxw.h src/MSHV_2767/src/HvTxW/hvtxw.h
+--- orig/MSHV_2767/src/HvTxW/hvtxw.h	2026-11-03 16:00:03.318610530 +0100
++++ src/MSHV_2767/src/HvTxW/hvtxw.h	2026-11-03 16:02:39.583971425 +0100
+@@ -365,6 +365,7 @@
+     void Emit65DeepSearchDb(QStringList);//1.49 deep search 65
+     //void EmitLocFromDB(QString);
+     void EmitAstroWIsClosed();
++    void EmitDopplerFreqs(bool,double,double);//Doppler tracking (IC8TEM mod)
+     void EmitMessageS(QString msg,bool imidiatly,bool iftximid);
+     void EmitAuto();
+     void EmitFileNameChenged();
+diff -ruN orig/MSHV_2767/src/config.h src/MSHV_2767/src/config.h
+--- orig/MSHV_2767/src/config.h	2026-11-03 16:00:03.255966069 +0100
++++ src/MSHV_2767/src/config.h	2026-11-12 10:52:05.225085826 +0100
+@@ -17,16 +17,16 @@
+ #define _WIN32_
+ #endif
+ #if defined(_WIN32_) && !defined(_WIN64_)  // r008 Only For Testers SP9HWY
+-#define APP_NAME "MSHV version " VER_MS " 32-bit"// r006 Only For Testers  r008
++#define APP_NAME "MSHV-IC8TEM version " VER_MS " 32-bit"// r006 Only For Testers  r008
+ #define UNICODE //HV FOR WCHAR* LPCSTR
+ #endif
+ #if defined _WIN64_
+-#define APP_NAME "MSHV version " VER_MS " 64-bit"// r002 For Test
++#define APP_NAME "MSHV-IC8TEM version " VER_MS " 64-bit"// r002 For Test
+ #define UNICODE //HV FOR WCHAR* LPCSTR
+ #endif
+ 
+ #if defined _LINUX_
+-#define APP_NAME "MSHV version " VER_MS    //c11++ intervaly -> "MSHV version " VER_MS
++#define APP_NAME "MSHV-IC8TEM version " VER_MS    //c11++ intervaly -> "MSHV version " VER_MS
+ #endif
+ 
+ #define DATA_HEIGHT         150
+diff -ruN orig/MSHV_2767/src/main_ms.cpp src/MSHV_2767/src/main_ms.cpp
+--- orig/MSHV_2767/src/main_ms.cpp	2026-11-03 16:00:03.411463283 +0100
++++ src/MSHV_2767/src/main_ms.cpp	2026-11-12 11:26:41.011596739 +0100
+@@ -7,6 +7,7 @@
+ #define _SHKY_H_
+ #define _BANDS_H_
+ #include "main_ms.h"
++#include "mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
+ 
+ #include <QScreen>
+ #include <QWindow>
+@@ -26,7 +27,7 @@
+ static int styid = 0;
+ void _ReadSSAndSet_()
+ {
+-    QString app_p = (QCoreApplication::applicationDirPath());
++    QString app_p = (MshvAppPath());
+     QFile file(app_p+"/settings/ms_start");
+     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+     QString langid = "0";
+@@ -90,7 +91,7 @@
+         else lid = 0;
+ 
+         /*QString istr = "";
+-        QString App_Path = (QCoreApplication::applicationDirPath());
++        QString App_Path = (MshvAppPath());
+         if 		(lid == 1 ) istr = "mshv_bg.qm";   
+         else if (lid == 2 ) istr = "mshv_ru.qm";   
+         else if (lid == 3 ) istr = "mshv_zh.qm";   
+@@ -153,7 +154,7 @@
+     f_rx_glob_ = false;
+ 
+     setWindowTitle(APP_NAME + InstName);  //qDebug()<<QCoreApplication::applicationName();
+-    App_Path = (QCoreApplication::applicationDirPath());
++    App_Path = (MshvAppPath());
+ 
+     dsty = false;
+     if (styid==1) dsty = true;
+@@ -642,13 +643,30 @@
+ 
+     QString str_bt0[COUNT_MODE];//2.74
+     int btid0[COUNT_MODE];
++    //IC8TEM mod: preferred modes first, in this order: FT8 FT4 Q65B Q65C Q65A MSK144 JT65B, then all the others
++    const int pref_mods[7] = {11,13,15,16,14,0,8};
++    int cbt0 = 0;
++    for (int i = 0; i < 7; ++i)
++    {
++        str_bt0[cbt0] = ModeStr(pref_mods[i]);
++        btid0[cbt0]   = pref_mods[i];
++        cbt0++;
++    }
+     for (int i = 0; i < COUNT_MODE; ++i)
+     {
+-        str_bt0[i] = ModeStr(pos_mods[i]);
+-        btid0[i]   = pos_mods[i];
++        bool isp = false;
++        for (int j = 0; j < 7; ++j)
++        {
++            if (pos_mods[i]==pref_mods[j]) isp = true;
++        }
++        if (isp) continue;
++        str_bt0[cbt0] = ModeStr(pos_mods[i]);
++        btid0[cbt0]   = pos_mods[i];
++        cbt0++;
+     }
++    //IC8TEM mod: default = these 7 modes, switcher visible (220)
+     W_mod_bt_sw = new HvWBtSw(this,COUNT_MODE,btid0,str_bt0,tr("Mode Switcher Buttons"),tr("Choose Modes")+":",
+-                              tr("USE MODE SWITCHER"),"0#2#18#13#11#14#15#7#8#222",dsty);
++                              tr("USE MODE SWITCHER"),"11#13#15#16#14#0#8#220#222",dsty);
+     //connect(W_mod_bt_sw,SIGNAL(clicked(int)),this,SLOT(ModBtSwClicked(int)));move down when rb_mode[] is created
+     QAction *ac_bt_mode = new QAction(tr("Mode Switcher Buttons"),this);
+     ac_bt_mode->setIcon(QPixmap(":pic/smenu.png"));
+@@ -812,6 +830,7 @@
+ 
+     //connect(THvTxW, SIGNAL(EmitRigBandFromFreq(int)), this, SLOT(SetBandFromRigFreq(int)));//1.61= down is started
+     connect(THvTxW, SIGNAL(EmitFreqGlobalToRig(QString,int)), THvRigControl, SLOT(SetFreq(QString,int)));//2.74
++    connect(THvTxW, SIGNAL(EmitDopplerFreqs(bool,double,double)), THvRigControl, SLOT(SetDopplerFreqs(bool,double,double)));//Doppler tracking (IC8TEM mod)
+     //connect(THvTxW, SIGNAL(EmitModeGlobalToRig(QString)), THvRigControl, SLOT(SetMode(QString)));//1.61= stop for the moment
+     connect(THvRigControl, SIGNAL(EmitGetedFreq(QString)), THvTxW, SLOT(SetFreqGlobalFromRigCat(QString)));//1.61=
+     connect(THvRigControl, SIGNAL(EmitGetedMode(QString)), THvTxW, SLOT(SetModeGlobalFromRigCat(QString)));//1.61=
+diff -ruN orig/MSHV_2767/src/mshv_ic8tem_path.h src/MSHV_2767/src/mshv_ic8tem_path.h
+--- orig/MSHV_2767/src/mshv_ic8tem_path.h	1970-01-01 01:00:00.000000000 +0100
++++ src/MSHV_2767/src/mshv_ic8tem_path.h	2026-11-12 11:26:35.503596542 +0100
+@@ -0,0 +1,76 @@
++/* MSHV-IC8TEM: writable data folder (settings, log, RxWavs, ...)
++ *
++ * MSHV keeps all its data next to the executable. That works for a portable
++ * Windows folder, but not for read-only installs (macOS .app in /Applications,
++ * AppImage, .deb/.rpm in /opt, BSD packages).
++ *
++ *  - MSHV_DATA_DIR env set  -> data there; seeded (no overwrite) from
++ *                              MSHV_SEED_DIR (or the executable folder)
++ *  - macOS                  -> ~/Library/Application Support/MSHV-IC8TEM,
++ *                              seeded from MSHV.app/Contents/Resources
++ *  - otherwise              -> executable folder (original MSHV behaviour)
++ *
++ * May be used under the terms of the GNU General Public License (GPL)
++ */
++#ifndef MSHV_IC8TEM_PATH_H
++#define MSHV_IC8TEM_PATH_H
++
++#include <QCoreApplication>
++#include <QDir>
++#include <QFile>
++#include <QFileInfo>
++#include <QString>
++#include <QByteArray>
++
++inline void MshvCopyTreeNoOverwrite(const QString &src,const QString &dst)
++{
++    QDir sd(src);
++    if (!sd.exists()) return;
++    QDir().mkpath(dst);
++    QFileInfoList l = sd.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden);
++    for (int i = 0; i < l.count(); ++i)
++    {
++        const QFileInfo &fi = l.at(i);
++        QString t = dst+"/"+fi.fileName();
++        if (fi.isDir()) MshvCopyTreeNoOverwrite(fi.absoluteFilePath(),t);
++        else if (!QFile::exists(t)) QFile::copy(fi.absoluteFilePath(),t);
++    }
++}
++inline QString MshvAppPath()
++{
++    static QString cached;
++    if (!cached.isEmpty()) return cached;
++    QString exe_dir = QCoreApplication::applicationDirPath();
++    QByteArray env = qgetenv("MSHV_DATA_DIR");
++    if (!env.isEmpty())
++    {
++        QString data = QDir::fromNativeSeparators(QString::fromLocal8Bit(env));
++        QByteArray seed = qgetenv("MSHV_SEED_DIR");
++        QString sdir = seed.isEmpty() ? exe_dir : QDir::fromNativeSeparators(QString::fromLocal8Bit(seed));
++        if (QDir(sdir).absolutePath() != QDir(data).absolutePath())
++        {
++            QStringList sub;
++            sub << "settings" << "log" << "RxWavs" << "ExportLog" << "AllTxtMonthly" << "Screenshots";
++            for (int i = 0; i < sub.count(); ++i) MshvCopyTreeNoOverwrite(sdir+"/"+sub.at(i),data+"/"+sub.at(i));
++        }
++        QDir().mkpath(data);
++        cached = data;
++        return cached;
++    }
++#if defined _MACOS_
++    QString data = QDir::homePath()+"/Library/Application Support/MSHV-IC8TEM";
++    QString seed = QDir(exe_dir+"/../Resources").absolutePath();
++    QStringList sub;
++    sub << "settings" << "log" << "RxWavs" << "ExportLog" << "AllTxtMonthly" << "Screenshots";
++    for (int i = 0; i < sub.count(); ++i)
++    {
++        MshvCopyTreeNoOverwrite(seed+"/"+sub.at(i),data+"/"+sub.at(i));
++        QDir().mkpath(data+"/"+sub.at(i));
++    }
++    cached = data;
++#else
++    cached = exe_dir;
++#endif
++    return cached;
++}
++#endif

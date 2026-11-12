@@ -1,0 +1,123 @@
+MSHV 2.76.7 + DOPPLER TRACKING (modifica per IC8TEM)
+====================================================
+
+COSA C'E' DI NUOVO
+------------------
+La finestra "Astronomical Data" ha ora, sulla destra, tre riquadri come in WSJT-X:
+
+1) Doppler tracking
+   - Full Doppler to DX Grid   RX = Sked + Dop(Io-Luna-DX)   TX = Sked - Dop(Io-Luna-DX)
+                               (il DX non corregge nulla: trasmette e ascolta su Sked)
+   - Own Echo                  RX = Sked + Doppler eco proprio   TX = Sked
+   - Constant frequency on Moon (CFOM)
+                               RX = Sked + Self/2   TX = Sked - Self/2
+                               (il segnale "arriva sulla Luna" sempre su Sked)
+   - On DX Echo                il DX trasmette su Sked senza correzione e ascolta il proprio eco:
+                               RX = Sked + Dop(Io-Luna-DX)
+                               TX = Sked + Doppler eco del DX (fissato a inizio QSO) - Dop(Io-Luna-DX)
+   - Call DX                   come On DX Echo, ma la Sked diventa la frequenza TX del DX calcolata
+                               da dove lo stai ascoltando ora (RX attuale - Dop(Io-Luna-DX))
+   - None                      nessuna correzione (RX = TX = Sked)
+
+   I valori Doppler sono quelli gia' mostrati dalla finestra (Dop DX / Self), riscalati
+   sulla frequenza Sked esatta. Le formule sono anche nei tooltip dei pulsanti.
+
+2) Sked frequency
+   - campo "kHz" + pulsante "Set kHz": Sked = MHz attuali + kHz scelti (es. 432 + 090 = 432,090 000)
+   - Rx / Tx: frequenze effettive che vengono inviate alla radio
+   - Tx Shift: da -999,999 a +999,999 MHz (risoluzione 1 kHz), applicato al TX solo con "Enable"
+     (TX = TX corretto + Shift). Funziona anche con "None".
+
+3) Echo Mode (RIT / Dither): presente per somiglianza con WSJT-X ma disattivato,
+   perche' MSHV non ha il modo Echo.
+
+COME AGISCE SUL CAT
+-------------------
+- Il tracking e' attivo solo con la finestra Astronomical Data APERTA, con CAT attivo,
+  e con un metodo diverso da None (oppure Tx Shift abilitato).
+- In ricezione la radio viene portata sulla frequenza Rx; quando MSHV va in TX la frequenza
+  Tx viene impostata PRIMA di chiudere il PTT; al ritorno in RX il PTT si apre e poi si
+  reimposta la Rx (ripetuta dopo 350 ms per le radio che ignorano il comando subito dopo il TX).
+- Il Doppler viene aggiornato ogni 2 secondi (ogni variazione >= 1 Hz), anche durante il TX
+  (necessario per CFOM). Se la tua radio non accetta il cambio frequenza in TX, il Doppler a
+  432 MHz varia comunque solo di pochi Hz in un periodo.
+- Se giri la manopola del VFO, la Sked si sposta di conseguenza (scarto > 50 Hz).
+- Se cambi banda o frequenza da MSHV, la nuova frequenza diventa la Sked.
+- Chiudendo la finestra o scegliendo None la radio torna sulla frequenza Sked.
+- Con il tracking attivo la funzione "Static TX" di MSHV viene sospesa (sposterebbe il VFO in TX);
+  si riattiva da sola togliendo il tracking.
+- L'offset transverter impostato in Rig Control continua a essere applicato normalmente.
+- Le impostazioni (metodo, kHz, Tx Shift, Enable) vengono salvate (tranne Call DX).
+
+CORREZIONE DI UN DIFETTO
+------------------------
+In astro() la tabella xdop[] era una variabile locale non inizializzata: il Doppler del DX
+calcolato nella prima chiamata veniva riletto nella seconda solo "per fortuna". Ora e' static.
+
+FILE MODIFICATI (vedi DOPPLER_IC8TEM.patch)
+------------------------------------------
+src/HvTxW/HvAstroDataW/hvastrodataw.h / .cpp   pannello, calcoli, sked
+src/HvRigControl/hvrigcontrol.h / .cpp         comandi CAT RX/TX attorno al PTT
+src/HvTxW/hvtxw.h / .cpp                       collegamenti e salvataggio impostazioni
+src/main_ms.cpp                                collegamento finestra -> CAT
+
+COME COMPILARE (senza Qt installato)
+====================================
+
+METODO A - GitHub (consigliato: niente da installare sul PC)
+  1. Crea un account gratuito su github.com (se non lo hai).
+  2. Crea un nuovo repository (anche privato), "uploading an existing file":
+     trascina TUTTO il contenuto di questa cartella, compresa la cartella .github
+     (se il browser non la mostra, carica la cartella intera con "upload files").
+  3. Scheda "Actions" -> "Build MSHV Windows 64-bit" -> "Run workflow".
+  4. Dopo circa 10-15 minuti, nella stessa pagina scarica l'artifact "MSHV_win64":
+     e' la cartella bin con MSHV_WIN64.exe e tutte le DLL. Scompattala e avvia l'exe.
+  Usa Qt 5.15.2 + MinGW 8.1, lo stesso tipo di compilatore delle librerie incluse.
+
+METODO B - sul tuo PC con compila.bat
+  1. Scompatta lo zip in una cartella SENZA spazi nel percorso, es. C:\MSHV_DOP
+  2. Doppio clic su compila.bat
+     - la prima volta scarica e installa MSYS2 (compilatore + Qt5) in C:\msys64,
+       circa 1,5 GB e 15-30 minuti, serve Internet
+     - poi compila e copia le DLL in bin\
+  3. Avvia bin\MSHV_WIN64.exe
+  Per rimuovere tutto in seguito basta cancellare C:\msys64.
+
+NOTA: le tue impostazioni stanno in bin\settings. Se vuoi usare quelle della tua
+installazione MSHV attuale, copia la sua cartella settings dentro bin\ prima di avviare.
+
+ALTRE MODIFICHE (versione 2)
+============================
+
+1) MULTI ANSWER AUTO SEQ PROTOCOL - "Unlock TX Slots"
+   Nuova spunta sotto TX Slots, DISATTIVATA di default (comportamento originale LZ2HV).
+   Se la attivi, TX Slots e' sempre abilitato e non viene limitato a 1 nelle sotto-bande
+   FT8/FT4 HF, in Q65 e in EU VHF. Massimo: 6 in FT8, 4 in FT4, 3 in FT2.
+
+2) LoTW - Opzioni > Network Configuration > linguetta "Page 3"
+   - Scarica https://lotw.arrl.org/lotw-user-activity.csv e caricalo con
+     "Load LoTW CSV File". Viene copiato in settings/database e ricaricato a ogni avvio.
+   - "Valid if last LoTW upload is on or after": data minima dell'ultimo upload LoTW
+     perche' un call sia considerato valido.
+   - Spunta per mostrare/nascondere il pallino. Impostazioni in settings/ms_lotw.
+
+3) Pallino nero nelle decodifiche
+   A destra di ogni riga decodificata compare un pallino nero se la stazione che
+   trasmette (es. K1ABC in "CQ K1ABC FN42" o in "IC8TEM K1ABC -10") e' nella lista LoTW
+   con data valida. Riconosce anche K1ABC/P, EA8/K1ABC ecc.
+
+4) Finestra Log - "Fictitious log reset YYYYMMDDHHmmSS (UTC)"
+   Spunta + 14 cifre (anno mese giorno ora minuti secondi UTC). Se attiva, i QSO
+   precedenti a quella data vengono ignorati per:
+   - evidenziare call e locator gia' lavorati (quindi i quadrati "nuovi" tornano nuovi)
+   - il controllo dupe.
+   Il log non viene modificato. Se la data non e' valida il campo diventa rosso.
+
+5) Filtri (Decode List Filters)
+   "Show LoTW Users Only": nasconde le stazioni senza pallino LoTW (i messaggi diretti
+   a te restano visibili). "Hide QSO B4 Messages" (originale) nasconde i gia' collegati,
+   attivo con Options > Text Highlight sezione 2; rispetta l'annullamento fittizio del log.
+   I filtri di MSHV agiscono solo in FT8/FT4/FT2.
+
+6) Modi all'avvio: pulsanti FT8, FT4, Q65B, Q65C, Q65A, MSK144, JT65B.
+7) Nome nel titolo: "MSHV-IC8TEM".

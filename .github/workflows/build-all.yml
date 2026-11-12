@@ -1,0 +1,291 @@
+# MSHV-IC8TEM - build all distributions and publish a GitHub Release on tags v*
+name: Build all distributions
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+env:
+  MSHV_VERSION: 2.76.7-ic8tem.1
+
+permissions:
+  contents: write
+
+jobs:
+  # ---------------------------------------------------------------- Windows x64 / x86
+  windows:
+    name: ${{ matrix.name }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            arch: win64_mingw81
+            tools: tools_mingw,qt.tools.win64_mingw810
+            mingw: mingw810_64
+            pro: MSHV_WIN64.pro
+          - name: windows-x86
+            arch: win32_mingw81
+            tools: tools_mingw,qt.tools.win32_mingw810
+            mingw: mingw810_32
+            pro: MSHV_WIN32.pro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          host: windows
+          target: desktop
+          arch: ${{ matrix.arch }}
+          tools: ${{ matrix.tools }}
+          cache: true
+      - name: Build
+        shell: cmd
+        run: |
+          set PATH=%IQTA_TOOLS%\${{ matrix.mingw }}\bin;%PATH%
+          qmake ${{ matrix.pro }} -after "TARGET=MSHV-IC8TEM"
+          mingw32-make -j4
+      - name: Package
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:IQTA_TOOLS\${{ matrix.mingw }}\bin;$env:PATH"
+          windeployqt --release --no-translations --compiler-runtime bin\MSHV-IC8TEM.exe
+          Get-ChildItem bin -Recurse -Force -Filter .gitkeep | Remove-Item -Force
+          New-Item -ItemType Directory -Force dist, stage | Out-Null
+          Copy-Item bin stage\MSHV-IC8TEM -Recurse
+          Copy-Item COPYING.txt, README.md, CHANGES_IC8TEM.md, LEGGIMI_DOPPLER_IC8TEM.txt stage\MSHV-IC8TEM
+          Compress-Archive stage\MSHV-IC8TEM "dist\MSHV-IC8TEM-$env:MSHV_VERSION-${{ matrix.name }}.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: dist/*
+
+  # ---------------------------------------------------------------- Windows ARM64 (Snapdragon)
+  windows-arm64:
+    name: windows-arm64
+    runs-on: windows-11-arm
+    continue-on-error: true
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
+          update: true
+          install: zip
+          pacboy: >-
+            toolchain:p qt5-base:p qt5-activeqt:p qt5-websockets:p qt5-tools:p fftw:p
+      - name: Build
+        run: |
+          QM=""
+          for c in qmake-qt5 qmake /clangarm64/qt5/bin/qmake /clangarm64/lib/qt5/bin/qmake; do command -v $c >/dev/null 2>&1 && { QM=$(command -v $c); break; }; done
+          echo "qmake: $QM"; $QM -v
+          $QM MSHV_WIN64.pro -after "TARGET=MSHV-IC8TEM" "LIBS=-ldsound -lfftw3 -lsetupapi" "QMAKE_CXXFLAGS-=-pedantic-errors"
+          (command -v mingw32-make >/dev/null && mingw32-make -j4) || make -j4
+      - name: Package
+        run: |
+          WDQ=""
+          for c in windeployqt-qt5 windeployqt /clangarm64/qt5/bin/windeployqt /clangarm64/lib/qt5/bin/windeployqt; do command -v $c >/dev/null 2>&1 && { WDQ=$(command -v $c); break; }; done
+          [ -n "$WDQ" ] && "$WDQ" --release --no-translations bin/MSHV-IC8TEM.exe || true
+          for i in 1 2 3; do for f in bin/*.exe bin/*.dll bin/*/*.dll; do ldd "$f" 2>/dev/null; done | grep -i '/clangarm64/' | awk '{print $3}' | sort -u | xargs -r cp -u -t bin/; done
+          find bin -name .gitkeep -delete
+          mkdir -p dist stage/MSHV-IC8TEM && cp -a bin/. stage/MSHV-IC8TEM/ && cp COPYING.txt README.md CHANGES_IC8TEM.md LEGGIMI_DOPPLER_IC8TEM.txt stage/MSHV-IC8TEM/
+          (cd stage && zip -qr "../dist/MSHV-IC8TEM-$MSHV_VERSION-windows-arm64.zip" MSHV-IC8TEM)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-arm64
+          path: dist/*
+
+  # ---------------------------------------------------------------- Linux x86_64 / aarch64 (Debian 11 base: glibc 2.31)
+  linux:
+    name: linux-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    container: debian:bullseye
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            deb: amd64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            deb: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential git ca-certificates \
+            qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5websockets5-dev libasound2-dev libpulse-dev libfftw3-dev \
+            dpkg-dev file wget xz-utils libgl1-mesa-dev
+      - uses: actions/checkout@v4
+      - name: Build
+        run: sh packaging/linux/build_unix.sh MSHV_x86_64.pro
+      - name: Package
+        run: |
+          sh packaging/linux/make_tar.sh dist linux-${{ matrix.arch }}
+          sh packaging/linux/make_deb.sh dist ${{ matrix.deb }} debian-ubuntu-mint-${{ matrix.deb }}
+          sh packaging/linux/make_appimage.sh dist ${{ matrix.arch }}
+          if [ "${{ matrix.arch }}" = "aarch64" ]; then
+            cp "dist/MSHV-IC8TEM-$MSHV_VERSION-debian-ubuntu-mint-arm64.deb" "dist/MSHV-IC8TEM-$MSHV_VERSION-raspios-64bit-arm64.deb"
+            sh packaging/linux/make_slackpkg.sh dist aarch64
+          fi
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: dist/*
+
+  # ---------------------------------------------------------------- Linux i686 (32 bit)
+  linux-i686:
+    name: linux-i686
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and package (i386 container)
+        run: |
+          docker run --rm --platform linux/386 -e MSHV_VERSION -v "$PWD":/src -w /src i386/debian:bullseye bash -ec '
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential \
+              qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5websockets5-dev libasound2-dev libpulse-dev libfftw3-dev dpkg-dev file xz-utils libgl1-mesa-dev
+            linux32 sh packaging/linux/build_unix.sh MSHV_I686.pro
+            sh packaging/linux/make_tar.sh dist linux-i686
+            sh packaging/linux/make_deb.sh dist i386 debian-ubuntu-mint-i386
+            chown -R '"$(id -u):$(id -g)"' dist bin build'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-i686
+          path: dist/*
+
+  # ---------------------------------------------------------------- Raspberry Pi OS 32 bit / armv7l (armhf, emulated)
+  linux-armhf:
+    name: linux-armhf
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm
+      - name: Build and package (armhf container)
+        run: |
+          docker run --rm --platform linux/arm/v7 -e MSHV_VERSION -v "$PWD":/src -w /src arm32v7/debian:bullseye bash -ec '
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential \
+              qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5websockets5-dev libasound2-dev libpulse-dev libfftw3-dev dpkg-dev file xz-utils libgles2-mesa-dev
+            sh packaging/linux/build_unix.sh MSHV_ARM_PI.pro
+            sh packaging/linux/make_tar.sh dist linux-armv7l-armhf
+            sh packaging/linux/make_deb.sh dist armhf raspios-32bit-armhf
+            chown -R '"$(id -u):$(id -g)"' dist bin build'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-armhf
+          path: dist/*
+
+  # ---------------------------------------------------------------- RPM (Fedora / openSUSE), built on openSUSE Leap 15.6 (glibc 2.31)
+  rpm:
+    name: rpm-x86_64
+    runs-on: ubuntu-24.04
+    container: opensuse/leap:15.6
+    steps:
+      - name: Dependencies
+        run: |
+          zypper -n refresh
+          zypper -n install gcc-c++ make git tar gzip rpm-build \
+            libqt5-qtbase-devel libqt5-qtwebsockets-devel alsa-devel libpulse-devel fftw3-devel
+      - uses: actions/checkout@v4
+      - name: Build
+        run: QMAKE=/usr/bin/qmake-qt5 sh packaging/linux/build_unix.sh MSHV_x86_64.pro
+      - name: Package
+        run: |
+          ROOT="$PWD/rpmroot"
+          sh packaging/linux/stage_root.sh "$ROOT"
+          rpmbuild -bb --define "_topdir $PWD/rpmbuild" --define "stage $ROOT" \
+            --define "mshv_ver ${MSHV_VERSION%%-*}" --define "mshv_rel ic8tem1" packaging/linux/mshv-ic8tem.spec
+          mkdir -p dist
+          cp rpmbuild/RPMS/*/*.rpm "dist/MSHV-IC8TEM-$MSHV_VERSION-fedora-opensuse-x86_64.rpm"
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-x86_64
+          path: dist/*
+
+  # ---------------------------------------------------------------- FreeBSD amd64
+  freebsd:
+    name: freebsd-amd64
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: vmactions/freebsd-vm@v1
+        with:
+          envs: 'MSHV_VERSION'
+          usesh: true
+          prepare: |
+            pkg install -y qt5-qmake qt5-buildtools qt5-core qt5-gui qt5-widgets qt5-network qt5-websockets alsa-lib pulseaudio fftw3 gmake
+          run: |
+            QMAKE=/usr/local/lib/qt5/bin/qmake MAKE=gmake sh packaging/linux/build_unix.sh MSHV_FreeBSD_amd64.pro \
+              "QMAKE_CC=cc" "QMAKE_CXX=c++" "QMAKE_LINK=c++" \
+              "LIBS=-L/usr/local/lib -lasound -lfftw3 -lpulse-simple -lpulse" "INCLUDEPATH+=/usr/local/include"
+            sh packaging/linux/make_tar.sh dist freebsd-amd64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: freebsd-amd64
+          path: dist/*
+
+  # ---------------------------------------------------------------- macOS (experimental)
+  macos:
+    name: macos-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: apple-silicon
+            runner: macos-14
+          - arch: intel
+            runner: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies
+        run: brew install qt@5 portaudio fftw
+      - name: Build
+        run: |
+          export PATH="$(brew --prefix qt@5)/bin:$PATH"
+          qmake MSHV_macOS.pro
+          make -j"$(sysctl -n hw.ncpu)"
+      - name: Package
+        run: |
+          export PATH="$(brew --prefix qt@5)/bin:$PATH"
+          macdeployqt bin/MSHV.app -always-overwrite
+          codesign --force --deep -s - bin/MSHV.app
+          mkdir -p dist
+          hdiutil create -volname MSHV-IC8TEM -srcfolder bin/MSHV.app -ov -format UDZO "dist/MSHV-IC8TEM-$MSHV_VERSION-macos-${{ matrix.arch }}.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: dist/*
+
+  # ---------------------------------------------------------------- Release
+  release:
+    name: GitHub Release
+    if: startsWith(github.ref, 'refs/tags/') && always()
+    needs: [windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, freebsd, macos]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: ls -la dist && (cd dist && sha256sum * > SHA256SUMS.txt)
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: MSHV-IC8TEM ${{ env.MSHV_VERSION }}
+          body_path: packaging/RELEASE_NOTES.md
+          files: dist/*
+          fail_on_unmatched_files: false

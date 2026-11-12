@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=MSHV-IC8TEM
+GenericName=Weak signal digital modes
+Comment=MSHV with Doppler tracking (CFOM), LoTW and more (IC8TEM mod)
+Exec=mshv-ic8tem
+Icon=mshv-ic8tem
+Terminal=false
+Categories=Network;HamRadio;
