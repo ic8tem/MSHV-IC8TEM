@@ -3,6 +3,9 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "cpuwudget.h"
+#if defined _MACOS_
+#include <QProgressBar>
+#endif
 //#define MAX_H_DISPLY_CPU 2
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,11 +48,43 @@ CpuWudget_W::CpuWudget_W(int CpuN,int cpu_count,/*bool all_in_one,*/QWidget *par
     {
         CpuSensorHv *TTCpuSensorHv = new CpuSensorHv("cpu"+QString("%1").arg(i), i);
         ListCpuSensor.append(TTCpuSensorHv);
+#if !defined(_MACOS_)
+        // 12-vertical-bar layout — works fine on Linux/Windows. On macOS the
+        // PNG assets render near-invisible in dark mode, so we ditch them
+        // and use a single theme-aware QProgressBar (built below).
         HvProgBarSlowV *TTHvProgBarSlowV = new HvProgBarSlowV(0,0,QPixmap(":pic/progress_on_v12.png"), QPixmap(":pic/progress_off_v12.png"), this);
         ListProgBarV.append(TTHvProgBarSlowV);
         H_mcpuv->addWidget(TTHvProgBarSlowV);
         H_mcpuv->setAlignment(TTHvProgBarSlowV,Qt::AlignBottom);
     }
+#if defined _MACOS_
+    MacCpuBar = new QProgressBar();
+    MacCpuBar->setRange(0, 100);
+    MacCpuBar->setTextVisible(false);
+    MacCpuBar->setOrientation(Qt::Horizontal);
+    MacCpuBar->setFixedHeight(h_150 - 1);
+    MacCpuBar->setMinimumWidth(60);
+    // Green → yellow → red gradient — standard CPU-meter aesthetic, plays
+    // nicely with both light and dark backgrounds. Chunk fills left to
+    // right so the colour at any given fill level is meaningful (low =
+    // green, near full = red).
+    MacCpuBar->setStyleSheet(
+        "QProgressBar {"
+        "  background-color: rgba(40,40,40,180);"
+        "  border: 1px solid rgb(80,80,80);"
+        "  border-radius: 3px;"
+        "  margin: 1px;"
+        "}"
+        "QProgressBar::chunk {"
+        "  background: qlineargradient(x1:0,y1:0,x2:1,y2:0,"
+        "    stop:0    rgb(46,204,64),"   // green
+        "    stop:0.55 rgb(255,220,0),"   // yellow
+        "    stop:0.85 rgb(255,133,27),"  // orange
+        "    stop:1    rgb(255,65,54));"  // red
+        "  border-radius: 2px;"
+        "}");
+    H_mcpu->addWidget(MacCpuBar);
+#endif
     H_mcpu->addLayout(H_mcpuv);
     //}
 
@@ -78,10 +113,14 @@ void CpuWudget_W::SetValueAllInOne()
     {
         int load = ListCpuSensor.at(i)->getCPULoad();
         cpus_losd += load;
+#if !defined(_MACOS_)
         ListProgBarV.at(i)->setValue(load, 100);
     }
     if (s_cpu_count<1) s_cpu_count=1;//2.76 protection div by zero
     cpus_losd = cpus_losd/s_cpu_count;
+#if defined _MACOS_
+    MacCpuBar->setValue(cpus_losd);
+#endif
     l_cpu0->setText(QString("%1%").arg(cpus_losd));//.arg(cpu0));
 }
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +173,9 @@ CpuWudget::CpuWudget( QWidget *parent )
     timer_refreshcpu->start(1000);
 #endif
 #endif
+#if defined _MACOS_
+    timer_refreshcpu->start(1000);
+#endif
 }
 CpuWudget::~CpuWudget()
 {}
@@ -145,6 +187,9 @@ CpuWudget::~CpuWudget()
 }*/
 #if defined _FREEBSDHV_
 #include <QProcess>
+#endif
+#if defined _MACOS_
+#include <QThread>
 #endif
 void CpuWudget::ScanForCpus()
 {
@@ -200,6 +245,18 @@ void CpuWudget::ScanForCpus()
     //}
     s_cpu_c = cpu_count;
 #endif
+#endif
+#if defined _MACOS_
+    {
+        // macOS: ask sysctl how many logical CPUs we have, so the widget
+        // displays a single all-in-one bar with the right scale.
+        int cpu_count = QThread::idealThreadCount();
+        if (cpu_count < 1) cpu_count = 1;
+        CpuWudget_W *TCpuWudget_W = new CpuWudget_W(0, cpu_count);
+        H_B->addWidget(TCpuWudget_W);
+        connect(this, SIGNAL(Refresh()), TCpuWudget_W, SLOT(SetValueAllInOne()));
+        s_cpu_c = cpu_count;
+    }
 #endif
 #if defined _WIN32_
     SYSTEM_INFO   systeminfo;

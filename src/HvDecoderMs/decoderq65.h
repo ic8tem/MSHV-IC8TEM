@@ -16,6 +16,7 @@
 #include <QObject>
 #include <complex.h>
 #define complex		_Complex
+#include "../mac_complex_shim.h"//macOS: complex shim (VU2CPL)
 #include "../Hv_Lib_fftw/fftw3.h"
 #include "../HvMsPlayer/libsound/HvGenQ65/gen_q65.h"
 #include "../HvMsPlayer/libsound/HvGenQ65/q65_subs.h"

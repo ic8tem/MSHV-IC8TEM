@@ -19,6 +19,7 @@
 /*
 #include <complex.h> // gnu++11 c++11
 #define complex		_Complex
+#include "../../../mac_complex_shim.h"//macOS: complex shim (VU2CPL)
 #include "../../../Hv_Lib_fftw/fftw3.h"
 */
 //#include <complex.h> // gnu++11 c++11

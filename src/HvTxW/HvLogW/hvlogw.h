@@ -5,6 +5,7 @@
 
 #ifndef HVLOGW_H
 #define HVLOGW_H
+#include <pthread.h>//IC8TEM: explicit (needed by clang/libc++, e.g. Windows ARM64)
 
 #include <QWidget>
 #include <QVBoxLayout>

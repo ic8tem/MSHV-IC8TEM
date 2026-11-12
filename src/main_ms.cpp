@@ -7,6 +7,8 @@
 #define _SHKY_H_
 #define _BANDS_H_
 #include "main_ms.h"
+#include "mshv_app_path.h"
+#include "mshv_txtrace.h"
 #include "mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
 
 #include <QScreen>
@@ -14,6 +16,46 @@
 #include <QDesktopWidget>
 #include <QDesktopServices>
 #include <QMimeData>  // For QT5
+
+#if defined _MACOS_
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QKeySequence>
+/* macOS port (2026-09-21) -- give every "Ctrl+X" menu shortcut a physical
+ * Control-key twin. Qt on macOS maps Qt::ControlModifier (the shortcut
+ * table's "Ctrl") to the COMMAND key and the physical Control key to
+ * Qt::MetaModifier. The application menu owns Cmd+Q (Quit) and Cmd+H
+ * (Hide) and macOS itself owns Cmd+` (next window), so those shortcuts
+ * could not be reached at all, and the rest worked on Cmd only while the
+ * Keyboard Shortcuts window says "Ctrl". With the twin the table reads
+ * literally on a Mac (Control+H opens Help) and Cmd keeps working wherever
+ * macOS does not claim it. Main_Ms::keyPressEvent() does the same inline
+ * for the shortcuts it handles itself (Ctrl+Q, Ctrl+`, Ctrl+A, ...). */
+static void MshvAddControlKeyTwins(QMenuBar *mb)
+{
+    QList<QAction*> todo = mb->actions();
+    while (!todo.isEmpty())
+    {
+        QAction *a = todo.takeFirst();
+        if (a->menu())
+        {
+            todo += a->menu()->actions();
+            continue;
+        }
+        const QList<QKeySequence> seqs = a->shortcuts();
+        QList<QKeySequence> twins;
+        for (const QKeySequence &s : seqs)
+        {
+            if (s.count() != 1) continue;
+            int k = s[0];
+            if ((k & Qt::CTRL) && !(k & Qt::META))
+                twins << QKeySequence((k & ~Qt::CTRL) | Qt::META);
+        }
+        if (!twins.isEmpty()) a->setShortcuts(seqs + twins);
+    }
+}
+#endif
 
 #define _CONT_NAME_
 #include "config_str_con.h"
@@ -446,7 +488,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     Option_m->addAction(QPixmap(":pic/mixer_play.png"),ShKey[lid][7][1], this, SLOT(WMixPlay()),QKeySequence(tr(ShKey[lid][7][0],ShKey[lid][7][1])));
     Option_m->addAction(QPixmap(":pic/mixer_rec.png"),ShKey[lid][8][1], this, SLOT(WMixRec()),QKeySequence(tr(ShKey[lid][8][0],ShKey[lid][8][1])));
 #endif
-#if defined _LINUX_
+#if defined _LINUX_ || defined _MACOS_
     THvMixerMain = new HvMixerMain();
     Option_m->addAction(QPixmap(":pic/mixer_play.png"),ShKey[lid][7][1], THvMixerMain, SLOT(Start()),QKeySequence(tr(ShKey[lid][7][0],ShKey[lid][7][1])));
     Option_m->addAction(QPixmap(":pic/mixer_rec.png"),ShKey[lid][8][1], THvMixerMain, SLOT(Start()),QKeySequence(tr(ShKey[lid][8][0],ShKey[lid][8][1])));
@@ -1264,6 +1306,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     Min_Menu->addMenu(lang_m);
     //// end Translation ////
     Min_Menu->addMenu(Help_m);
+#if defined _MACOS_
+    MshvAddControlKeyTwins(Min_Menu);// the physical Control key is the table's "Ctrl" too (helper at the top of this file)
+#endif
 
     Min_Menu->setContentsMargins(4,0,4,0);//4,0,4,0 ( qreal left, qreal top, qreal right, qreal bottom )
     //Min_Menu->setFixedHeight(23);//1.56=off for +150%
@@ -1533,7 +1578,17 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
 
     SB_VDispStartFreq = new HvSpinBox();
     SB_VDispStartFreq->setRange(0,3000);//s3000+b2000=5000 max
+#if defined _MACOS_
+    // mac port: default spectrum-display range to 0..4000 Hz (was 100..3300)
+    // so the FT8 AP-decode cursors (frq00/frq01) — re-derived from
+    // s_start/s_stop in DisplayMs::SetMode — start out wide. Otherwise the
+    // operator has to drag them on every launch even though saved settings
+    // restore this same value a moment later. Companion change in
+    // DisplayMs::ctor for s_start/s_stop and frq00/frq01.
+    SB_VDispStartFreq->setValue(0);
+#else
     SB_VDispStartFreq->setValue(100);//old 200
+#endif
     SB_VDispStartFreq->setFixedHeight(19);//problem hv
     //SB_VDispStartFreq->setFixedWidth(113);//125% problem hv
     SB_VDispStartFreq->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -1547,7 +1602,11 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
 
     SB_VDispBandwidth = new HvSpinBox();
     SB_VDispBandwidth->setRange(2000,5000);//s3000+b2000=5000 max
+#if defined _MACOS_
+    SB_VDispBandwidth->setValue(4000);// mac port: see SB_VDispStartFreq above
+#else
     SB_VDispBandwidth->setValue(3200);//old 2000
+#endif
     SB_VDispBandwidth->setFixedHeight(19);//problem hv
     //SB_VDispBandwidth->setFixedWidth(107);//125% problem hv
     SB_VDispBandwidth->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -2708,8 +2767,42 @@ void Main_Ms::UpdateFlexMeter(bool up,bool is_meter,double fwd,double swr)
 
 void Main_Ms::SetRigTxRx(bool f)
 {
-	if (f_tx_busy == f) return;//2.76.7 Protection from background working Clock synchronisation software.  
-    f_tx_busy = f;//2.47
+#if defined _MACOS_
+    // DIAGNOSTIC (2026-09-08), inert unless MSHV_TXTRACE is set.
+    // Finds what asks for TX a second time inside one transmission -- the
+    // duplicate PTT-ON behind the Flex double relay click.  The click is
+    // already fixed downstream (hvrigcontrol.cpp + network.cpp), but the
+    // duplicate REQUEST is still generated; this names its caller.
+    // Must run BEFORE f_tx_busy is assigned, since that is the flag the
+    // duplicate is detected against.
+    // 2026-09-10: LZ2HV's own guard now follows this block, so a duplicate
+    // is logged here and then returns -- the DUPLICATE count is what his
+    // guard absorbed.
+    if (MshvTxTraceOn())
+    {
+        static int calls = 0;
+        const bool dup = (f && f_tx_busy);   // asked to key while already keyed
+        const QString when = QDateTime::currentDateTime().toString("HH:mm:ss.zzz");
+        if (dup)
+        {
+            fprintf(stderr, "[MSHV TX] %s  DUPLICATE SetRigTxRx(true) -- already f_tx_busy\n%s",
+                    when.toUtf8().constData(), MshvBacktrace().toUtf8().constData());
+        }
+        else if (++calls <= 6)
+        {
+            // the first few normal transitions, to diff a clean path against a duplicate
+            fprintf(stderr, "[MSHV TX] %s  SetRigTxRx(%d) normal\n%s",
+                    when.toUtf8().constData(), (int)f, MshvBacktrace().toUtf8().constData());
+        }
+        else
+        {
+            fprintf(stderr, "[MSHV TX] %s  SetRigTxRx(%d)\n", when.toUtf8().constData(), (int)f);
+        }
+        fflush(stderr);
+    }
+#endif
+	if (f_tx_busy == f) return;//2.76.7 Protection MAC and PC from bad Machine Clock
+    f_tx_busy = f;//2.47  //if (f_tx_busy == f) return;
     THvRigControl->SetPtt(f,0);//id 0=All 1=p1 2=p2
     THvTxW->SetTxRxCountAutoSeq(f);//qDebug()<<"SetRigTxRx...................."<<f;
     if (f)
@@ -5209,6 +5302,23 @@ void Main_Ms::Screenshot()//new 2.56
 }
 void Main_Ms::keyPressEvent(QKeyEvent* event)
 {
+#if defined _MACOS_
+    /* macOS port (2026-09-21): the physical Control key arrives as
+     * Qt::MetaModifier here (Qt::ControlModifier is the Command key), so the
+     * shortcut table's "Ctrl+Q" and "Ctrl+`" could only be typed as Cmd+Q and
+     * Cmd+`, which the application menu (Quit) and macOS (next window) take
+     * before this widget ever sees them. Re-dispatch a Control-key press as
+     * the Command-key event the switch below expects; the switch itself stays
+     * upstream's, and Cmd still works for everything macOS leaves alone. */
+    if (event->modifiers() == Qt::MetaModifier)
+    {
+        QKeyEvent ev(event->type(), event->key(), Qt::ControlModifier, event->text(),
+                     event->isAutoRepeat(), event->count());
+        keyPressEvent(&ev);
+        event->setAccepted(ev.isAccepted());
+        return;
+    }
+#endif
     /*    Qt::Key_NumberSign-># Qt::Key_Bar->| Qt::Key_Semicolon->;
     if (event->key() == Qt::Key_Space || event->key() == Qt::Key_NumberSign
             || event->key() == Qt::Key_Bar || event->key() == Qt::Key_Semicolon)

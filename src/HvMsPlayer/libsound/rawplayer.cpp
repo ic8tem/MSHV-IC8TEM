@@ -28,6 +28,12 @@ int Rawplayer::buffering = 1000;
 int Rawplayer::pa_sa_rate = 44100;
 int Rawplayer::s_bitpersamplelin = 16;
 #endif
+#if defined _MACOS_
+char *Rawplayer::defaultdevice=(char*)"default";
+int Rawplayer::buffering = 1000;
+int Rawplayer::pa_sa_rate = 44100;
+int Rawplayer::s_bitpersamplelin = 16;
+#endif
 #if defined _WIN32_ //Primary Sound Driver or "0"
 char *Rawplayer::defaultdevice=(char*)"Primary Sound Driver";
 int Rawplayer::buffering = 1000;//1.42 600 to 1000 default
@@ -57,6 +63,9 @@ Rawplayer::~Rawplayer()
 #if defined _LINUX_
     lin_destroy();
 #endif 
+#if defined _MACOS_
+    mac_destroy();
+#endif
 }
 bool Rawplayer::initialize(char *device_name)
 {
@@ -78,6 +87,9 @@ bool Rawplayer::initialize(char *device_name)
 #endif
 #if defined _LINUX_
     return lin_initialize(device_name,s_bitpersamplelin);
+#endif
+#if defined _MACOS_
+    return mac_initialize(device_name,s_bitpersamplelin);
 #endif
     return true;
 }
@@ -113,6 +125,9 @@ bool Rawplayer::setsoundtype(int stereo,int samplesize,int speed)
 #if defined _LINUX_
     rawchannels = 2;
 #endif
+#if defined _MACOS_
+    rawchannels = 2;
+#endif
     //2.70 read all variants
     if (ftci) audiobuffersize = 4096;
     else if (rawsamplesize==16) audiobuffersize = 4096;
@@ -132,6 +147,9 @@ bool Rawplayer::resetsoundtype(void)
 #if defined _LINUX_
     return lin_resetsoundtype();
 #endif
+#if defined _MACOS_
+    return mac_resetsoundtype();
+#endif
 }
 //void * fast_memcpy(void * to, const void * from, size_t len);
 //#define fast_memcpy(a,b,c) memcpy(a,b,c)
@@ -150,6 +168,9 @@ bool Rawplayer::putblock(void *buffer,int size)
 #endif
 #if defined _LINUX_
         return lin_putblock(buffer,size);
+#endif
+#if defined _MACOS_
+        return mac_putblock(buffer,size);
 #endif
     }
     return 0;

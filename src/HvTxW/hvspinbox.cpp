@@ -221,7 +221,17 @@ void HvSpinBoxDf::SetDfAllModes(QString s)
             {
                 ls[j].remove(tstr);
                 //if (!ls[j].isEmpty() && (ls[j].toInt()>9 && ls[j].toInt()<601))
+#if defined _MACOS_
+                // mac port: accept saved DF tolerance up to 2000 to match
+                // the wider per-mode setRange() in SetMode (also Mac-only).
+                // Without this, getdftol_all values >= 1501 are silently
+                // dropped by the parser and s_dftolerance[mode] stays at
+                // the constructor default 1500 — defeating the widened
+                // SB_DfTolerance1 max + CorrDfW 2000 step.
+                if (!ls[j].isEmpty() && (ls[j].toInt()>9 && ls[j].toInt()<2001))
+#else
                 if (!ls[j].isEmpty() && (ls[j].toInt()>9 && ls[j].toInt()<1501))//1.78
+#endif
                 {
                     s_dftolerance[i] = ls[j].toInt();
                 }
@@ -287,7 +297,15 @@ void HvSpinBoxDf::SetMode(int i)
             setValue(s_dftolerance[s_mode]);
         }
         else setValue(s_dftolerance[s_mode]);
+#if defined _MACOS_
+        // mac port: raise max so the AP-decode window can span the full
+        // 0..4000 spectrum (half-width = 2000). Upstream caps at 1500
+        // which width-locks the green cursors at 3 kHz no matter how wide
+        // the operator sets the waterfall (s_start..s_stop).
+        setRange(50,2000);
+#else
         setRange(50,1500);
+#endif
     }
     else if (s_mode==13) // ft4
     {
@@ -302,7 +320,11 @@ void HvSpinBoxDf::SetMode(int i)
             setValue(s_dftolerance[s_mode]);
         }
         else setValue(s_dftolerance[s_mode]);
+#if defined _MACOS_
+        setRange(100,2000);// mac port: see ft8 above
+#else
         setRange(100,1500);
+#endif
     }
     else if (s_mode==18) // ft2
     {
@@ -317,7 +339,11 @@ void HvSpinBoxDf::SetMode(int i)
             setValue(s_dftolerance[s_mode]);
         }
         else setValue(s_dftolerance[s_mode]);
+#if defined _MACOS_
+        setRange(100,2000);// mac port: see ft8 above
+#else
         setRange(100,1500);
+#endif
     }
     else if (s_mode == 14 || s_mode == 15 || s_mode == 16 || s_mode == 17) // q65
     {
@@ -333,7 +359,11 @@ void HvSpinBoxDf::SetMode(int i)
         }
         else setValue(s_dftolerance[s_mode]);
         //setRange(50,1500);
+#if defined _MACOS_
+        setRange(50,2000);// mac port: see ft8 above
+#else
         setRange(50,1000);
+#endif
     }
     else
     {
@@ -423,6 +453,13 @@ void HvSpinBoxDf::Slot_valueChanged(int val)
         case 1000:
             setValue(1500);
             break;
+#if defined _MACOS_
+        // mac port: continue the ladder past 1500 so up-arrow jumps to
+        // 2000 instead of stepping by +1 (Qt's default with no case match).
+        case 1500:
+            setValue(2000);
+            break;
+#endif
 
             /*case 600:
                  setValue(1000);
@@ -487,6 +524,12 @@ void HvSpinBoxDf::Slot_valueChanged(int val)
         case 1500:
             setValue(1000);
             break;
+#if defined _MACOS_
+        // mac port: down-arrow ladder partner for the up-arrow case 1500.
+        case 2000:
+            setValue(1500);
+            break;
+#endif
 
             /*case 1000:
                 setValue(600);

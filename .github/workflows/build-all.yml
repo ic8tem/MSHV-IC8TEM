@@ -50,8 +50,17 @@ jobs:
       - name: Package
         shell: pwsh
         run: |
-          $env:PATH = "$env:IQTA_TOOLS\${{ matrix.mingw }}\bin;$env:PATH"
-          windeployqt --release --no-translations --compiler-runtime bin\MSHV-IC8TEM.exe
+          $env:PATH = "$env:QT_ROOT_DIR\bin;$env:IQTA_TOOLS\${{ matrix.mingw }}\bin;$env:PATH"
+          & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --qmake "$env:QT_ROOT_DIR\bin\qmake.exe" --release --no-translations --compiler-runtime bin\MSHV-IC8TEM.exe
+          if (-not (Test-Path bin\platforms\qwindows.dll)) {
+            New-Item -ItemType Directory -Force bin\platforms, bin\styles, bin\imageformats | Out-Null
+            Copy-Item "$env:QT_ROOT_DIR\plugins\platforms\qwindows.dll" bin\platforms\
+            Copy-Item "$env:QT_ROOT_DIR\plugins\styles\qwindowsvistastyle.dll" bin\styles\ -ErrorAction SilentlyContinue
+            Copy-Item "$env:QT_ROOT_DIR\plugins\imageformats\*.dll" bin\imageformats\ -ErrorAction SilentlyContinue
+            foreach ($d in 'Qt5Core','Qt5Gui','Qt5Network','Qt5WebSockets','Qt5Widgets') { Copy-Item "$env:QT_ROOT_DIR\bin\$d.dll" bin\ }
+            foreach ($d in 'libgcc_s_seh-1','libgcc_s_dw2-1','libstdc++-6','libwinpthread-1') { Copy-Item "$env:QT_ROOT_DIR\bin\$d.dll" bin\ -ErrorAction SilentlyContinue }
+          }
+          if (-not (Test-Path bin\platforms\qwindows.dll)) { throw "qwindows.dll missing" }
           Get-ChildItem bin -Recurse -Force -Filter .gitkeep | Remove-Item -Force
           New-Item -ItemType Directory -Force dist, stage | Out-Null
           Copy-Item bin stage\MSHV-IC8TEM -Recurse
@@ -100,11 +109,11 @@ jobs:
           name: windows-arm64
           path: dist/*
 
-  # ---------------------------------------------------------------- Linux x86_64 / aarch64 (Debian 11 base: glibc 2.31)
+  # ---------------------------------------------------------------- Linux x86_64 / aarch64 (Ubuntu 22.04 base: glibc 2.35)
   linux:
     name: linux-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
-    container: debian:bullseye
+    container: ubuntu:22.04
     strategy:
       fail-fast: false
       matrix:
@@ -121,7 +130,7 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential git ca-certificates \
             qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5websockets5-dev libasound2-dev libpulse-dev libfftw3-dev \
-            dpkg-dev file wget xz-utils libgl1-mesa-dev
+            dpkg-dev file wget xz-utils libgl1-mesa-dev libfuse2 squashfs-tools
       - uses: actions/checkout@v4
       - name: Build
         run: sh packaging/linux/build_unix.sh MSHV_x86_64.pro
@@ -148,7 +157,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and package (i386 container)
         run: |
-          docker run --rm --platform linux/386 -e MSHV_VERSION -v "$PWD":/src -w /src i386/debian:bullseye bash -ec '
+          docker run --rm --platform linux/386 -e MSHV_VERSION -v "$PWD":/src -w /src i386/debian:bookworm bash -ec '
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential \
               qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5websockets5-dev libasound2-dev libpulse-dev libfftw3-dev dpkg-dev file xz-utils libgl1-mesa-dev
@@ -173,7 +182,7 @@ jobs:
           platforms: arm
       - name: Build and package (armhf container)
         run: |
-          docker run --rm --platform linux/arm/v7 -e MSHV_VERSION -v "$PWD":/src -w /src arm32v7/debian:bullseye bash -ec '
+          docker run --rm --platform linux/arm/v7 -e MSHV_VERSION -v "$PWD":/src -w /src arm32v7/debian:bookworm bash -ec '
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential \
               qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5websockets5-dev libasound2-dev libpulse-dev libfftw3-dev dpkg-dev file xz-utils libgles2-mesa-dev
@@ -229,6 +238,7 @@ jobs:
           run: |
             QMAKE=/usr/local/lib/qt5/bin/qmake MAKE=gmake sh packaging/linux/build_unix.sh MSHV_FreeBSD_amd64.pro \
               "QMAKE_CC=cc" "QMAKE_CXX=c++" "QMAKE_LINK=c++" \
+              "QMAKE_CXXFLAGS-=-freorder-functions" "QMAKE_CXXFLAGS-=-funroll-all-loops" \
               "LIBS=-L/usr/local/lib -lasound -lfftw3 -lpulse-simple -lpulse" "INCLUDEPATH+=/usr/local/include"
             sh packaging/linux/make_tar.sh dist freebsd-amd64
       - uses: actions/upload-artifact@v4

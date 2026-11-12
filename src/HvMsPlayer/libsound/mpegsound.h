@@ -323,6 +323,9 @@ private:
 // Class for playing raw data
 #include <alsa/asoundlib.h>//hv for alsa sound
 #endif
+#if defined _MACOS_
+// macOS playback uses PortAudio (CoreAudio); no system header needed here.
+#endif
 
 //static LPDIRECTSOUNDBUFFER hdsbuf = NULL;
 //#include <windows.h>
@@ -402,6 +405,10 @@ public:
     static int s_bitpersamplelin; 
     //static int  setvolume_lin(int volume);
 #endif    
+#if defined _MACOS_
+    static int pa_sa_rate;
+    static int s_bitpersamplelin;
+#endif
 
 //signals:
  
@@ -438,6 +445,12 @@ private:
     bool lin_resetsoundtype();
     bool lin_putblock(void *buffer,int size);
     snd_pcm_format_t check_formats(snd_pcm_t *h, snd_pcm_hw_params_t *hware);
+#endif
+#if defined _MACOS_
+    void mac_destroy();
+    bool mac_initialize(char *device_name,int);
+    bool mac_resetsoundtype();
+    bool mac_putblock(void *buffer,int size);
 #endif
     int buffer_size;
     int write_position;

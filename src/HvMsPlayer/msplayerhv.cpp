@@ -61,6 +61,11 @@ MsPlayerHV::MsPlayerHV(QString path)
 
     pthread_attr_setschedpolicy(&thread_attr, SCHED_OTHER);  //2.38 stop <-no needed   need Linux test OTHER=0 FIFO=1 RR=2 policy
     pthread_attr_setschedparam(&thread_attr, &param);
+#if defined _MACOS_
+    // macOS pthreads default to ~512 KB; the TX message generators allocate
+    // multi-MB arrays on the stack. Match Linux's 8 MB.
+    pthread_attr_setstacksize(&thread_attr, 8 * 1024 * 1024);
+#endif
 
     //pthread_create(&th,NULL,MsPlayerHV::ThreadEntry,(void*)this);
     pthread_create(&thtx,&thread_attr,MsPlayerHV::ThreadEntry,(void*)this);
@@ -98,11 +103,17 @@ void MsPlayerHV::SetModeForWavSaves(int mode)
 #if defined _LINUX_
         Rawplayer::pa_sa_rate = 44100;
 #endif
+#if defined _MACOS_
+        Rawplayer::pa_sa_rate = 44100;
+#endif
     }
     else
     {
         SAVE_SAMPLE_RATE = SAVE_SAMPLE_RATE_12000;
 #if defined _LINUX_
+        Rawplayer::pa_sa_rate = 48000;
+#endif
+#if defined _MACOS_
         Rawplayer::pa_sa_rate = 48000;
 #endif
     }
@@ -114,6 +125,9 @@ void MsPlayerHV::SetSoundDevice(QString dev_in_number,int bpsamp,int buffer)
     Rawplayer::buffering = buffer;
     s_bitpersample = bpsamp;
 #if defined _LINUX_
+    Rawplayer::s_bitpersamplelin = bpsamp;
+#endif
+#if defined _MACOS_
     Rawplayer::s_bitpersamplelin = bpsamp;
 #endif
     //qDebug()<<"MsPlayerHV========"<<Rawplayer::defaultdevice<<dev_in_number<<bpsamp;

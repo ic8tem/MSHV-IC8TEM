@@ -4,6 +4,10 @@
  */
 #define _BANDS_H_
 #include "hvrigcontrol.h"
+#if defined _MACOS_
+#include <QTime>
+#include "../mshv_txtrace.h"   // MSHV_TXTRACE=1: LZ2HV asked for prints at SetPtt() and TimerTryStaticTxF()
+#endif
 #include <unistd.h>   // uslepp Linux and windows
 #include <math.h> /* round, floor, ceil, trunc */
 #include "qexsp_1_2rc/qextserialenumerator.h"
@@ -1652,7 +1656,21 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
 
     SetEnabledAll(true);
 
-    if (sett.port_type==RIG_PORT_NETWORK) SetNetConnect();//2.51 need to be here
+    if (sett.port_type==RIG_PORT_NETWORK)
+    {
+#if defined _MACOS_
+        // When MSHV is relaunched while AetherSDR / SmartSDR is already
+        // running with TCI, the first immediate auto-connect frequently
+        // lands as "disconnected" — the SDR hasn't released the prior
+        // session yet, or Qt's event loop hasn't fully spun up by the time
+        // wsocket->open() runs from this signal chain. Defer the connect
+        // by ~1.5 s so the user doesn't have to click Disconnect/Connect
+        // by hand on every launch.
+        QTimer::singleShot(1500, this, SLOT(SetNetConnect()));
+#else
+        SetNetConnect();//2.51 need to be here
+#endif
+    }
     //qDebug()<<"rrrr"<<s_rig_name;
     ////////////////////////////////////////////////////////new read com
     rb_dtr->setEnabled(true);
@@ -1947,6 +1965,11 @@ void HvRigControl::SetQrgParms(QString s,bool f)//2.45
 //int currt = 0;
 void HvRigControl::TimerTryStaticTxF()
 {
+#if defined _MACOS_
+    // LZ2HV, 2026-09-10: "qDebug()<<\"TimerTryStaticTxF()-------------->\"<<\"f_txrx_static_tx=\"<<f_txrx_static_tx;"
+    if (MshvTxTraceOn()) fprintf(stderr, "[MSHV TX] %s  TimerTryStaticTxF()--------------> f_txrx_static_tx=%s\n",
+                                 qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), f_txrx_static_tx ? "true" : "false");
+#endif
     if (f_txrx_static_tx)//try go to TX
     {
         timer_try_static_tx->stop();
@@ -2116,8 +2139,11 @@ void HvRigControl::SetPtt(bool flag, int id)//id 0=All 1=p1 2=p2
         return;
     }
     if (!flag) dop_in_tx = false;//IC8TEM
-	//if (flag) qDebug()<<"SetPtt====== TO TX"<<flag<<id;
-	//else  qDebug()<<"SetPtt=RX"<<flag<<id;	
+#if defined _MACOS_
+    // LZ2HV, 2026-09-10: "qDebug()<<\"SetPt=\"<<\"flag=\"<<flag<<\"id=\"<<id;" -- to see where TX is set 2-3 times
+    if (MshvTxTraceOn()) fprintf(stderr, "[MSHV TX] %s  SetPt= flag=%s id=%d\n",
+                                 qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), flag ? "true" : "false", id);
+#endif
     bool all_sttx = false;  //ft8  ft4 q65
     if (f_static_tx && all_static_tx_modes) all_sttx = true;
     bool all_qrg = false;  //msk fsk

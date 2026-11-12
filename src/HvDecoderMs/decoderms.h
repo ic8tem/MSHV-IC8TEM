@@ -4,9 +4,11 @@
  */
 #ifndef DECODERMS_H
 #define DECODERMS_H
+#include <pthread.h>//IC8TEM: explicit (needed by clang/libc++, e.g. Windows ARM64)
 
 #include <complex.h>
 #define complex		_Complex
+#include "../mac_complex_shim.h"//macOS: complex shim (VU2CPL)
 //#include "../Hv_Lib_fftw/fftw3.h"
 
 #include "decoderpom.h"

@@ -38,6 +38,12 @@ private:
     int s_cpu_count;
     QList<CpuSensorHv *> ListCpuSensor;
     QList<HvProgBarSlowV *> ListProgBarV;
+#if defined _MACOS_
+    // macOS uses a single theme-aware QProgressBar instead of 12 PNG-based
+    // mini-bars; the bundled PNG assets are drawn for Plastique's light
+    // palette and look near-invisible in MSHV's dark theme.
+    class QProgressBar *MacCpuBar;
+#endif
 };
 
 class CpuWudget : public QWidget

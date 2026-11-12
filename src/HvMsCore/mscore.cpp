@@ -78,10 +78,17 @@ MsCore::MsCore()
     hCapture = NULL;
     is_little_endian = 0;
 #endif
+#if defined _MACOS_
+    is_pulse_a_in = false;
+    is_little_endian = 1;
+#endif
 
 #if defined _LINUX_
     //strncpy(rad_sound_state.dev_capt_name, "hw:0,0", SC_SIZE_L); //2.65  default pulse
     strncpy(rad_sound_state.dev_capt_name, "pulse: default", SC_SIZE_L);
+#endif
+#if defined _MACOS_
+    strncpy(rad_sound_state.dev_capt_name, "default", SC_SIZE_L);
 #endif
 #if defined _WIN32_  //Primary Sound Capture Driver or "0"
     strncpy(rad_sound_state.dev_capt_name, "Primary Sound Capture Driver", SC_SIZE_L);//
@@ -113,6 +120,9 @@ MsCore::MsCore()
    	}
 #endif
 #if defined _LINUX_
+    rad_open_sound();
+#endif
+#if defined _MACOS_
     rad_open_sound();
 #endif
 
@@ -179,6 +189,9 @@ void MsCore::close_sound()
     }
 #endif
 #if defined _LINUX_
+    rad_close_sound();
+#endif
+#if defined _MACOS_
     rad_close_sound();
 #endif
 }
@@ -419,6 +432,12 @@ void MsCore::FastResetSoundCardIn_p()// for pure sound cards
         rad_open_sound();
     }
 #endif
+#if defined _MACOS_
+    if (!ftci) //tci
+    {
+        rad_open_sound();
+    }
+#endif
 
     record_app();            //fftw
 
@@ -512,6 +531,12 @@ void MsCore::SetupSettings_(QString dev_in_number,int bpsampl,int latency,int ca
                 if (c_retry>120) break;
             }
         }
+    }
+#endif
+#if defined _MACOS_
+    if (!ftci) //tci
+    {
+        rad_open_sound();
     }
 #endif
 
@@ -897,6 +922,9 @@ void MsCore::Refresh_t()
             ReadData();
 #endif
 #if defined _LINUX_
+            alsa_read_sound();
+#endif
+#if defined _MACOS_
             alsa_read_sound();
 #endif
         }

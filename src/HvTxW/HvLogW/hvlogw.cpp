@@ -3,6 +3,9 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "hvlogw.h"
+#if defined _MACOS_
+#include <QToolButton>//macOS port (VU2CPL)
+#endif
 //#define _S0SATIDN_
 #include "config_prop_all.h"
 #define _BANDS_H_
@@ -1724,6 +1727,17 @@ HvLogW::HvLogW(QString inst,QString app_path, bool indsty,int x,int y,QWidget *w
     connect(THvLogList, SIGNAL(SortClicked(int)), this, SLOT(SortClicked(int)));
 
     Min_Menu = new QMenuBar();
+#if defined _MACOS_
+    // Qt on macOS auto-hoists every QMenuBar to the global menu bar at the
+    // top of the screen, so this inline-in-layout menu vanishes from the
+    // Log window. Disable native promotion so it stays where it's drawn,
+    // and force a visible height — QMenuBar in non-native mode otherwise
+    // collapses to 0px when added to a horizontal layout.
+    Min_Menu->setNativeMenuBar(false);
+    Min_Menu->setFixedHeight(24);
+    Min_Menu->setMinimumWidth(80);
+    Min_Menu->setStyleSheet("QMenuBar::item { padding: 2px 8px; }");
+#endif
 
     //Min_Menu->setMinimumWidth(100);
     //Min_Menu->setContentsMargins(0,0,0,0);
@@ -1839,7 +1853,22 @@ HvLogW::HvLogW(QString inst,QString app_path, bool indsty,int x,int y,QWidget *w
     QHBoxLayout *H_mm = new QHBoxLayout();
     H_mm->setContentsMargins (0, 1, 1, 0);
     H_mm->setSpacing(0);
+#if defined _MACOS_
+    // QMenuBar in non-native mode on macOS doesn't render its dropdown
+    // entries reliably (Qt 5.15.x bug — sometimes 0px, sometimes invisible
+    // text). Use a plain QToolButton with the same QMenu as a popup so the
+    // Export / Cabrillo / Backup actions are reachable.
+    Min_Menu->setVisible(false);
+    QToolButton *MacMenuBtn = new QToolButton();
+    MacMenuBtn->setText(tr("Menu"));
+    MacMenuBtn->setPopupMode(QToolButton::InstantPopup);
+    MacMenuBtn->setFixedHeight(22);
+    MacMenuBtn->setMinimumWidth(80);
+    MacMenuBtn->setMenu(Menu_m);
+    H_mm->addWidget(MacMenuBtn);
+#else
     H_mm->addWidget(Min_Menu);
+#endif
     //H_mm->setAlignment(Qt::AlignCenter);
     QFrame *Box_mm = new QFrame();
     Box_mm->setFrameShape(QFrame::Box);

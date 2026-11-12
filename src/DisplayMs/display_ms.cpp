@@ -77,8 +77,19 @@ DisplayMs::DisplayMs(int dispident,bool f,QWidget * parent )
     }
 
     f_zero_freq_scale = false;
+#if defined _MACOS_
+    // mac port: default the spectrum-display range wide (0..4000 Hz) so the
+    // FT8 AP-decode cursors (frq00/frq01) — which SetMode resets to
+    // s_start+10 / s_stop-10 during ctor, *before* Read_Settings runs —
+    // start out wide. Otherwise the operator has to drag them wider on
+    // every launch even though the saved spinbox values restore the same
+    // range a moment later. See also frq00/frq01 below + main_ms.cpp.
+    s_start = 0;
+    s_stop  = 4000;
+#else
     s_start = 100;//2.76.1 3000hz bw
     s_stop = 3300;//2.76.1 3000hz bw
+#endif
     x_pos_freq_line = 25;//25pix
     f_disp_v_h = false;
     var_vdisp_height = DATA_HEIGHT*2 - x_pos_freq_line;
@@ -99,8 +110,15 @@ DisplayMs::DisplayMs(int dispident,bool f,QWidget * parent )
     }
 
     //2.24 ft8/4 df
+#if defined _MACOS_
+    // mac port: match the wider s_start/s_stop above; frq00/frq01_limit are
+    // 20/4980, so 10..3990 stays inside the limit-clamp range comfortably.
+    frq00 = 10.0;
+    frq01 = 3990.0;
+#else
     frq00 = 200.0; //2.76.1 3000hz bw
     frq01 = 3200.0;//2.76.1 3000hz bw
+#endif
     f_mouse_pres = false;
     f_r00 = false;
     f_r01 = false;
@@ -2279,7 +2297,17 @@ void DisplayMs::CorrDfW(int i)//2.24 ft8/4 df
 {
     //qDebug()<<"1 EMIT"<<i<<ss_prev_res_;
     int res = 10;
+#if defined _MACOS_
+    // mac port: add a 2000 step so AP-decode windows wider than 1500 Hz
+    // survive the snap-to-discrete-step quantisation. Without this step,
+    // s_vd_df > 1000 falls into the i>1000 branch below and snaps back
+    // to 1500, undoing ResetVDFreqDf's wide_df=1990 and the
+    // SB_DfTolerance1 max=2000 raised in HvSpinBoxDf::SetMode.
+    if (i>1500) 	res = 2000;
+    else if (i>1000) res = 1500;
+#else
     if (i>1000) 	res = 1500;
+#endif
     else if (i>800) res = 1000;
     else if (i>600) res = 800;
     else if (i>550) res = 600;
@@ -2450,10 +2478,26 @@ void DisplayMs::ResetVDFreqDf()
             //if (s_mode==11 && id_mshf==2) vd_tx_freq = 750;//2.76sh
             //if (s_mode==11 && id_mshf==1) vd_rx_freq = 750;//2.76sh
             SetVDTxFreq();
+#if defined _MACOS_
+            // mac port: scale the AP-decode tolerance window (frq00/frq01)
+            // to the current spectrum range instead of the upstream
+            // hardcoded 200/3200 / s_vd_df=1500. Otherwise a stray click
+            // in the upper waterfall area (which fires this reset) snaps
+            // the green cursors back to width=2*1500=3000 Hz centered on
+            // (frq00+frq01)/2, even though s_start/s_stop are wide.
+            // SetVDRxFreqF0F1 (called downstream) re-normalises frq00/frq01
+            // from s_vd_df, so all three must agree on the wide width.
+            int wide_df = (int)((s_stop - s_start) / 2.0) - 10;
+            emit EmitVDRxDf(wide_df);
+            frq00 = s_start + 10.0;
+            frq01 = s_stop  - 10.0;
+            s_vd_df = wide_df;
+#else
             emit EmitVDRxDf(1500);
             frq00 = 200.0;
             frq01 = 3200.0;
             s_vd_df = 1500;//<- importent
+#endif
         //}
         /*else
         {
@@ -2474,10 +2518,21 @@ void DisplayMs::ResetVDFreqDf()
         vd_rx_freq = 1200.0;
         vd_tx_freq = vd_rx_freq;
         SetVDTxFreq();
+#if defined _MACOS_
+        // mac port: scale to current spectrum range (see FT8/FT4/FT2 above).
+        // s_vd_df must match the (frq01-frq00)/2 width or SetVDRxFreqF0F1
+        // re-normalises the cursors back to the narrow s_vd_df=1000 width.
+        int wide_df = (int)((s_stop - s_start) / 2.0) - 10;
+        emit EmitVDRxDf(wide_df);
+        frq00 = s_start + 10.0;
+        frq01 = s_stop  - 10.0;
+        s_vd_df = wide_df;
+#else
         emit EmitVDRxDf(1000);
         frq00 = 200.0;
         frq01 = 2200.0;
         s_vd_df = 1000;//<- importent
+#endif
     }
     else
     {

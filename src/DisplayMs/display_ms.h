@@ -4,6 +4,7 @@
  */
 #ifndef DISPLAY_MS_H
 #define DISPLAY_MS_H
+#include <pthread.h>//IC8TEM: explicit (needed by clang/libc++, e.g. Windows ARM64)
 
 #include "../config.h"
 

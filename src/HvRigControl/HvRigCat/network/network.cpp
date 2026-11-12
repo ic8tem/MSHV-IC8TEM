@@ -16,6 +16,14 @@ MSHV Native FlexRadio VITA-49 audio and control backend, Copyright (C) 2026 Mano
 
 #include <unistd.h> 
 #include <QLocale>
+#if defined _MACOS_
+#include <sys/socket.h> //Qt 5.15 CFSocket workaround: connect outside Qt
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <errno.h>
+#include <string.h>
+#endif
 
 //----- vita49 ---------------------------------------------------
 #include <QCoreApplication> //flex native vita-49: aboutToQuit
@@ -572,6 +580,14 @@ Network::Network(int ModelID,QWidget *parent)
 
     timer_init = new QTimer();
     connect(timer_init, SIGNAL(timeout()), this, SLOT(initAll()));
+#if defined _MACOS_
+    mac_cfd = -1;
+    mac_cfor_tci = false;
+    mac_tci_checked = false;
+    mac_ctimer = new QTimer(this);
+    mac_ctimer->setSingleShot(true);
+    connect(mac_ctimer, SIGNAL(timeout()), this, SLOT(MacConnectPoll()));
+#endif
 
     //QTimer::singleShot(5000,this,SLOT(disconnected_s()));
     //QTimer::singleShot(6000,this,SLOT(connected_s()));
@@ -583,6 +599,9 @@ Network::Network(int ModelID,QWidget *parent)
 Network::~Network()
 {
     //qDebug()<<"Delete"<<rigs_network[s_ModelID].name;
+#if defined _MACOS_
+    MacConnectCancel();
+#endif
 
     //----- vita49 ---------------------------------------------------
 #if defined DEBUG_FLEX_TRACE //if (flex_trace) fprintf(stderr, "[MSHV Flex] ~Network: tearing down\n");
@@ -646,6 +665,37 @@ void Network::SetTciStrtStopAudio(bool f)
 {
     static bool start_stop_audio = false; //qDebug()<<"audio_???"<<f;
     if (start_stop_audio == f) return;
+#if defined _MACOS_
+    /* Never latch a state we could not actually transmit.
+     *
+     * writeData() DROPS every command below when the TCI WebSocket is not
+     * in ConnectedState (it returns false; see its s_ModelID 3/4 branch),
+     * but the latch above was set regardless. At start-up that is exactly
+     * what happens: HvRigCat calls SetTciSelect(tci_select,...) from the
+     * rig's own construction (hvrigcatw.cpp), long before connectToHost()
+     * has created the socket -- and on macOS MacConnectStart() defers that
+     * by a further 350 ms+ since the CFSocket fix (aa13103). So audio_start
+     * went nowhere while start_stop_audio was left true.
+     *
+     * readNet() re-arms the stream at TCI init-complete with
+     * "if (tci_select>0) SetTciStrtStopAudio(true);" -- the right place,
+     * with the socket up -- but that call then hit the == test above and
+     * returned, so audio_start was never sent and no IQ/audio stream ever
+     * started. The operator's workaround (Interface Control -> Disconnect,
+     * then Connect) worked only because the Disconnect path calls
+     * SetTciStrtStopAudio(false), clearing the latch so the next
+     * init-complete re-arm gets through.
+     *
+     * f == false is always safe to record: a socket that is down IS
+     * stopped. Only the "start" direction has to wait for a live socket.
+     */
+    if (f && !(is_wsocket && wsocket->state() == QAbstractSocket::ConnectedState))
+    {
+        fprintf(stderr, "[MSHV TCI] audio_start deferred: socket not up yet "
+                        "(will be sent at init-complete)\n");
+        return;
+    }
+#endif
     start_stop_audio = f;
     if (f)
     {
@@ -659,10 +709,16 @@ void Network::SetTciStrtStopAudio(bool f)
             writeData("tx_stream_audio_buffering:"+s_tcitxbuff+";",false,NULL);
         }
         writeData("audio_start:"+tci_trx+";",false,NULL);
+#if defined _MACOS_
+        fprintf(stderr, "[MSHV TCI] audio_start sent (trx %s)\n", qPrintable(tci_trx));
+#endif
     }
     else
     {
         writeData("audio_stop:"+tci_trx+";",false,NULL); //qDebug()<<"audio_stop";
+#if defined _MACOS_
+        fprintf(stderr, "[MSHV TCI] audio_stop sent (trx %s)\n", qPrintable(tci_trx));
+#endif
     }
 }
 void Network::SetTciSelect(int i,int vr,bool vt)//tci 0=non 1=rx 2=tx 3=rx,tx
@@ -1885,6 +1941,12 @@ void Network::connectToHost()
         }
         if (!is_wsocket)
         {
+#if defined _MACOS_
+            //Qt 5.15 CFSocket workaround: open the WebSocket only once a plain
+            //connect to the TCI port has succeeded, see MacConnectStart().
+            if (!mac_tci_checked && MacConnectStart(true)) return;
+            mac_tci_checked = false;
+#endif
             //qDebug()<<"TCI Socket Create"<<tci_19;
             wsocket = new HvWebSocket((quint32)tci_trx.toInt());//Q_NULLPTR QString(), QWebSocketProtocol::VersionLatest, this
             connect(wsocket,SIGNAL(connected()),this,SLOT(connected_s()));
@@ -1927,8 +1989,18 @@ void Network::connectToHost()
             return;
         }
         int p1 = s_netport.toInt();
+#if defined _MACOS_
+        //Qt 5.15 CFSocket workaround, see MacConnectStart(); false = the host
+        //is a name, not an address, so it stays with Qt as before.
+        if (!MacConnectStart(false))
+        {
+            socket->connectToHost(s_nethost, p1);
+            socket->waitForConnected(350);
+        }
+#else
         socket->connectToHost(s_nethost, p1);
         socket->waitForConnected(350);//importent for TCP hv
+#endif
 
     	//----- vita49 ---------------------------------------------------
     	UpdateFlexVita();//flex native vita-49: no-op until the CAT init completes
@@ -1947,6 +2019,126 @@ void Network::ConnectNet(QString all)
     s_tcitxbuff = l.at(6);
     connectToHost(); //qDebug()<<l.at(0)<<l.at(1)<<l.at(2)<<l.at(3)<<l.at(4)<<l.at(5);
 }
+#if defined _MACOS_
+//Qt 5.15 CFSocket workaround (2026-10-02). Qt 5.15's qcfsocketnotifier.cpp,
+//on a FAILED connect (kCFSocketConnectCallBack with an error), sends the event
+//to the read notifier, whose handler closes the socket and deletes Qt's
+//MacSocketInfo, and then reads socketInfo->writeNotifier from the freed
+//memory: a crash in notifyInternal2 (rig link refused at startup crashed 4 of
+//15 launches, 0 of 15 with the port listening). Qt 6 removed that path
+//(52f1ba17); 5.15 never got it. So the connect is made here with a plain
+//socket, and Qt only ever gets a socket that is already connected -- CFSocket
+//then never sends a connect callback for it. Returns false when s_nethost is
+//a name: that connect stays with Qt as before.
+bool Network::MacConnectStart(bool tci)
+{
+    MacConnectCancel();
+    QHostAddress a;
+    QString h = s_nethost.trimmed();
+    if (h.compare("localhost", Qt::CaseInsensitive)==0) a = QHostAddress(QHostAddress::LocalHost);
+    else if (!a.setAddress(h)) return false;
+    quint16 port = (quint16)s_netport.toUInt();
+
+    struct sockaddr_storage ss;
+    memset(&ss, 0, sizeof(ss));
+    socklen_t len;
+    if (a.protocol()==QAbstractSocket::IPv6Protocol)
+    {
+        struct sockaddr_in6 *s6 = (struct sockaddr_in6 *)&ss;
+        Q_IPV6ADDR v6 = a.toIPv6Address();
+        len = sizeof(struct sockaddr_in6);
+        s6->sin6_len = len;
+        s6->sin6_family = AF_INET6;
+        s6->sin6_port = htons(port);
+        memcpy(&s6->sin6_addr, &v6, 16);
+    }
+    else
+    {
+        struct sockaddr_in *s4 = (struct sockaddr_in *)&ss;
+        len = sizeof(struct sockaddr_in);
+        s4->sin_len = len;
+        s4->sin_family = AF_INET;
+        s4->sin_port = htons(port);
+        s4->sin_addr.s_addr = htonl(a.toIPv4Address());
+    }
+    int fd = ::socket(ss.ss_family, SOCK_STREAM, IPPROTO_TCP);
+    if (fd<0) return false;
+    int one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &one, sizeof(one));
+    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+    mac_cfor_tci = tci;
+    if (::connect(fd, (struct sockaddr *)&ss, len)!=0)
+    {
+        if (errno!=EINPROGRESS)//failed at once: the error is in errno, not SO_ERROR
+        {
+            int e = errno;
+            ::close(fd);
+            fprintf(stderr, "[MSHV net] connect to %s:%s failed: %s\n",
+                    qPrintable(s_nethost), qPrintable(s_netport), strerror(e));
+            return true;
+        }
+        //the same 350 ms the Qt path blocked for, then poll without blocking
+        struct pollfd p = {fd, POLLOUT, 0};
+        poll(&p, 1, 350);
+    }
+    mac_cfd = fd;
+    MacConnectPoll();
+    return true;
+}
+void Network::MacConnectPoll()
+{
+    if (mac_cfd<0) return;
+    struct pollfd p = {mac_cfd, POLLOUT, 0};
+    int r = poll(&p, 1, 0);
+    if (r==0)//still connecting; the OS ends it with ETIMEDOUT if nobody answers
+    {
+        mac_ctimer->start(50);
+        return;
+    }
+    int err = 0;
+    socklen_t el = sizeof(err);
+    if (r<0) err = errno;
+    else if (getsockopt(mac_cfd, SOL_SOCKET, SO_ERROR, &err, &el)!=0) err = errno;
+    if (err==0)
+    {
+        struct sockaddr_storage peer;
+        socklen_t pl = sizeof(peer);
+        if (getpeername(mac_cfd, (struct sockaddr *)&peer, &pl)!=0) err = errno;//belt and braces
+    }
+    int fd = mac_cfd;
+    mac_cfd = -1;
+    if (err!=0)
+    {
+        ::close(fd);
+        fprintf(stderr, "[MSHV net] connect to %s:%s failed: %s\n",
+                qPrintable(s_nethost), qPrintable(s_netport), strerror(err));
+        return;
+    }
+    if (mac_cfor_tci)
+    {
+        ::close(fd);
+        mac_tci_checked = true;
+        connectToHost();
+        return;
+    }
+    if (!socket->setSocketDescriptor(fd, QAbstractSocket::ConnectedState, QIODevice::ReadWrite))
+    {
+        ::close(fd);
+        fprintf(stderr, "[MSHV net] setSocketDescriptor failed: %s\n", qPrintable(socket->errorString()));
+        return;
+    }
+    connected_s();//setSocketDescriptor() does not emit connected()
+}
+void Network::MacConnectCancel()
+{
+    mac_ctimer->stop();
+    if (mac_cfd>=0)
+    {
+        ::close(mac_cfd);
+        mac_cfd = -1;
+    }
+}
+#endif
 int cinit_id_nt = -1;
 //int cretr_nt = -1;//2.76.7 move up
 void Network::connected_s()
@@ -1971,6 +2163,15 @@ void Network::disconnected_s()
 {
 #if defined _MACOS_
     fprintf(stderr, "[MSHV TCI] disconnected_s fired\n");
+    /* Clear the audio-stream latch on ANY drop, not just the operator's own
+     * Disconnect (connectToHost() already does it on that path). Without
+     * this, a socket the radio or ExpertSDR closed leaves start_stop_audio
+     * true, and the re-arm readNet() performs at the next init-complete is
+     * swallowed by the == test in SetTciStrtStopAudio() -- the same silent
+     * "no IQ stream" as the start-up case above. The socket is already
+     * gone, so the audio_stop write is a no-op; clearing the latch is the
+     * whole point. Mirrors what the vita49 block below does for Flex. */
+    SetTciStrtStopAudio(false);
 #endif
     //----- vita49 ---------------------------------------------------
     //flex native vita-49: the control socket is gone, so there is nobody to
@@ -2463,7 +2664,12 @@ void Network::wTextMessageReceived(const QString &s0)//tci
         // pub/sub model with no response → 5/20-retry timeout. Hand the
         // proactive notification to the upstream init-complete path by
         // raising isGetRadio here.
-        if (!isGetRadio && cretr_nt != -2 && ls1.at(0) == "vfo" && ls2.at(1) == "0") isGetRadio = true;
+        if (!isGetRadio && cretr_nt != -2
+            && (s_ModelID==3 || s_ModelID==4)
+            && ls1.at(0) == "vfo" && ls2.at(1) == "0")
+        {
+            isGetRadio = true;
+        }
 #endif        
         if (isGetRadio)
         {

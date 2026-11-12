@@ -30,7 +30,7 @@
 #include "HvAggressiveW/aggressiv_d.h"
 #include "HvTxW/hvspinbox.h"
 
-#if defined _LINUX_
+#if defined _LINUX_ || defined _MACOS_
 #include "HvAlsaMixer/hvmixermain.h"
 #endif
 #include "HvButtons/hvbutton_left4.h"
@@ -319,7 +319,7 @@ private:
     float GetOSVersion();
     QProcess *Start_Cmd;
 #endif
-#if defined _LINUX_
+#if defined _LINUX_ || defined _MACOS_
     HvMixerMain *THvMixerMain;
 #endif
 
@@ -427,7 +427,7 @@ protected:
         if (THvHelpSkMs->isVisible()) THvHelpSkMs->close();
         if (THvHelpMs->isVisible()) THvHelpMs->close();
         THvTxW->CloseAllWidget();
-#if defined _LINUX_
+#if defined _LINUX_ || defined _MACOS_
         if (THvMixerMain->isVisible()) THvMixerMain->close();
 #endif
         if (THvTxW->THvAstroDataW->isVisible())

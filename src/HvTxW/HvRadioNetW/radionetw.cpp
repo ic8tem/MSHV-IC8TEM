@@ -1111,8 +1111,16 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     GB_spot_settings->setLayout(V_spot);
     V_l->addWidget(GB_spot_settings);
     connect(pb_tcp_conect, SIGNAL(clicked(bool)), this, SLOT(ConDiscon()));
+#if defined _MACOS_
+    // Defer DX-cluster reconnect until the user finishes editing the host/port
+    // so a partial entry like "d" or "db0" isn't pushed to the telnet client
+    // on every keystroke.
+    connect(TCPServer, &QLineEdit::editingFinished, this, [this]() { TCPServPortChanged(TCPServer->text()); });
+    connect(TCPPort,   &QLineEdit::editingFinished, this, [this]() { TCPServPortChanged(TCPPort->text()); });
+#else
     connect(TCPServer, SIGNAL(textChanged(QString)), this, SLOT(TCPServPortChanged(QString)));
     connect(TCPPort, SIGNAL(textChanged(QString)), this, SLOT(TCPServPortChanged(QString)));
+#endif
     connect(Cb_telnet, SIGNAL(currentIndexChanged(QString)), this, SLOT(CbTelnetChanged(QString)));
     /////////////END TCP///////////////////////////////////////////
     QGroupBox *GB_udp_broad_settings = new QGroupBox(tr("UDP Broadcast Settings")+":");   //Network Services:
@@ -1194,6 +1202,15 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     h_udp2b->setSpacing(5);
     h_udp2b->addWidget(l_udp2);
     h_udp2b->addWidget(cb_udp2adif);
+#if defined _MACOS_
+    // F4 — a Reconnect button, mirroring the WSJT-X UDP path above. The
+    // Simplified UDP path uses a connected socket; on macOS an ICMP
+    // port-unreachable from a listener that isn't running knocks it out of
+    // ConnectedState, and until now nothing let the operator force it back or
+    // even see it happen. Mac-only per Rule 2 (err toward _MACOS_-guarded).
+    pb_re_conect_udp2 = new QPushButton(tr("Reconnect"));
+    pb_re_conect_udp2->setFixedHeight(20);
+#endif
     QHBoxLayout *h_udp2c = new QHBoxLayout();
     h_udp2c->setContentsMargins(5,5,5,0);
     h_udp2c->setSpacing(5);
@@ -1201,8 +1218,20 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     h_udp2c->addWidget(udp2_Server);
     h_udp2c->addWidget(l_udp2_p);
     h_udp2c->addWidget(udp2_Port);
+#if defined _MACOS_
+    h_udp2c->addWidget(pb_re_conect_udp2);
+    // F4 — delivery status for the Simplified UDP path. Without it a QSO that
+    // fails to send (socket not connected) is silently lost, with no Status
+    // label, Reconnect or error dialog — unlike the WSJT-X path beside it.
+    l_udp2_info = new QLabel(tr("Status")+": "+tr("idle"));
+    l_udp2_info->setFont(f_t);
+    l_udp2_info->setContentsMargins(5,0,5,0);
+#endif
     socet_udp2_broad = new QUdpSocket(this);
     connect(cb_udp2adif, SIGNAL(toggled(bool)), this, SLOT(StartStopUdp2Broad(bool)));
+#if defined _MACOS_
+    connect(pb_re_conect_udp2, SIGNAL(clicked(bool)), this, SLOT(ReconnectUdp2Broad()));//F4
+#endif
     ///////////END 2ndUDP/////////////////////////////////////////////
 
     V_udp->addLayout(h_qsoadif);
@@ -1212,6 +1241,9 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     V_udp->addLayout(h_udp2a);
     V_udp->addLayout(h_udp2b);
     V_udp->addLayout(h_udp2c);
+#if defined _MACOS_
+    V_udp->addWidget(l_udp2_info);
+#endif
     GB_udp_broad_settings->setLayout(V_udp);
     V_l->addWidget(GB_udp_broad_settings);
 
@@ -1593,7 +1625,14 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
                                    }
                                    .simplified (),"",4739);
     connect(cb_start_stop_psk_rpt, SIGNAL(toggled(bool)), this, SLOT(StartStopReport(bool)));
+#if defined _MACOS_
+    // Don't push the PSK Reporter host on every keystroke — wait until the
+    // user finishes editing so partial input like "1" or "192.168" isn't
+    // treated as the active server.
+    connect(UDPServer, &QLineEdit::editingFinished, this, [this]() { ServTextChanged(UDPServer->text()); });
+#else
     connect(UDPServer, SIGNAL(textChanged(QString)), this, SLOT(ServTextChanged(QString)));
+#endif
     connect(pb_re_conect, SIGNAL(clicked(bool)), this, SLOT(Reconnect()));
     connect(UDPPort, SIGNAL(textChanged(QString)), this, SLOT(PortTextChanged(QString)));
     connect(cb_udp_tcp_psk_rpt, SIGNAL(toggled(bool)), this, SLOT(UdpTcpChangedPsk(bool)));
@@ -1625,8 +1664,17 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     connect(cb_udp_broad_log_adif, SIGNAL(toggled(bool)), this, SLOT(StartStopUdpBroad(bool)));
     connect(cb_udp_broad_decod, SIGNAL(toggled(bool)), this, SLOT(StartStopUdpBroad(bool)));
     connect(pb_re_conect_udp_broad, SIGNAL(clicked(bool)), this, SLOT(ReconnectUdpBroad()));
+#if defined _MACOS_
+    // UDPSrvPortBroadChanged drives MessageClient::set_server → QHostInfo::
+    // lookupHost, which would otherwise fire (and surface a red "UDP server
+    // lookup failed" status) on the very first keystroke of an IP address.
+    // Fire only when the user is done editing the field.
+    connect(UDPServerBroad, &QLineEdit::editingFinished, this, [this]() { UDPSrvPortBroadChanged(UDPServerBroad->text()); });
+    connect(UDPPortBroad,   &QLineEdit::editingFinished, this, [this]() { UDPSrvPortBroadChanged(UDPPortBroad->text()); });
+#else
     connect(UDPServerBroad, SIGNAL(textChanged(QString)), this, SLOT(UDPSrvPortBroadChanged(QString)));
     connect(UDPPortBroad, SIGNAL(textChanged(QString)), this, SLOT(UDPSrvPortBroadChanged(QString)));
+#endif
 
     sr_path = path+"/settings/ms_stinfonet";
     ReadSettings();
@@ -3453,6 +3501,26 @@ void RadioAndNetW::StartStopUdp2Broad(bool)
 {
     RefreshUdpOrTcpBroadLoggedAll();
 }
+#if defined _MACOS_
+void RadioAndNetW::ReconnectUdp2Broad()
+{
+    // F4 — force a fresh connect for the Simplified UDP path. The socket also
+    // self-heals on the next QSO (SendAdifRecord reconnects when it finds the
+    // socket out of ConnectedState), but that costs one lost record; this lets
+    // the operator re-establish it deliberately after a listener restart.
+    const int p1 = udp2_Port->text().toInt();
+    if (socet_udp2_broad->state() == QAbstractSocket::ConnectedState)
+        socet_udp2_broad->disconnectFromHost();
+    socet_udp2_broad->connectToHost(udp2_Server->text(), p1);
+    socet_udp2_broad->waitForConnected(200);
+    if (socet_udp2_broad->state() == QAbstractSocket::ConnectedState)
+        l_udp2_info->setText(tr("Status")+": <font color='green'>"
+            + tr("connected")+"</font>");
+    else
+        l_udp2_info->setText(tr("Status")+": <font color='red'>"
+            + tr("not connected")+"</font>");
+}
+#endif
 void RadioAndNetW::SendAdifRecord(QString s)
 {
     QString srem_lf = s.mid(0,s.count()-1); //remove -> \n
@@ -3498,7 +3566,23 @@ void RadioAndNetW::SendAdifRecord(QString s)
             QString sendd_ = "<PROGRAMID:4>MSHV<EOH>"+srem_lf;
             QByteArray data = sendd_.toUtf8();
             socet_udp2_broad->write(data); //qDebug()<<sendd_; qDebug()<<s;
+#if defined _MACOS_
+            // F4 — confirm delivery so a dropped QSO isn't silent. Green for
+            // a good send, matching the WSJT-X path's "Connected" convention.
+            l_udp2_info->setText(tr("Status")+": <font color='green'>"
+                + tr("sent")+" "
+                + QDateTime::currentDateTime().toString("hh:mm:ss")+"</font>");
+#endif
         }
+#if defined _MACOS_
+        else
+        {
+            // The reconnect above failed — the record did NOT reach the
+            // logger. Say so (red), instead of losing it silently (F4).
+            l_udp2_info->setText(tr("Status")+": <font color='red'>"
+                + tr("not connected — last QSO not sent")+"</font>");
+        }
+#endif
         //No good idea slow down App spead -> The socket is bound to an address and port.
         //socet_udp2_broad->writeDatagram(data,QHostAddress(udp2_Server->text()),p1);
     }

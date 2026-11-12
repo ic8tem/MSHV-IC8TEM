@@ -493,8 +493,51 @@ int _pa_get_devicelist_(pa_devicelist_t *input, pa_devicelist_t *output)
 }
 #endif
 ///////////////////end pulse dev //////////////////////////////////////////////
+#if defined _MACOS_
+#include <portaudio.h>
+#endif
 void SettingsMs::SearchSoundDev()
 {
+#if defined _MACOS_
+    {
+        static bool s_pa_inited = false;
+        if (!s_pa_inited) { Pa_Initialize(); s_pa_inited = true; }
+        QStringList lst_in, lst_out;
+        int n = Pa_GetDeviceCount();
+        if (n < 0)
+        {
+            QMessageBox::critical(this, "MSHV", "PortAudio failed to initialize.", QMessageBox::Close);
+        }
+        else
+        {
+            lst_in  << "default";
+            lst_out << "default";
+            for (int i = 0; i < n; ++i)
+            {
+                const PaDeviceInfo *info = Pa_GetDeviceInfo(i);
+                if (!info) continue;
+                QString name = QString::fromUtf8(info->name);
+                if (info->maxInputChannels  > 0) lst_in  << name;
+                if (info->maxOutputChannels > 0) lst_out << name;
+            }
+            if (!lst_in.isEmpty())  DevBoxIn->addItems(lst_in);
+            if (!lst_out.isEmpty()) DevBoxOut->addItems(lst_out);
+        }
+        // Fall through past the _LINUX_ / _WIN32_ blocks to the common
+        // TCI Client Input/Output items at the end of the function — those
+        // need to appear in the dropdowns on every platform, including Mac.
+        DevBoxIn->addItem("TCI Client Input");
+        DevBoxOut->addItem("TCI Client Output");
+	for (int ch = 1; ch <= 8; ++ch)
+	{
+		if (ch==1) DevBoxIn->addItem("Flex Native Input");
+		else DevBoxIn->addItem(QString("Flex Native Input DAX %1").arg(ch));		
+	}
+	DevBoxOut->addItem("Flex Native Output");
+        no_emit = false;
+        return;
+    }
+#endif
 #if defined _LINUX_
     ///////////////////pulse dev //////////////////////////////////////////////
     int ctr; //2.63 first is pulse, for PI4 devices is important
@@ -855,6 +898,15 @@ void SettingsMs::OutDeviceChanged(QString)
         //qDebug()<<"OutDeviceChanged="<<card_out;
         //dev_out mast bi in numbers
 #endif
+#if defined _MACOS_
+        // Pass the CoreAudio device name straight through. PortAudio
+        // matches by Pa_GetDeviceInfo(...)->name in pick_output_device().
+        // Without this the dropdown selection is ignored and the OS
+        // default output is used regardless of what the user picked —
+        // which is why TX was going to USB Advanced Audio Device instead
+        // of CommonRadioAudio In 1.
+        emit OutDevChanged(DevBoxOut->currentText(),b0.toInt(),OutBuf->currentText().toInt());
+#endif
     }
 }
 void SettingsMs::InChannelChanget(bool)
@@ -916,6 +968,15 @@ void SettingsMs::InDeviceChanged(QString)
                           CardBufferPolls->currentText().toInt(),(int)rb_right_ch->isChecked(),SB_Refresh->value(),
                           SB_Refresh_lm->value());
         // qDebug()<<DevBoxIn->currentIndex()<<"OOO"<<DevHandles[DevBoxIn->currentIndex()];
+#endif
+#if defined _MACOS_
+        // Pass through the CoreAudio device name like the output path.
+        // (RX previously only worked because the macOS default input
+        // happened to be the right device.)
+        emit InDevChanged(DevBoxIn->currentText(),b0.toInt(),
+                          CardLatency->currentText().toInt(),
+                          CardBufferPolls->currentText().toInt(),(int)rb_right_ch->isChecked(),SB_Refresh->value(),
+                          SB_Refresh_lm->value());
 #endif
         //}
     }

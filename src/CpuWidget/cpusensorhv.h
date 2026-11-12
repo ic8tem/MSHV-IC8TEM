@@ -60,6 +60,14 @@ private:
 #endif
     QString cpuNbr;
     int cpu_num;// for windows
+#if defined _MACOS_
+    // Per-CPU tick counters from host_processor_info(PROCESSOR_CPU_LOAD_INFO).
+    // Same delta-math as the Linux /proc/stat path; just a different source.
+    unsigned long mac_userTicks;
+    unsigned long mac_sysTicks;
+    unsigned long mac_niceTicks;
+    unsigned long mac_idleTicks;
+#endif
 #if defined _WIN32_
     SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION spi_old[MAX_PROC+2];
     SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION spi[MAX_PROC+2];

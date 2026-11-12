@@ -54,7 +54,10 @@ HvFontDialog::HvFontDialog(QString path,QWidget *parent)
 #if defined _LINUX_
     db.addApplicationFont(path + "/settings/resources/font/DejaVuSansMono.ttf");
 #endif
-    db.addApplicationFont(path + "/settings/resources/font/arial.ttf"); 
+#if defined _MACOS_
+    db.addApplicationFont(path + "/settings/resources/font/DejaVuSansMono.ttf");
+#endif
+    db.addApplicationFont(path + "/settings/resources/font/arial.ttf");
     
     //QStringList fontList = db.applicationFontFamilies(nFontList);
     //fontList << db.applicationFontFamilies(nFontApp);
@@ -102,6 +105,12 @@ void HvFontDialog::SetDefFont()
 #if defined _LINUX_
     SetFontsAll("Arial#9#DejaVu Sans Mono#10");
 #endif
+#if defined _MACOS_
+    // macOS: Helvetica Neue + Menlo at retina-friendly sizes. These names
+    // are guaranteed to exist on every modern macOS install, so the combo's
+    // findText() lookup in SetFontsAll won't fall back to Arial.
+    SetFontsAll("Helvetica Neue#13#Menlo#13");
+#endif
 }
 QString HvFontDialog::GetFontsAll()
 {
@@ -133,12 +142,23 @@ void HvFontDialog::SetFontsAll(QString s)
 	   have_change_app = true;
 	}
 	
-	if(comboFontList->findText(ls.at(2))>-1)
 	{
-		comboFontList->setCurrentIndex(comboFontApp->findText(ls.at(2)));
-		fontSizeList->setValue(ls.at(3).toInt());	
-		have_change_list = true;	
-	}	
+		int idx = comboFontList->findText(ls.at(2));
+#if defined _MACOS_
+		// If the saved list font (e.g. "DejaVu Sans Mono" carried over from
+		// a Linux install) isn't on this Mac, fall through to a system
+		// monospace so the decode columns stay aligned.
+		if (idx < 0) idx = comboFontList->findText("Menlo");
+		if (idx < 0) idx = comboFontList->findText("Monaco");
+		if (idx < 0) idx = comboFontList->findText("Courier New");
+#endif
+		if (idx > -1)
+		{
+			comboFontList->setCurrentIndex(idx);
+			fontSizeList->setValue(ls.at(3).toInt());
+			have_change_list = true;
+		}
+	}
 	block_emit_fonts = false;
 	
 	if(have_change_app)		

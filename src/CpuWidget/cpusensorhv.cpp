@@ -5,6 +5,12 @@
 #include "cpusensorhv.h"
 //#include <QtGui>
 
+#if defined _MACOS_
+#include <mach/mach.h>
+#include <mach/processor_info.h>
+#include <mach/mach_host.h>
+#endif
+
 #if defined _WIN32_
 int GetProc_Info_(SYSTEM_INFO &sy,LPFN_NtQuerySystemInformation &nt,SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION *xspi_old,SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION *xspi)
 {
@@ -50,6 +56,12 @@ CpuSensorHv::CpuSensorHv(QString cpuN, int cpu_number)
     system=0;
     nice=0;
     idle=0;//2.12
+#endif
+#if defined _MACOS_
+    mac_userTicks = 0;
+    mac_sysTicks  = 0;
+    mac_niceTicks = 0;
+    mac_idleTicks = 0;
 #endif
 	cpuNbr = cpuN;
 }
@@ -99,6 +111,52 @@ void CpuSensorHv::getTicks (long &u,long &s,long &n,long &i)//
 #endif
 int CpuSensorHv::getCPULoad()
 {
+#if defined _MACOS_
+    // Per-CPU usage via host_processor_info() — the macOS analogue of
+    // reading /proc/stat. Returns one processor_cpu_load_info_data_t per
+    // logical CPU, with cumulative tick counters for user/system/nice/idle.
+    natural_t cpu_count = 0;
+    processor_info_array_t info_array = NULL;
+    mach_msg_type_number_t info_count = 0;
+
+    kern_return_t kr = host_processor_info(mach_host_self(),
+                                           PROCESSOR_CPU_LOAD_INFO,
+                                           &cpu_count,
+                                           &info_array,
+                                           &info_count);
+    if (kr != KERN_SUCCESS || info_array == NULL) return 0;
+
+    int load = 0;
+    if (cpu_num >= 0 && cpu_num < (int)cpu_count)
+    {
+        processor_cpu_load_info_t load_info =
+            (processor_cpu_load_info_t)info_array;
+        unsigned long u = load_info[cpu_num].cpu_ticks[CPU_STATE_USER];
+        unsigned long s = load_info[cpu_num].cpu_ticks[CPU_STATE_SYSTEM];
+        unsigned long n = load_info[cpu_num].cpu_ticks[CPU_STATE_NICE];
+        unsigned long i = load_info[cpu_num].cpu_ticks[CPU_STATE_IDLE];
+
+        unsigned long du = u - mac_userTicks;
+        unsigned long ds = s - mac_sysTicks;
+        unsigned long dn = n - mac_niceTicks;
+        unsigned long di = i - mac_idleTicks;
+        unsigned long total = du + ds + dn + di;
+        if (total > 0)
+            load = (int)((100.0 * (du + ds + dn)) / (double)total + 0.5);
+
+        mac_userTicks = u;
+        mac_sysTicks  = s;
+        mac_niceTicks = n;
+        mac_idleTicks = i;
+    }
+
+    // host_processor_info allocates the array via vm_allocate; release it
+    // back to the kernel so we don't leak per refresh.
+    vm_deallocate(mach_task_self(),
+                  (vm_address_t)info_array,
+                  info_count * sizeof(integer_t));
+    return load;
+#endif
 #if defined _LINUX_
     //QString str;
     long uTicks, sTicks, nTicks, iTicks;

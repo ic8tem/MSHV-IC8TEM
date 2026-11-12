@@ -6,6 +6,7 @@
 
 #ifndef MSPLAYERHV_H
 #define MSPLAYERHV_H
+#include <pthread.h>//IC8TEM: explicit (needed by clang/libc++, e.g. Windows ARM64)
 //
 //#include <QtGui>
 

@@ -29,6 +29,9 @@
 #include <alsa/asoundlib.h>
 #include <pthread.h> //	pthread_create, pthread_mutex_unlock
 #endif
+#if defined _MACOS_
+#include <pthread.h>
+#endif
 
 #define SC_SIZE_L			128
 #define CLOSED_TEXT		"The sound device is closed."
@@ -52,6 +55,7 @@
 
 #include <complex.h> // gnu++11 c++11
 #define complex		_Complex
+#include "../mac_complex_shim.h"//macOS: complex shim (VU2CPL)
 
 #include "../Hv_Lib_fftw/fftw3.h"
 
@@ -273,6 +277,26 @@ private:
     int cSamples_r[SAMP_BUFFER_SIZE+1000];   
     bool is_pulse_a_in;
     
+#endif
+#if defined _MACOS_
+    // macOS uses PortAudio over CoreAudio. Same buffers/state as the Linux
+    // path so the call sites in mscore.cpp can stay structurally similar.
+    int alsa_read_sound();              // implemented in macsound_in.cpp
+    int channel_I;
+    int channel_Q;
+    int chan_capt, chan_play;
+    int latency_frames;
+    int sample_bytes;
+    int is_little_endian;
+    void rad_close_sound();
+    void rad_open_sound();
+    short buffer2[SAMP_BUFFER_SIZE+1000];
+    int quisk_overrange;
+    unsigned char buffer3[(3 * SAMP_BUFFER_SIZE)+1000];
+    int buffer4[SAMP_BUFFER_SIZE+1000];
+    int cSamples_l[SAMP_BUFFER_SIZE+1000];
+    int cSamples_r[SAMP_BUFFER_SIZE+1000];
+    bool is_pulse_a_in;                 // unused; kept for code-path parity
 #endif
     int s_count_resample;
     double s_in_level;    
