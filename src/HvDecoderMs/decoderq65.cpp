@@ -12,6 +12,7 @@
  */
 
 #include "decoderq65.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 //#include "../HvMsPlayer/libsound/gen_pulse_gfsk.h"
 //#include "ft_all_ap_def.h"
 //#include <unistd.h>

@@ -4,6 +4,7 @@
  */
 
 #include "mscore.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 #include <algorithm> // zaradi max(
 //#include <unistd.h>
 

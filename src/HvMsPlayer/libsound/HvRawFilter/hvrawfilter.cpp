@@ -3,6 +3,7 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "hvrawfilter.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 //#include <QtGui>
 //#define LSH_HSH_GAIN -12.5
  

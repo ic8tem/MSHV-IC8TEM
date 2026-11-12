@@ -12,6 +12,7 @@
  */
 
 #include "decoderms.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 
 #define _JTMS_DH_
 #include "../config_msg_all.h"

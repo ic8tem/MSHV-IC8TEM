@@ -4,6 +4,7 @@
 // Reports will be sent in batch mode every 5 minutes.
 // Updated For MSHV by Hrisimir Hristov, LZ2HV 2020
 #include "pskreporterudptcp.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 
 #include <QQueue>
 #include <QDateTime>

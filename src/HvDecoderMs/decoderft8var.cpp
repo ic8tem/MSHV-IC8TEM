@@ -11,6 +11,7 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "decoderms.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 #include "../HvMsPlayer/libsound/genpom.h"
 #include "ft_all_ap_def.h"
 //#include <QtGui>

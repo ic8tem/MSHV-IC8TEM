@@ -4,6 +4,7 @@
  */
 
 #include "hvinle.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 #include "config_rpt_all.h"
 #include "../HvMsPlayer/libsound/HvGenMsk/config_rpt_msk40.h"
 #include "../config_str_color.h"

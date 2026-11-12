@@ -12,6 +12,7 @@
  */
 
 //#include "../config_213.h"
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 #include "decoderms.h"
 #include "../nhash.h"
 //2.28 included for small exe size

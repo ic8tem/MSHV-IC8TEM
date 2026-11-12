@@ -29,6 +29,7 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 //#include <QtGui>
+#include <stdlib.h>//IC8TEM: explicit for clang/libc++ (OpenBSD, Windows ARM64)
 #include "q65_subs.h"
 #include <stdio.h>
 #include <math.h>
