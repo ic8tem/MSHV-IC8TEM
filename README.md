@@ -36,7 +36,8 @@ MSHV is free software released under the **GNU General Public License v3** (see 
 
 * MSHV — Copyright © Hrisimir Hristov, LZ2HV.
 * JT6M, JT9, JT65, JTMS, QRA64, ISCAT, MSK144, FT8, FT4, Q65 algorithms and code — Copyright © 2001-2025 Joseph Taylor, K1JT, and the WSJT Development Group (GPLv3).
-* FFTW — GPL; qextserialport — MIT; Qt — LGPLv3 (dynamically linked).
+* macOS support (PortAudio audio, Mac menus/keys, CPU meter, fixes) — code from the macOS port by Manoj Kumar R, VU2CPL (<https://github.com/vu2cpl/mshv-macos-port>, GPLv3); its FFT-pointer and Flex-tuner fixes are also used on every platform.
+* FFTW — GPL; qextserialport — MIT; Qt — LGPLv3 (dynamically linked); PortAudio — MIT.
 * Modifications — Copyright © 2026 Costantino, IC8TEM, released under GPLv3.
 
 This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

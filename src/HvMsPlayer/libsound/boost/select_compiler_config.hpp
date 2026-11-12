@@ -42,7 +42,7 @@
 #elif defined __clang__ && !defined(__CUDACC__) && !defined(__ibmxl__)
 // when using clang and cuda at same time, you want to appear as gcc
 //  Clang C++ emulates GCC, so it has to appear early.
-#   define BOOST_COMPILER_CONFIG "boost/config/compiler/clang.hpp"
+#   define BOOST_COMPILER_CONFIG "clang.hpp"
 
 #elif defined __DMC__
 //  Digital Mars C++

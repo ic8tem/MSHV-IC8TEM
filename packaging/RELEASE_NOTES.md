@@ -22,7 +22,7 @@ Not the official MSHV: please report problems with this version to IC8TEM.
 
 Installed packages keep your data in `~/.local/share/MSHV-IC8TEM` (Linux) or `~/Library/Application Support/MSHV-IC8TEM` (macOS). The portable folders (zip / tar.gz) keep it inside the folder.
 
-License: GNU GPL v3. MSHV © LZ2HV; WSJT algorithms © K1JT and the WSJT Development Group; modifications © 2026 IC8TEM. `SHA256SUMS.txt` lists the checksums.
+License: GNU GPL v3. MSHV © LZ2HV; WSJT algorithms © K1JT and the WSJT Development Group; macOS port code © VU2CPL; modifications © 2026 IC8TEM. `SHA256SUMS.txt` lists the checksums.
 
 ---
 *Italiano:* versione modificata di MSHV 2.76.7 (LZ2HV) con Doppler tracking/CFOM via CAT, lista LoTW con pallino e filtro, annullamento fittizio del log, sblocco TX Slots opzionale. Scegli il file per il tuo sistema dalla tabella sopra; la guida in italiano è `LEGGIMI_DOPPLER_IC8TEM.txt`.
