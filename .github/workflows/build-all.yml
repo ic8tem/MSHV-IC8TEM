@@ -3,6 +3,8 @@ name: Build all distributions
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
   release:
     types: [published]
 
@@ -13,8 +15,40 @@ permissions:
   contents: write
 
 jobs:
+  # ---------------------------------------------------------------- Is there something to publish?
+  # push to main: build + publish only if the release v$MSHV_VERSION does not exist yet
+  # (so a version change in this file publishes automatically); manual run / release: always build.
+  gate:
+    runs-on: ubuntu-24.04
+    outputs:
+      build: ${{ steps.g.outputs.build }}
+      publish: ${{ steps.g.outputs.publish }}
+      tag: ${{ steps.g.outputs.tag }}
+    steps:
+      - id: g
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$MSHV_VERSION"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            if gh release view "$TAG" -R "${{ github.repository }}" >/dev/null 2>&1; then
+              echo "build=false" >> "$GITHUB_OUTPUT"; echo "publish=false" >> "$GITHUB_OUTPUT"
+              echo "Release $TAG already exists: nothing to do"
+            else
+              echo "build=true" >> "$GITHUB_OUTPUT"; echo "publish=true" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+            echo "build=true" >> "$GITHUB_OUTPUT"; echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"; echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # ---------------------------------------------------------------- Windows x64 / x86
   windows:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: ${{ matrix.name }}
     runs-on: windows-2022
     strategy:
@@ -77,6 +111,8 @@ jobs:
 
   # ---------------------------------------------------------------- Windows ARM64 (Snapdragon)
   windows-arm64:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: windows-arm64
     runs-on: windows-11-arm
     continue-on-error: true
@@ -123,6 +159,8 @@ jobs:
 
   # ---------------------------------------------------------------- Linux x86_64 / aarch64 (Ubuntu 22.04 base: glibc 2.35)
   linux:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: linux-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     container: ubuntu:22.04
@@ -163,6 +201,8 @@ jobs:
 
   # ---------------------------------------------------------------- Linux i686 (32 bit)
   linux-i686:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: linux-i686
     runs-on: ubuntu-24.04
     steps:
@@ -184,6 +224,8 @@ jobs:
 
   # ---------------------------------------------------------------- Raspberry Pi OS 32 bit / armv7l (armhf, emulated)
   linux-armhf:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: linux-armhf
     runs-on: ubuntu-24.04
     timeout-minutes: 340
@@ -209,6 +251,8 @@ jobs:
 
   # ---------------------------------------------------------------- RPM (Fedora / openSUSE), built on openSUSE Leap 15.6 (glibc 2.31)
   rpm:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: rpm-x86_64
     runs-on: ubuntu-24.04
     container: opensuse/leap:15.6
@@ -237,6 +281,8 @@ jobs:
 
   # ---------------------------------------------------------------- FreeBSD amd64
   freebsd:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: freebsd-amd64
     runs-on: ubuntu-24.04
     steps:
@@ -260,6 +306,8 @@ jobs:
 
   # ---------------------------------------------------------------- OpenBSD amd64 (PortAudio/sndio audio path of the macOS port)
   openbsd:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: openbsd-amd64
     runs-on: ubuntu-24.04
     continue-on-error: true
@@ -285,6 +333,8 @@ jobs:
 
   # ---------------------------------------------------------------- macOS (experimental)
   macos:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
     name: macos-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     continue-on-error: true
@@ -320,8 +370,8 @@ jobs:
   # ---------------------------------------------------------------- Release
   release:
     name: GitHub Release
-    if: github.event_name == 'release' && always()
-    needs: [windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, freebsd, openbsd, macos]
+    if: always() && needs.gate.outputs.publish == 'true' && needs.windows.result == 'success' && needs.linux.result == 'success'
+    needs: [gate, windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, freebsd, openbsd, macos]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -332,7 +382,8 @@ jobs:
       - run: ls -la dist && (cd dist && sha256sum * > SHA256SUMS.txt)
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name }}
+          tag_name: ${{ needs.gate.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           name: MSHV-IC8TEM ${{ env.MSHV_VERSION }}
           body_path: packaging/RELEASE_NOTES.md
           files: dist/*

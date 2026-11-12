@@ -25,7 +25,7 @@ Ready-made packages for Windows (x64, x86, ARM64), Linux (AppImage, tar.gz, .deb
 
 ## Building
 
-* **GitHub Actions**: *Actions* → *Build all distributions* → *Run workflow* builds every package; publishing a GitHub Release (e.g. tag `v2.76.7-ic8tem.1`) builds them and attaches them to the release.
+* **GitHub Actions**: changing `MSHV_VERSION` in `.github/workflows/build-all.yml` on `main` builds every package and publishes the release `v<MSHV_VERSION>` automatically. *Actions* → *Build all distributions* → *Run workflow* only builds (no release).
 * **Windows, local**: run `compila.bat` (installs MSYS2 + Qt5 in `C:\msys64` the first time, then builds into `bin\`).
 * **Linux / BSD, local**: install Qt5 (widgets, network, websockets), ALSA, PulseAudio, FFTW3 development packages, then `sh packaging/linux/build_unix.sh MSHV_x86_64.pro`.
 * Original instructions by LZ2HV: `README_HOW_TO_COMPILE.txt`.
