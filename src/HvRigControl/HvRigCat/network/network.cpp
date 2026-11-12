@@ -2064,7 +2064,9 @@ bool Network::MacConnectStart(bool tci)
     int fd = ::socket(ss.ss_family, SOCK_STREAM, IPPROTO_TCP);
     if (fd<0) return false;
     int one = 1;
+#ifdef SO_NOSIGPIPE //IC8TEM: not on OpenBSD
     setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &one, sizeof(one));
+#endif
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
     mac_cfor_tci = tci;
     if (::connect(fd, (struct sockaddr *)&ss, len)!=0)

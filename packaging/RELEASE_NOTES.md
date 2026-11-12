@@ -17,6 +17,7 @@ Not the official MSHV: please report problems with this version to IC8TEM.
 | Linux armv7l | `…-linux-armv7l-armhf.tar.gz` |
 | Slackware ARM64 (Raspberry Pi) | `mshv-ic8tem-…-aarch64-1_ic8tem.txz` (installpkg) |
 | FreeBSD amd64 | `…-freebsd-amd64.tar.gz` (see README-UNIX.txt for `pkg install`) |
+| OpenBSD amd64 | `…-openbsd-amd64.tar.gz` (see README-UNIX.txt for `pkg_add`) |
 | macOS Apple Silicon / Intel | `…-macos-<arch>.dmg` (unsigned: right-click → Open the first time) |
 
 Installed packages keep your data in `~/.local/share/MSHV-IC8TEM` (Linux) or `~/Library/Application Support/MSHV-IC8TEM` (macOS). The portable folders (zip / tar.gz) keep it inside the folder.

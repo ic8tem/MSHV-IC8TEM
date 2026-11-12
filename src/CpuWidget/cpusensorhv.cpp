@@ -5,7 +5,11 @@
 #include "cpusensorhv.h"
 //#include <QtGui>
 
-#if defined _MACOS_
+#if defined _OPENBSDHV_ //IC8TEM: OpenBSD build (PortAudio path of the macOS port)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <sys/sched.h>
+#elif defined _MACOS_
 #include <mach/mach.h>
 #include <mach/processor_info.h>
 #include <mach/mach_host.h>
@@ -111,7 +115,23 @@ void CpuSensorHv::getTicks (long &u,long &s,long &n,long &i)//
 #endif
 int CpuSensorHv::getCPULoad()
 {
-#if defined _MACOS_
+#if defined _OPENBSDHV_
+    // IC8TEM: OpenBSD per-CPU tick counters, kern.cp_time2.<cpu>
+    int mib[3] = {CTL_KERN, KERN_CPTIME2, cpu_num};
+    u_int64_t t[CPUSTATES];
+    size_t sz = sizeof(t);
+    if (cpu_num < 0 || sysctl(mib, 3, t, &sz, NULL, 0) == -1) return 0;
+    unsigned long busy = 0;
+    for (int k = 0; k < CPUSTATES; ++k) if (k != CP_IDLE) busy += (unsigned long)t[k];
+    unsigned long idl = (unsigned long)t[CP_IDLE];
+    unsigned long db = busy - mac_userTicks;
+    unsigned long di = idl - mac_idleTicks;
+    int load = 0;
+    if (db + di > 0) load = (int)((100.0 * db) / (double)(db + di) + 0.5);
+    mac_userTicks = busy;
+    mac_idleTicks = idl;
+    return load;
+#elif defined _MACOS_
     // Per-CPU usage via host_processor_info() — the macOS analogue of
     // reading /proc/stat. Returns one processor_cpu_load_info_data_t per
     // logical CPU, with cumulative tick counters for user/system/nice/idle.

@@ -57,7 +57,7 @@ inline QString MshvAppPath()
         cached = data;
         return cached;
     }
-#if defined _MACOS_
+#if defined _MACOS_ && !defined _OPENBSDHV_
     QString data = QDir::homePath()+"/Library/Application Support/MSHV-IC8TEM";
     QString seed = QDir(exe_dir+"/../Resources").absolutePath();
     QStringList sub;

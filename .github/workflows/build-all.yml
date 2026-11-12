@@ -237,13 +237,38 @@ jobs:
             pkg install -y qt5-qmake qt5-buildtools qt5-core qt5-gui qt5-widgets qt5-network qt5-websockets alsa-lib pulseaudio fftw3 gmake
           run: |
             QMAKE=/usr/local/lib/qt5/bin/qmake MAKE=gmake sh packaging/linux/build_unix.sh MSHV_FreeBSD_amd64.pro \
-              "QMAKE_CC=cc" "QMAKE_CXX=c++" "QMAKE_LINK=c++" \
+              "QMAKE_CC=cc" "QMAKE_CXX=c++" "QMAKE_LINK=c++" "DEFINES-=__linux__" \
               "QMAKE_CXXFLAGS-=-freorder-functions" "QMAKE_CXXFLAGS-=-funroll-all-loops" \
               "LIBS=-L/usr/local/lib -lasound -lfftw3 -lpulse-simple -lpulse" "INCLUDEPATH+=/usr/local/include"
             sh packaging/linux/make_tar.sh dist freebsd-amd64
       - uses: actions/upload-artifact@v4
         with:
           name: freebsd-amd64
+          path: dist/*
+
+  # ---------------------------------------------------------------- OpenBSD amd64 (PortAudio/sndio audio path of the macOS port)
+  openbsd:
+    name: openbsd-amd64
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: vmactions/openbsd-vm@v1
+        with:
+          envs: 'MSHV_VERSION'
+          usesh: true
+          prepare: |
+            pkg_add -I qtbase qtwebsockets portaudio-svn fftw3 gmake
+          run: |
+            QMAKE=/usr/local/bin/qmake-qt5 MAKE=gmake sh packaging/linux/build_unix.sh MSHV_macOS.pro \
+              "DEFINES+=_OPENBSDHV_" "LIBS=-L/usr/local/lib -lportaudio -lfftw3" "INCLUDEPATH+=/usr/local/include" \
+              "QMAKE_POST_LINK=" "QMAKE_INFO_PLIST=" \
+              "SOURCES-=src/HvRigControl/qexsp_1_2rc/qextserialenumerator_osx.cpp" \
+              "SOURCES+=src/HvRigControl/qexsp_1_2rc/qextserialenumerator_unix.cpp"
+            sh packaging/linux/make_tar.sh dist openbsd-amd64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openbsd-amd64
           path: dist/*
 
   # ---------------------------------------------------------------- macOS (experimental)
@@ -284,7 +309,7 @@ jobs:
   release:
     name: GitHub Release
     if: startsWith(github.ref, 'refs/tags/') && always()
-    needs: [windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, freebsd, macos]
+    needs: [windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, freebsd, openbsd, macos]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

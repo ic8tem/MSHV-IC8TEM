@@ -56,6 +56,7 @@ CpuWudget_W::CpuWudget_W(int CpuN,int cpu_count,/*bool all_in_one,*/QWidget *par
         ListProgBarV.append(TTHvProgBarSlowV);
         H_mcpuv->addWidget(TTHvProgBarSlowV);
         H_mcpuv->setAlignment(TTHvProgBarSlowV,Qt::AlignBottom);
+#endif
     }
 #if defined _MACOS_
     MacCpuBar = new QProgressBar();
@@ -115,6 +116,7 @@ void CpuWudget_W::SetValueAllInOne()
         cpus_losd += load;
 #if !defined(_MACOS_)
         ListProgBarV.at(i)->setValue(load, 100);
+#endif
     }
     if (s_cpu_count<1) s_cpu_count=1;//2.76 protection div by zero
     cpus_losd = cpus_losd/s_cpu_count;
