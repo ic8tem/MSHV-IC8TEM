@@ -103,8 +103,16 @@ jobs:
         run: |
           WDQ=""
           for c in windeployqt-qt5 windeployqt /clangarm64/qt5/bin/windeployqt /clangarm64/lib/qt5/bin/windeployqt; do command -v $c >/dev/null 2>&1 && { WDQ=$(command -v $c); break; }; done
-          [ -n "$WDQ" ] && "$WDQ" --release --no-translations bin/MSHV-IC8TEM.exe || true
+          set +e +o pipefail
+          [ -n "$WDQ" ] && "$WDQ" --release --no-translations --no-angle --no-opengl-sw bin/MSHV-IC8TEM.exe
+          if [ ! -f bin/platforms/qwindows.dll ]; then
+            P=$(ls /clangarm64/share/qt5/plugins/platforms/qwindows.dll /clangarm64/qt5/plugins/platforms/qwindows.dll /clangarm64/lib/qt5/plugins/platforms/qwindows.dll 2>/dev/null | head -1)
+            mkdir -p bin/platforms && cp "$P" bin/platforms/
+            S=$(dirname "$(dirname "$P")")/styles; [ -d "$S" ] && mkdir -p bin/styles && cp "$S"/*.dll bin/styles/
+          fi
           for i in 1 2 3; do for f in bin/*.exe bin/*.dll bin/*/*.dll; do ldd "$f" 2>/dev/null; done | grep -i '/clangarm64/' | awk '{print $3}' | sort -u | xargs -r cp -u -t bin/; done
+          set -e
+          test -f bin/platforms/qwindows.dll
           find bin -name .gitkeep -delete
           mkdir -p dist stage/MSHV-IC8TEM && cp -a bin/. stage/MSHV-IC8TEM/ && cp COPYING.txt README.md CHANGES_IC8TEM.md LEGGIMI_DOPPLER_IC8TEM.txt stage/MSHV-IC8TEM/
           (cd stage && zip -qr "../dist/MSHV-IC8TEM-$MSHV_VERSION-windows-arm64.zip" MSHV-IC8TEM)
