@@ -8,7 +8,8 @@
  *                              MSHV_SEED_DIR (or the executable folder)
  *  - macOS                  -> ~/Library/Application Support/MSHV-IC8TEM,
  *                              seeded from MSHV.app/Contents/Resources
- *  - otherwise              -> executable folder (original MSHV behaviour)
+ *  - otherwise              -> executable folder (original MSHV behaviour) if writable,
+ *                              else %APPDATA%\MSHV-IC8TEM or ~/.local/share/MSHV-IC8TEM
  *
  * May be used under the terms of the GNU General Public License (GPL)
  */
@@ -69,7 +70,32 @@ inline QString MshvAppPath()
     }
     cached = data;
 #else
-    cached = exe_dir;
+    // IC8TEM: original behaviour (data next to the executable) when that folder is writable;
+    // otherwise (e.g. installed in Program Files or /opt) use a per-user folder seeded from it.
+    {
+        QFile wt(exe_dir+"/.mshv_write_test");
+        if (wt.open(QIODevice::WriteOnly))
+        {
+            wt.close();
+            wt.remove();
+            cached = exe_dir;
+            return cached;
+        }
+    }
+#if defined _WIN32_ || defined _WIN64_
+    QByteArray ad = qgetenv("APPDATA");
+    QString data = (ad.isEmpty() ? QDir::homePath() : QDir::fromNativeSeparators(QString::fromLocal8Bit(ad)))+"/MSHV-IC8TEM";
+#else
+    QString data = QDir::homePath()+"/.local/share/MSHV-IC8TEM";
+#endif
+    QStringList sub;
+    sub << "settings" << "log" << "RxWavs" << "ExportLog" << "AllTxtMonthly" << "Screenshots";
+    for (int i = 0; i < sub.count(); ++i)
+    {
+        MshvCopyTreeNoOverwrite(exe_dir+"/"+sub.at(i),data+"/"+sub.at(i));
+        QDir().mkpath(data+"/"+sub.at(i));
+    }
+    cached = data;
 #endif
     return cached;
 }

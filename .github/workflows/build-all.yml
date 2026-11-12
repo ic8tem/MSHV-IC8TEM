@@ -60,11 +60,13 @@ jobs:
             tools: tools_mingw,qt.tools.win64_mingw810
             mingw: mingw810_64
             pro: MSHV_WIN64.pro
+            inno: x64
           - name: windows-x86
             arch: win32_mingw81
             tools: tools_mingw,qt.tools.win32_mingw810
             mingw: mingw810_32
             pro: MSHV_WIN32.pro
+            inno: x86
     steps:
       - uses: actions/checkout@v4
       - uses: jurplel/install-qt-action@v4
@@ -104,6 +106,9 @@ jobs:
           Copy-Item bin stage\MSHV-IC8TEM -Recurse
           Copy-Item COPYING.txt, README.md, CHANGES_IC8TEM.md, LEGGIMI_DOPPLER_IC8TEM.txt stage\MSHV-IC8TEM
           Compress-Archive stage\MSHV-IC8TEM "dist\MSHV-IC8TEM-$env:MSHV_VERSION-${{ matrix.name }}.zip"
+      - name: Installer (Setup.exe)
+        shell: pwsh
+        run: ./packaging/windows/make_installer.ps1 -SrcDir stage/MSHV-IC8TEM -Arch ${{ matrix.inno }} -OutDir dist
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
@@ -152,6 +157,9 @@ jobs:
           find bin -name .gitkeep -delete
           mkdir -p dist stage/MSHV-IC8TEM && cp -a bin/. stage/MSHV-IC8TEM/ && cp COPYING.txt README.md CHANGES_IC8TEM.md LEGGIMI_DOPPLER_IC8TEM.txt stage/MSHV-IC8TEM/
           (cd stage && zip -qr "../dist/MSHV-IC8TEM-$MSHV_VERSION-windows-arm64.zip" MSHV-IC8TEM)
+      - name: Installer (Setup.exe)
+        shell: pwsh
+        run: ./packaging/windows/make_installer.ps1 -SrcDir stage/MSHV-IC8TEM -Arch arm64 -OutDir dist
       - uses: actions/upload-artifact@v4
         with:
           name: windows-arm64
@@ -270,7 +278,7 @@ jobs:
           ROOT="$PWD/rpmroot"
           sh packaging/linux/stage_root.sh "$ROOT"
           rpmbuild -bb --define "_topdir $PWD/rpmbuild" --define "stage $ROOT" \
-            --define "mshv_ver ${MSHV_VERSION%%-*}" --define "mshv_rel ic8tem1" packaging/linux/mshv-ic8tem.spec
+            --define "mshv_ver ${MSHV_VERSION%%-*}" --define "mshv_rel ${MSHV_VERSION#*-}" packaging/linux/mshv-ic8tem.spec
           mkdir -p dist
           cp rpmbuild/RPMS/*/*.rpm "dist/MSHV-IC8TEM-$MSHV_VERSION-fedora-opensuse-x86_64.rpm"
           ls -la dist

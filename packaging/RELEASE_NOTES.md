@@ -5,9 +5,9 @@ Not the official MSHV: please report problems with this version to IC8TEM.
 
 | System | File |
 |---|---|
-| Windows 64 bit | `…-windows-x64.zip` (unzip, run `MSHV-IC8TEM.exe`) |
-| Windows 32 bit | `…-windows-x86.zip` |
-| Windows ARM64 (Snapdragon) | `…-windows-arm64.zip` |
+| Windows 64 bit | **`…-windows-x64-setup.exe`** (installer) or `…-windows-x64.zip` (portable) |
+| Windows 32 bit | **`…-windows-x86-setup.exe`** or `…-windows-x86.zip` |
+| Windows ARM64 (Snapdragon) | **`…-windows-arm64-setup.exe`** or `…-windows-arm64.zip` |
 | Linux x86_64 / aarch64, any distribution | `…-linux-<arch>.AppImage` (self-contained) or `…-linux-<arch>.tar.gz` (system Qt5) |
 | Debian / Ubuntu / Mint | `…-debian-ubuntu-mint-<arch>.deb` |
 | Fedora / openSUSE | `…-fedora-opensuse-x86_64.rpm` |
@@ -20,7 +20,7 @@ Not the official MSHV: please report problems with this version to IC8TEM.
 | OpenBSD amd64 | `…-openbsd-amd64.tar.gz` (see README-UNIX.txt for `pkg_add`) |
 | macOS Apple Silicon / Intel | `…-macos-<arch>.dmg` (unsigned: right-click → Open the first time) |
 
-Installed packages keep your data in `~/.local/share/MSHV-IC8TEM` (Linux) or `~/Library/Application Support/MSHV-IC8TEM` (macOS). The portable folders (zip / tar.gz) keep it inside the folder.
+The Windows installer needs no administrator rights (it installs in `%LOCALAPPDATA%\Programs\MSHV-IC8TEM`) and keeps your settings and logs when you update or uninstall; Windows SmartScreen may warn because the installer is not code-signed (*More info → Run anyway*). Installed Linux/macOS packages keep your data in `~/.local/share/MSHV-IC8TEM` (Linux) or `~/Library/Application Support/MSHV-IC8TEM` (macOS). The portable folders (zip / tar.gz) keep it inside the folder.
 
 License: GNU GPL v3. MSHV © LZ2HV; WSJT algorithms © K1JT and the WSJT Development Group; macOS port code © VU2CPL; modifications © 2026 IC8TEM. `SHA256SUMS.txt` lists the checksums.
 

@@ -37,3 +37,8 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * Explicit `#include <pthread.h>` in four headers (needed by clang on Windows ARM64).
 * Bundled Boost config: `clang.hpp` and the clang selection from VU2CPL's port, so clang builds (macOS, FreeBSD, OpenBSD, Windows ARM64) compile. `mac_complex_shim.h` enabled for every libc++ build; `malloc.h` replaced by `stdlib.h` on Apple/BSD.
 * OpenBSD: built with the PortAudio (sndio) audio path of the macOS port (`_OPENBSDHV_`), CPU meter via `sysctl(KERN_CPTIME2)`.
+
+## 2026-11-12 — 2.76.7-ic8tem.2
+* Windows installers (`…-windows-x64-setup.exe`, `x86`, `arm64`), Inno Setup, per-user install in `%LOCALAPPDATA%\Programs\MSHV-IC8TEM` (no administrator rights); settings and logs are kept on update and uninstall. Italian and English.
+* `src/mshv_ic8tem_path.h` — if the program folder is not writable (e.g. copied into Program Files or /opt), data go to `%APPDATA%\MSHV-IC8TEM` or `~/.local/share/MSHV-IC8TEM`, seeded from the program folder.
+* Automatic release when `MSHV_VERSION` changes on `main`.
