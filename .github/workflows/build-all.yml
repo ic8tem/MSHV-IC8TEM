@@ -97,7 +97,7 @@ jobs:
           QM=""
           for c in qmake-qt5 qmake /clangarm64/qt5/bin/qmake /clangarm64/lib/qt5/bin/qmake; do command -v $c >/dev/null 2>&1 && { QM=$(command -v $c); break; }; done
           echo "qmake: $QM"; $QM -v
-          $QM MSHV_WIN64.pro -after "TARGET=MSHV-IC8TEM" "LIBS=-ldsound -lfftw3 -lsetupapi" "QMAKE_CXXFLAGS-=-pedantic-errors"
+          $QM MSHV_WIN64.pro -after "TARGET=MSHV-IC8TEM" "LIBS=-ldsound -lfftw3 -lsetupapi -lpthread" "QMAKE_CXXFLAGS-=-pedantic-errors"
           (command -v mingw32-make >/dev/null && mingw32-make -j4) || make -j4
       - name: Package
         run: |
@@ -265,7 +265,7 @@ jobs:
             pkg_add -I qtbase qtwebsockets portaudio-svn fftw3 gmake
           run: |
             QMAKE=/usr/local/bin/qmake-qt5 MAKE=gmake sh packaging/linux/build_unix.sh MSHV_macOS.pro \
-              "DEFINES+=_OPENBSDHV_" "LIBS=-L/usr/local/lib -lportaudio -lfftw3" "INCLUDEPATH+=/usr/local/include" \
+              "DEFINES+=_OPENBSDHV_" "LIBS=-L/usr/local/lib -lportaudio -lfftw3 -lexecinfo" "INCLUDEPATH+=/usr/local/include" \
               "QMAKE_POST_LINK=" "QMAKE_INFO_PLIST=" \
               "SOURCES-=src/HvRigControl/qexsp_1_2rc/qextserialenumerator_osx.cpp" \
               "SOURCES+=src/HvRigControl/qexsp_1_2rc/qextserialenumerator_unix.cpp"
