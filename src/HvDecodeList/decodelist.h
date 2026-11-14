@@ -63,6 +63,7 @@ public:
     //void SetItem_hv(QStringList,int,int,int);
     //void SetEditRow(int);
     void SetMode(int,bool,bool,bool,bool,bool); 
+    void SetShowMskWidth(bool);//IC8TEM
     /*int GetListCount()
     {
         return 	model.rowCount();
@@ -190,7 +191,8 @@ private:
     void SaveAndCorrSectionSize();//2.10 max 20 int def_section_sizes[20]; from model.columnCount()
     int count_dec;
 	void CountMsgInPeriod(bool);
-	bool s_show_timec;	
+	bool s_show_timec;
+	bool s_show_mskw;//IC8TEM	
 	bool s_show_distc;
 	bool s_show_freqc;
 	bool s_show_counc;

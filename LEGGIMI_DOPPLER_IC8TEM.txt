@@ -121,3 +121,9 @@ ALTRE MODIFICHE (versione 2)
 
 6) Modi all'avvio: pulsanti FT8, FT4, Q65B, Q65C, Q65A, MSK144, JT65B.
 7) Nome nel titolo: "MSHV-IC8TEM".
+8) Durata del ping in MSK144 (dalla 2.76.7-ic8tem.3)
+   Menu della lista decodifiche: "Show/Hide Width (Ping Duration) Column MSK144".
+   La colonna Width mostra per ogni decodifica la durata del ping in ms (passi di
+   20 ms), misurata come tempo sopra la soglia di rivelazione del decoder: non e' la
+   durata fisica completa della traccia. Messaggi brevi (sh) senza valore.
+   FSK441/FSK315/JTMS (ms) e JT6M (secondi) hanno gia' la colonna Width.

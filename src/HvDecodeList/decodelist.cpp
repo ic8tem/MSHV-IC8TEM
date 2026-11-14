@@ -146,6 +146,7 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     list_b4qso.clear();
     //f_show_timec = true;
     s_show_timec = true;
+    s_show_mskw = false;//IC8TEM
     //f_show_distc = false;
     s_show_distc = false;
     //f_show_freqc = true;
@@ -672,6 +673,13 @@ void DecodeList::CorrListSize()
     if (wid*2>800) setMinimumWidth(wid);//setMinimumSize(wid,127);//800 = app minimum size
     else setMinimumWidth(100);//setMinimumSize(100,127);
 }
+void DecodeList::SetShowMskWidth(bool f)//IC8TEM MSK144 ping duration (Width) column
+{
+    s_show_mskw = f;
+    if (s_mode!=0) return;
+    if (f) THvHeader->showSection(2);
+    else THvHeader->hideSection(2);
+}
 void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3) //,bool ftc,bool fdc,bool ffc,bool fcc
 {
     //qDebug()<<fc[0]<<fc[1]<<fc[2]<<fc[3];
@@ -761,6 +769,11 @@ void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3)
         if (!f1) THvHeader->hideSection(8);
         if (!f2) THvHeader->hideSection(12);
         else THvHeader->showSection(12);
+        if (mode==0)//IC8TEM MSK144 ping duration (Width) column
+        {
+            if (s_show_mskw) THvHeader->showSection(2);
+            else THvHeader->hideSection(2);
+        }
 
         model.setHorizontalHeaderLabels(list_A);
 

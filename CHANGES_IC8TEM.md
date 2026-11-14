@@ -42,3 +42,7 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * Windows installers (`…-windows-x64-setup.exe`, `x86`, `arm64`), Inno Setup, per-user install in `%LOCALAPPDATA%\Programs\MSHV-IC8TEM` (no administrator rights); settings and logs are kept on update and uninstall. Italian and English.
 * `src/mshv_ic8tem_path.h` — if the program folder is not writable (e.g. copied into Program Files or /opt), data go to `%APPDATA%\MSHV-IC8TEM` or `~/.local/share/MSHV-IC8TEM`, seeded from the program folder.
 * Automatic release when `MSHV_VERSION` changes on `main`.
+
+## 2026-11-14 — 2.76.7-ic8tem.3
+* `src/HvDecoderMs/decodermsk144.cpp` — MSK144: the ping duration is now measured for every decode (before: only in MSK144ms) and written in the Width field (20 ms steps). Also present in ALL.TXT. Short messages (sh) have no value.
+* `src/HvDecodeList/decodelist.*`, `src/main_ms.*` — menu Decode List: **Show/Hide Width (Ping Duration) Column MSK144**, OFF by default, saved in `def_msk_width_col`.

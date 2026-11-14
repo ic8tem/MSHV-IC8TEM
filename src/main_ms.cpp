@@ -551,6 +551,10 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     ac_show_freqc->setCheckable(true);
     ac_show_freqc->setChecked(true);
     Dlf_m->addAction(ac_show_freqc);
+    ac_show_mskwidthc = new QAction(tr("Show/Hide Width (Ping Duration) Column")+" MSK144",this);//IC8TEM
+    ac_show_mskwidthc->setCheckable(true);
+    ac_show_mskwidthc->setChecked(false);
+    Dlf_m->addAction(ac_show_mskwidthc);
     for (int i = 0; i < COUNT_MODE; ++i)
     {
         s_show_lc[i][0] = true;//time
@@ -563,6 +567,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(ac_show_counc,SIGNAL(toggled(bool)),this,SLOT(SetSHAllColl(bool)));//2.73
     connect(ac_show_distc,SIGNAL(toggled(bool)),this,SLOT(SetSHAllColl(bool)));//2.72
     connect(ac_show_freqc,SIGNAL(toggled(bool)),this,SLOT(SetSHAllColl(bool)));//2.72
+    connect(ac_show_mskwidthc,SIGNAL(toggled(bool)),this,SLOT(SetShowMskWidthColl(bool)));//IC8TEM
 
     ac_filter_list = new QAction(QPixmap(":pic/filters.png"),tr("Decode List Filters")+" FT",this);
     Dlf_m->addAction(ac_filter_list);
@@ -3615,6 +3620,11 @@ void Main_Ms::SetSHAllColl(bool)
     s_show_lc[s_mode][3] = ac_show_counc->isChecked();
     SetModeDecodeListS(two_dec_list_all[s_mode],s_show_lc[s_mode][0],s_show_lc[s_mode][1],s_show_lc[s_mode][2],s_show_lc[s_mode][3]);
 }
+void Main_Ms::SetShowMskWidthColl(bool f)//IC8TEM MSK144 ping duration column
+{
+    TDecodeList1->SetShowMskWidth(f);
+    TDecodeList2->SetShowMskWidth(f);
+}
 void Main_Ms::SetTwoDecList(bool f)
 {
     two_dec_list_all[s_mode] = f;
@@ -3739,6 +3749,7 @@ void Main_Ms::ModeChanged(bool fg)
     ac_show_counc->setEnabled(false);
     ac_show_distc->setEnabled(false);
     ac_show_freqc->setEnabled(false);
+    ac_show_mskwidthc->setEnabled(false);//IC8TEM
     //ac_ft_df1500->setEnabled(false);
     ac_filter_list->setEnabled(false);
     ac_areset_qso->setEnabled(false);
@@ -3800,6 +3811,7 @@ void Main_Ms::ModeChanged(bool fg)
         ac_show_counc->setEnabled(true);
         ac_show_distc->setEnabled(true);
         ac_show_freqc->setEnabled(true);
+        ac_show_mskwidthc->setEnabled(true);//IC8TEM
     }
     if (rb_mode[1]->isChecked())
     {   //JTMS 197 cps.
@@ -4197,7 +4209,7 @@ void Main_Ms::SetQActionCb(QString s, bool idp, QAction *ac)//idp priority of pr
 }
 void Main_Ms::Read_Settings(QString path)
 {
-    const int c_st_id = 110;//dopalva se tuk v kraia
+    const int c_st_id = 111;//dopalva se tuk v kraia
     const QString st_id[c_st_id]=
         {
             "default_w","default_h","default_device_alsa","default_bitpersample","default_card_latency",
@@ -4223,7 +4235,7 @@ void Main_Ms::Read_Settings(QString path)
             "def_filter_list4","def_filter_list5","def_adle_vdsp","def_areset_qso","def_1_dec_sig_q65",
             "def_auto_clr_avg_afdec","def_dec_aft_eme_delay","def_max_drift","def_use_queue_cont","def_filter_list6",
             "use_aseq_max_dist","def_mod_bt_sw","def_show_lcols","vd_bw_lines_draw","def_band_bt_sw",
-            "def_show_hide_wf_tx","def_var_dec_parr"
+            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col"
         };
 
     QString st_res[c_st_id];
@@ -4681,6 +4693,9 @@ void Main_Ms::Read_Settings(QString path)
         }
     }
 
+    SetQActionCb(st_res[110], true, ac_show_mskwidthc);//IC8TEM def false
+    SetShowMskWidthColl(ac_show_mskwidthc->isChecked());
+
     THvTxW->SetBlockEmitFreqToRig(false);
 
     //qDebug()<<"W_MAIN START";//<<ttt.elapsed();//2813 ms new 513ms
@@ -4901,7 +4916,8 @@ void Main_Ms::Save_Settings(QString path)
             break;
         }
     }
-    out << "def_var_dec_parr=" << dd << "\n";    
+    out << "def_var_dec_parr=" << dd << "\n";
+    out << "def_msk_width_col=" << QString("%1").arg(ac_show_mskwidthc->isChecked()) << "\n";//IC8TEM
 
     file.close();
 }

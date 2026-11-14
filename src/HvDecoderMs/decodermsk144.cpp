@@ -771,8 +771,8 @@ void DecoderMs::detectmsk144(double complex *cbig,int n,double s_istart,int &nme
             //snrs[ndet]=10.0*log10(detmet[il])/2.0-5.0; //snrs(ndet)=10.0*log10(detmet(il))/2-5.0 !/2 because detmet is a 4th order moment
             snrs[ndet]=12.0*log10(detmet[il])/2.0-9.0;    //snrs(ndet)=12.0*log10(detmet(il))/2-9.0
 
-            if (ss_msk144ms)
-                duration[ndet]=MskPingDuration(detmet_dur,istp_real,il,3.5,nstepsize,(NSPM/2),dt_msk144);
+            //IC8TEM: ping duration always measured (Width column also in MSK144)
+            duration[ndet]=MskPingDuration(detmet_dur,istp_real,il,3.5,nstepsize,(NSPM/2),dt_msk144);
             //qDebug()<<"Get============="<<times[ndet]<<start_time<<end_time<<end_time-start_time;
 
             ndet++;
@@ -804,8 +804,8 @@ void DecoderMs::detectmsk144(double complex *cbig,int n,double s_istart,int &nme
                 ferrs[ndet]=detfer[il];//ferrs(ndet)=detfer(il)
                 snrs[ndet]=12.0*log10(detmet2[il])/2.0-9.0; //snrs(ndet)=12.0*log10(detmet2(il))/2-9.0
 
-                if (ss_msk144ms)
-                    duration[ndet]=MskPingDuration(detmet_dur2,istp_real,il,12.0,nstepsize,(NSPM/2),dt_msk144);
+                //IC8TEM: always measured
+                duration[ndet]=MskPingDuration(detmet_dur2,istp_real,il,12.0,nstepsize,(NSPM/2),dt_msk144);
 
                 ndet++;
             }
@@ -855,9 +855,7 @@ void DecoderMs::detectmsk144(double complex *cbig,int n,double s_istart,int &nme
         if ( nsnr > 24.0 ) nsnr=24.0;
         //if ( nsnr < -5.0 ) nsnr=-5.0;
         //if ( nsnr > 25.0 ) nsnr=25.0;
-        double p_duration = 0.0;
-        if (ss_msk144ms)
-            p_duration = duration[ip];
+        double p_duration = duration[ip];//IC8TEM always (Width column in MSK144)
 
         //! remove coarse freq error - should now be within a few Hz
         tweak1(cdat,NPTS,-(nrxfreq+ferr),cdat);//call tweak1(cdat,NPTS,-(1500+ferr),cdat)
@@ -1097,6 +1095,7 @@ void DecoderMs::detectmsk144(double complex *cbig,int n,double s_istart,int &nme
                                 <<QString(ident)+" "+QString("%1").arg((int)fest);
 
                                 //qDebug()<<"Msk144msgreceived="<<msgreceived<<"durat=="<<p_duration;
+                                list.replace(2,str_round_20ms(p_duration));//IC8TEM ping duration also in MSK144
                                 if (ss_msk144ms)
                                 {
                                     //int rpt = GetStandardRPT(p_duration,nsnr);//  (double width, double peak)

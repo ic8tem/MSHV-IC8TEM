@@ -67,6 +67,7 @@ private slots:
     void SetMacros(int,QString);//2.32
     void SetBandFromRigFreq(int i);
     void SetSHAllColl(bool);
+    void SetShowMskWidthColl(bool);//IC8TEM
     void SetTwoDecList(bool f);
     void ShowCloseAstroW(bool);
     void SetAstroWIsClosed();
@@ -344,6 +345,7 @@ private:
     QAction *ac_show_counc;
     QAction *ac_show_distc;
     QAction *ac_show_freqc;
+    QAction *ac_show_mskwidthc;//IC8TEM
     bool s_show_lc[COUNT_MODE][4];
     QAction *ac_filter_list;
       
