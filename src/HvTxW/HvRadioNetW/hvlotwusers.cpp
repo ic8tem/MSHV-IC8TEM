@@ -19,6 +19,9 @@
 #include <QNetworkReply>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QSslSocket>
+#include <QProcess>
+#include <QStandardPaths>
 
 static QHash<QString,int> g_lotw_calls;  // call -> julian day of the last LoTW upload
 static int  g_lotw_min_jd = 0;           // valid if last upload >= this day
@@ -196,6 +199,28 @@ void HvLotwUsersW::LoadCsvFile()
 }
 void HvLotwUsersW::DownloadCsv()
 {
+    if (!QSslSocket::supportsSsl())
+    {
+        // Qt without OpenSSL (e.g. Windows Qt 5.15): use curl of the system
+        // (Windows 10/11, macOS and most Linux have it).
+        QString curl = QStandardPaths::findExecutable("curl");
+        if (curl.isEmpty())
+        {
+            QMessageBox::warning(this,"MSHV",tr("HTTPS is not available here.")+"\n"+
+                                 tr("Open the link in the browser, save the file and load it with Load")+":\n"+LOTW_CSV_URL);
+            return;
+        }
+        QDir().mkpath(s_app_path+"/settings/database");
+        QProcess *pr = new QProcess(this);
+        pr->setProperty("tmp",s_csv_path+".tmp");
+        QStringList args;
+        args<<"-L"<<"-s"<<"-S"<<"-f"<<"--max-time"<<"300"<<"-o"<<(s_csv_path+".tmp")<<LOTW_CSV_URL;
+        connect(pr, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(CurlFinished(int,QProcess::ExitStatus)));
+        pb_download->setEnabled(false);
+        l_status->setText(tr("Downloading")+" "+LOTW_CSV_URL+" ... (curl)");
+        pr->start(curl,args);
+        return;
+    }
     QNetworkRequest req(QUrl(LOTW_CSV_URL));
     req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     req.setHeader(QNetworkRequest::UserAgentHeader, "MSHV-IC8TEM");
@@ -235,6 +260,31 @@ void HvLotwUsersW::DownloadFinished()
         return;
     }
     f.close();
+    UseDownloaded(tmp);
+}
+void HvLotwUsersW::CurlFinished(int code,QProcess::ExitStatus st)
+{
+    QProcess *pr = qobject_cast<QProcess*>(sender());
+    pb_download->setEnabled(true);
+    QString tmp = s_csv_path+".tmp";
+    QString err;
+    if (pr)
+    {
+        err = QString::fromLocal8Bit(pr->readAllStandardError()).trimmed();
+        pr->deleteLater();
+    }
+    if (st!=QProcess::NormalExit || code!=0)
+    {
+        QFile::remove(tmp);
+        RefreshStatus();
+        QMessageBox::warning(this,"MSHV",tr("Download failed")+": "+err+"\n\n"+
+                             tr("Open the link in the browser, save the file and load it with Load")+":\n"+LOTW_CSV_URL);
+        return;
+    }
+    UseDownloaded(tmp);
+}
+void HvLotwUsersW::UseDownloaded(QString tmp)
+{
     QHash<QString,int> h;
     QDate last;
     int n = ParseCsv(tmp,h,last);

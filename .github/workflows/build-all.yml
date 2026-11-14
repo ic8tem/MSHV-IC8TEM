@@ -57,15 +57,13 @@ jobs:
         include:
           - name: windows-x64
             arch: win64_mingw81
-            tools: tools_mingw,qt.tools.win64_mingw810 tools_openssl_x64,qt.tools.openssl.win_x64
-            ssl: Win_x64
+            tools: tools_mingw,qt.tools.win64_mingw810
             mingw: mingw810_64
             pro: MSHV_WIN64.pro
             inno: x64
           - name: windows-x86
             arch: win32_mingw81
-            tools: tools_mingw,qt.tools.win32_mingw810 tools_openssl_x86,qt.tools.openssl.win_x86
-            ssl: Win_x86
+            tools: tools_mingw,qt.tools.win32_mingw810
             mingw: mingw810_32
             pro: MSHV_WIN32.pro
             inno: x86
@@ -102,9 +100,6 @@ jobs:
           foreach ($d in 'libgcc_s_seh-1','libgcc_s_dw2-1','libstdc++-6','libwinpthread-1') {
             if (Test-Path "$env:QT_ROOT_DIR\bin\$d.dll") { Copy-Item "$env:QT_ROOT_DIR\bin\$d.dll" bin\ -Force }
           }
-          # OpenSSL 1.1 for HTTPS (LoTW list download)
-          Get-ChildItem "$env:IQTA_TOOLS\OpenSSL\${{ matrix.ssl }}\bin" -Filter "lib*-1_1*.dll" -ErrorAction SilentlyContinue | Copy-Item -Destination bin\ -Force
-          Get-ChildItem bin -Filter "lib*-1_1*.dll" | ForEach-Object { Write-Host "OpenSSL: $($_.Name)" }
           if (-not (Test-Path bin\platforms\qwindows.dll)) { throw "qwindows.dll missing" }
           Get-ChildItem bin -Recurse -Force -Filter .gitkeep | Remove-Item -Force
           New-Item -ItemType Directory -Force dist, stage | Out-Null
@@ -137,7 +132,7 @@ jobs:
           update: true
           install: zip
           pacboy: >-
-            toolchain:p qt5-base:p qt5-activeqt:p qt5-websockets:p qt5-tools:p fftw:p openssl:p
+            toolchain:p qt5-base:p qt5-activeqt:p qt5-websockets:p qt5-tools:p fftw:p
       - name: Build
         run: |
           QM=""
@@ -157,7 +152,6 @@ jobs:
             S=$(dirname "$(dirname "$P")")/styles; [ -d "$S" ] && mkdir -p bin/styles && cp "$S"/*.dll bin/styles/
           fi
           for i in 1 2 3; do for f in bin/*.exe bin/*.dll bin/*/*.dll; do ldd "$f" 2>/dev/null; done | grep -i '/clangarm64/' | awk '{print $3}' | sort -u | xargs -r cp -u -t bin/; done
-          cp -u /clangarm64/bin/libssl-*.dll /clangarm64/bin/libcrypto-*.dll bin/ 2>/dev/null; ls bin | grep -i -E "libssl|libcrypto"
           set -e
           test -f bin/platforms/qwindows.dll
           find bin -name .gitkeep -delete

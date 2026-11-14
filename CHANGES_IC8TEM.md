@@ -59,5 +59,5 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 
 ## 2026-11-14 — 2.76.7-ic8tem.5
 * `src/HvTxW/HvRadioNetW/hvlotwusers.*` — clickable link https://lotw.arrl.org/lotw-user-activity.csv and button **Download from ARRL and Load** (download, check, copy to settings/database, load).
-* `.github/workflows/build-all.yml` — Windows packages include the OpenSSL DLLs (HTTPS).
+* Where Qt has no OpenSSL (Windows) the download uses the system `curl` (Windows 10/11, macOS, Linux).
 * `wiki/` + `.github/workflows/wiki.yml` — Italian wiki with all the new functions, published to the GitHub wiki.

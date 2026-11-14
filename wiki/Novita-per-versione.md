@@ -2,7 +2,7 @@
 
 ## 2.76.7-ic8tem.5
 * LoTW: link cliccabile a <https://lotw.arrl.org/lotw-user-activity.csv> e pulsante **Download from ARRL and Load**.
-* Windows: librerie OpenSSL incluse per i collegamenti HTTPS.
+* Dove Qt non ha OpenSSL (Windows) lo scaricamento usa `curl` del sistema (Windows 10/11, macOS, Linux).
 
 ## 2.76.7-ic8tem.4
 * **Icom LAN**: IC-7300MK2, IC-705, IC-9700, IC-7610, IC-905 via rete con CAT e audio. Vedi [[Icom LAN|Icom-LAN]].

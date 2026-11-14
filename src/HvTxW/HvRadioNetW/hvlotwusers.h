@@ -14,6 +14,7 @@
 #include <QDateEdit>
 #include <QHash>
 #include <QString>
+#include <QProcess>
 class QNetworkAccessManager;
 
 class HvLotwUsersW : public QWidget
@@ -36,6 +37,7 @@ private slots:
     void DownloadCsv();
     void DownloadProgress(qint64,qint64);
     void DownloadFinished();
+    void CurlFinished(int,QProcess::ExitStatus);
 
 private:
     QString s_app_path;
@@ -52,5 +54,6 @@ private:
     void ReadSettings();
     void SaveSettings();
     void RefreshDecodeLists();
+    void UseDownloaded(QString tmp);
 };
 #endif
