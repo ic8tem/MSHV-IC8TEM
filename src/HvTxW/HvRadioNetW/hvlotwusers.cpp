@@ -14,10 +14,16 @@
 #include <QApplication>
 #include <QAbstractScrollArea>
 #include <QStringList>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QDesktopServices>
+#include <QUrl>
 
 static QHash<QString,int> g_lotw_calls;  // call -> julian day of the last LoTW upload
 static int  g_lotw_min_jd = 0;           // valid if last upload >= this day
 static bool g_lotw_show = true;
+#define LOTW_CSV_URL "https://lotw.arrl.org/lotw-user-activity.csv"
 
 static QString LotwBaseCall(const QString &c)
 {
@@ -70,11 +76,15 @@ HvLotwUsersW::HvLotwUsersW(QString app_path,QWidget *parent)
     s_set_path = app_path+"/settings/ms_lotw";
 
     QGroupBox *gb = new QGroupBox(tr("LoTW Users (Logbook of The World)"));
-    QLabel *l_info = new QLabel(tr("Download the file from ARRL:")+"\n"
-                                "https://lotw.arrl.org/lotw-user-activity.csv\n"+
-                                tr("then load it here. A copy is kept in settings/database."));
-    l_info->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    QLabel *l_info = new QLabel(tr("LoTW user list from ARRL")+":<br><a href=\"" LOTW_CSV_URL "\">" LOTW_CSV_URL "</a><br>"+
+                                tr("Press Download, or open the link, save the file and load it with Load. A copy is kept in settings/database."));
+    l_info->setTextFormat(Qt::RichText);
+    l_info->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    l_info->setOpenExternalLinks(true);
     l_info->setWordWrap(true);
+    pb_download = new QPushButton(" "+tr("Download from ARRL and Load")+" ");
+    connect(pb_download, SIGNAL(clicked()), this, SLOT(DownloadCsv()));
+    nam = new QNetworkAccessManager(this);
 
     QPushButton *pb_load = new QPushButton(" "+tr("Load LoTW CSV File")+" ... ");
     connect(pb_load, SIGNAL(clicked()), this, SLOT(LoadCsvFile()));
@@ -100,6 +110,7 @@ HvLotwUsersW::HvLotwUsersW(QString app_path,QWidget *parent)
 
     QHBoxLayout *H_load = new QHBoxLayout();
     H_load->setContentsMargins(0,0,0,0);
+    H_load->addWidget(pb_download);
     H_load->addWidget(pb_load);
     H_load->addStretch(1);
 
@@ -180,6 +191,63 @@ void HvLotwUsersW::LoadCsvFile()
         QFile::copy(fn,s_csv_path);
     }
     g_lotw_calls = tmp;
+    RefreshStatus();
+    RefreshDecodeLists();
+}
+void HvLotwUsersW::DownloadCsv()
+{
+    QNetworkRequest req(QUrl(LOTW_CSV_URL));
+    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    req.setHeader(QNetworkRequest::UserAgentHeader, "MSHV-IC8TEM");
+    QNetworkReply *r = nam->get(req);
+    pb_download->setEnabled(false);
+    l_status->setText(tr("Downloading")+" "+LOTW_CSV_URL+" ...");
+    connect(r, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(DownloadProgress(qint64,qint64)));
+    connect(r, SIGNAL(finished()), this, SLOT(DownloadFinished()));
+}
+void HvLotwUsersW::DownloadProgress(qint64 got,qint64)
+{
+    l_status->setText(tr("Downloading")+" ... "+QString("%1").arg((double)got/1048576.0,0,'f',1)+" MB");
+}
+void HvLotwUsersW::DownloadFinished()
+{
+    QNetworkReply *r = qobject_cast<QNetworkReply*>(sender());
+    pb_download->setEnabled(true);
+    if (!r) return;
+    r->deleteLater();
+    if (r->error() != QNetworkReply::NoError)
+    {
+        RefreshStatus();
+        QMessageBox::warning(this,"MSHV",tr("Download failed")+": "+r->errorString()+"\n\n"+
+                             tr("Open the link in the browser, save the file and load it with Load")+":\n"+LOTW_CSV_URL);
+        return;
+    }
+    QByteArray data = r->readAll();
+    QDir().mkpath(s_app_path+"/settings/database");
+    QString tmp = s_csv_path+".tmp";
+    QFile f(tmp);
+    if (!f.open(QIODevice::WriteOnly) || f.write(data)!=data.size())
+    {
+        f.close();
+        QFile::remove(tmp);
+        RefreshStatus();
+        QMessageBox::warning(this,"MSHV",tr("Cannot write")+" "+tmp);
+        return;
+    }
+    f.close();
+    QHash<QString,int> h;
+    QDate last;
+    int n = ParseCsv(tmp,h,last);
+    if (n <= 0)
+    {
+        QFile::remove(tmp);
+        RefreshStatus();
+        QMessageBox::warning(this,"MSHV",tr("The downloaded file is not a LoTW user list."));
+        return;
+    }
+    QFile::remove(s_csv_path);
+    QFile::rename(tmp,s_csv_path);
+    g_lotw_calls = h;
     RefreshStatus();
     RefreshDecodeLists();
 }

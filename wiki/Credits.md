@@ -1,4 +1,4 @@
-# Credits — code and knowledge reused
+# Riconoscimenti — Credits
 
 | What | From | License | How it is used here |
 |---|---|---|---|

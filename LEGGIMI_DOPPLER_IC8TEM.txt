@@ -95,7 +95,8 @@ ALTRE MODIFICHE (versione 2)
    FT8/FT4 HF, in Q65 e in EU VHF. Massimo: 6 in FT8, 4 in FT4, 3 in FT2.
 
 2) LoTW - Opzioni > Network Configuration > linguetta "Page 3"
-   - Scarica https://lotw.arrl.org/lotw-user-activity.csv e caricalo con
+   - Pulsante "Download from ARRL and Load" (scarica e carica da solo), oppure
+     link https://lotw.arrl.org/lotw-user-activity.csv : salvalo e caricalo con
      "Load LoTW CSV File". Viene copiato in settings/database e ricaricato a ogni avvio.
    - "Valid if last LoTW upload is on or after": data minima dell'ultimo upload LoTW
      perche' un call sia considerato valido.

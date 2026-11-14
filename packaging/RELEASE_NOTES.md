@@ -1,7 +1,9 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
-**New in ic8tem.4: Icom LAN** — IC-7300MK2 (and IC-705, IC-9700, IC-7610, IC-905) controlled over the network with CAT and audio, no USB cable: Rig Control → *Icom IC-7300MK2 LAN*, Sound → *Icom LAN Input/Output*. Guide: docs/ICOM_LAN.md in the source.
+**New in ic8tem.5:** LoTW list downloaded directly from ARRL (button, link https://lotw.arrl.org/lotw-user-activity.csv) · Italian wiki.
+
+**ic8tem.4: Icom LAN** — IC-7300MK2 (and IC-705, IC-9700, IC-7610, IC-905) controlled over the network with CAT and audio, no USB cable: Rig Control → *Icom IC-7300MK2 LAN*, Sound → *Icom LAN Input/Output*. Guide: docs/ICOM_LAN.md in the source.
 
 **New:** Doppler tracking in *Astronomical Data* (Full Doppler, Own Echo, **CFOM**, On DX Echo, Call DX; Tx Shift ±999.999 MHz, rig set via CAT) · LoTW users list (*Network Configuration → Page 3*), black dot and *Show LoTW Users Only* filter · *Fictitious log reset* in the Log window · optional *Unlock TX Slots* (OFF by default) · MSK144 Width (ping duration) column, optional · default mode buttons FT8, FT4, Q65B, Q65C, Q65A, MSK144, JT65B · fixes from VU2CPL (FFT pointers crash, Flex tuner keyed by Enter).
 

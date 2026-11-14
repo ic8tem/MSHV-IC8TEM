@@ -56,3 +56,8 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvMsCore/mscore.cpp` — `Icom LAN Input`: 48 kHz, or 44.1 kHz (resampled in the Icom LAN thread) for the modes that need 11025 Hz (FSK441, FSK315, JTMS, JT6M, ISCAT).
 * `src/HvMsPlayer/libsound/rawplayer.cpp`, `genmesage.cpp`, `src/HvRigControl/HvRigCat/network/network.cpp` — TX audio to the Icom LAN stream (44.1 kHz TX resampled to 48 kHz).
 * README: credits table for all reused code and protocol references.
+
+## 2026-11-14 — 2.76.7-ic8tem.5
+* `src/HvTxW/HvRadioNetW/hvlotwusers.*` — clickable link https://lotw.arrl.org/lotw-user-activity.csv and button **Download from ARRL and Load** (download, check, copy to settings/database, load).
+* `.github/workflows/build-all.yml` — Windows packages include the OpenSSL DLLs (HTTPS).
+* `wiki/` + `.github/workflows/wiki.yml` — Italian wiki with all the new functions, published to the GitHub wiki.

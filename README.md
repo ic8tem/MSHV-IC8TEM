@@ -10,7 +10,7 @@ Modified version of **MSHV 2.76.7** by Hrisimir Hristov, LZ2HV, with additions b
 | Area | Addition |
 |---|---|
 | Astronomical Data | **Doppler tracking** panel like WSJT-X: Full Doppler to DX Grid, Own Echo, **Constant Frequency on Moon (CFOM)**, On DX Echo, Call DX, None. Sked frequency, Set kHz, live Rx/Tx frequencies, **Tx Shift up to ±999.999 MHz**. Frequencies are sent to the rig via CAT (TX frequency set before PTT, RX frequency after PTT off). |
-| LoTW | Options → Network Configuration → **Page 3**: load `lotw-user-activity.csv` from ARRL, choose the minimum last-upload date. A **black dot** at the right edge of the message column marks decodes from LoTW users. |
+| LoTW | Options → Network Configuration → **Page 3**: **Download from ARRL and Load** button, or the link <https://lotw.arrl.org/lotw-user-activity.csv> and *Load*; choose the minimum last-upload date. A **black dot** at the right edge of the message column marks decodes from LoTW users. |
 | Decode List Filters | New **Show LoTW Users Only** option (messages addressed to you are always shown). |
 | Log | **Fictitious log reset YYYYMMDDHHmmSS (UTC)**: QSOs before that time are ignored for worked-before calls/locators (new squares) and dupe check. The log is not modified. |
 | Multi Answer | Optional **Unlock TX Slots** checkbox, **OFF by default** (original LZ2HV limits apply unless you enable it). |
@@ -18,6 +18,8 @@ Modified version of **MSHV 2.76.7** by Hrisimir Hristov, LZ2HV, with additions b
 | MSK144 ping duration | Decode List menu → **Show/Hide Width (Ping Duration) Column MSK144**: duration of each ping in ms (20 ms steps), as in MSK144ms. FSK441, JTMS and JT6M already have the Width column. |
 | Mode switcher | Default mode buttons: FT8, FT4, Q65B, Q65C, Q65A, MSK144, JT65B. |
 | Fix | `astro()` used a non-initialized local array for the DX Doppler (`xdop[2]`); now `static`. |
+
+Documentation (Italian): **[Wiki](../../wiki)** — the pages are also in the [wiki/](wiki/) folder.
 
 Every change in the source is marked with the comment `IC8TEM mod`. The full list is in [CHANGES_IC8TEM.md](CHANGES_IC8TEM.md).
 

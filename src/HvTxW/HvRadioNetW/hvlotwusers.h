@@ -14,6 +14,7 @@
 #include <QDateEdit>
 #include <QHash>
 #include <QString>
+class QNetworkAccessManager;
 
 class HvLotwUsersW : public QWidget
 {
@@ -32,6 +33,9 @@ private slots:
     void LoadCsvFile();
     void MinDateChanged(const QDate &);
     void ShowChanged(bool);
+    void DownloadCsv();
+    void DownloadProgress(qint64,qint64);
+    void DownloadFinished();
 
 private:
     QString s_app_path;
@@ -40,6 +44,8 @@ private:
     QLabel *l_status;
     QDateEdit *de_min_date;
     QCheckBox *cb_show;
+    QPushButton *pb_download;
+    QNetworkAccessManager *nam;
     bool f_block_save;
     int ParseCsv(QString path,QHash<QString,int> &out,QDate &last);
     void RefreshStatus();
