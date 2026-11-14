@@ -534,6 +534,8 @@ void SettingsMs::SearchSoundDev()
 		else DevBoxIn->addItem(QString("Flex Native Input DAX %1").arg(ch));		
 	}
 	DevBoxOut->addItem("Flex Native Output");
+	DevBoxIn->addItem("Icom LAN Input");//IC8TEM
+	DevBoxOut->addItem("Icom LAN Output");//IC8TEM
         no_emit = false;
         return;
     }
@@ -741,6 +743,8 @@ next_card:
 	}
 	DevBoxOut->addItem("Flex Native Output");
 	//end flex native vita-49
+	DevBoxIn->addItem("Icom LAN Input");//IC8TEM Icom LAN
+	DevBoxOut->addItem("Icom LAN Output");//IC8TEM Icom LAN
     no_emit = false; 
 }
 void SettingsMs::SetDevices_Drv(QString dev_in,QString bpsampl,QString card_latency,//sample_rate not used
@@ -857,7 +861,7 @@ void SettingsMs::OutDeviceChanged(QString)
 {
     if (!no_emit)
     {
-        if (DevBoxOut->currentText()=="TCI Client Output")//2.70
+        if (DevBoxOut->currentText()=="TCI Client Output" || DevBoxOut->currentText()=="Icom LAN Output")//2.70 IC8TEM
         {
             OutBuf->setEnabled(false);
             cb_out_bitpersample->setEnabled(false);
@@ -879,7 +883,7 @@ void SettingsMs::OutDeviceChanged(QString)
 
         //if (DevBoxOut->currentText()!="pulse")// "pulse: "
         QString dn0 = dev_name+"xxxxxxx";//2.70
-        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Output" && dev_name!="Flex Native Output")
+        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Output" && dev_name!="Flex Native Output" && dev_name!="Icom LAN Output")//IC8TEM
         {
             QRegExp rx;
             QString card_out, device_out;
@@ -919,7 +923,7 @@ void SettingsMs::InDeviceChanged(QString)
     {
         //if (!g_block_alsa)//
         //{
-        if (DevBoxIn->currentText()=="TCI Client Input")//2.70
+        if (DevBoxIn->currentText()=="TCI Client Input" || DevBoxIn->currentText()=="Icom LAN Input")//2.70 IC8TEM
         {
             cb_in_bitpersample->setEnabled(false);
             CardLatency->setEnabled(false);
@@ -939,7 +943,7 @@ void SettingsMs::InDeviceChanged(QString)
 
         //if (DevBoxIn->currentText()!="pulse")
         QString dn0 = dev_name+"xxxxxxx";//2.70
-        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Input" && !dev_name.startsWith("Flex Native Input"))
+        if (dn0.mid(0,7)!="pulse: " && dev_name!="TCI Client Input" && !dev_name.startsWith("Flex Native Input") && dev_name!="Icom LAN Input")//IC8TEM
         {
             QRegExp rx;
             QString card, device;

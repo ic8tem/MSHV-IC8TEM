@@ -94,6 +94,7 @@ HEADERS = src/main_ms.h \
  src/HvRigControl/HvRigCat/omnirig/omnirighv.h \
  src/HvRigControl/HvRigCat/sdrs/sdrs.h \
  src/HvRigControl/HvRigCat/network/network.h \
+ src/HvRigControl/HvRigCat/icomlan/icomlan.h \
  src/HvRigControl/HvRigCat/network/flexpanel.h \
  src/HvRigControl/HvRigCat/mits/mits.h \
  src/LabWidget/labw.h \
@@ -208,6 +209,7 @@ SOURCES = src/main.cpp \
  src/HvRigControl/HvRigCat/omnirig/omnirighv.cpp \
  src/HvRigControl/HvRigCat/sdrs/sdrs.cpp \
  src/HvRigControl/HvRigCat/network/network.cpp \
+ src/HvRigControl/HvRigCat/icomlan/icomlan.cpp \
  src/HvRigControl/HvRigCat/network/flexpanel.cpp \
  src/HvRigControl/HvRigCat/mits/mits.cpp \
  src/LabWidget/labw.cpp \

@@ -3,6 +3,7 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "mpegsound.h"
+extern void _SetTxAudioRateTci_(int rate);//IC8TEM Icom LAN
 #include <math.h>
 
 //static const double OUT_SAMPLE_RATE =11025.0;//no inposible hv rawfilter need to be off
@@ -137,6 +138,7 @@ bool GenMessage::initialize(char *msg,int mod_ident,double tx_freq,int period_t,
     }    	
 
 	ftci=player->gettci();
+	_SetTxAudioRateTci_((int)GEN_SAMPLE_RATE);//IC8TEM Icom LAN: rate of the TX blocks
 	QString tmp = (QString)msg+"   ";
 	if (tmp[0]=='@') all_gain = 48;//2.76.7 tune
 #if defined DEB_LIMI0

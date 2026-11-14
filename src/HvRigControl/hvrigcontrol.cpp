@@ -46,6 +46,17 @@ struct netSP
 #include "HvRigCat/network/network_def.h"
 //#define COU_NET_PS NETWORK_COUNT
 static netSP netServPort[NETWORK_COUNT];
+static QString netLanUser[NETWORK_COUNT];//IC8TEM Icom LAN
+static QString netLanPass[NETWORK_COUNT];//IC8TEM Icom LAN
+static QString LanPassEnc(const QString &p)
+{
+    return "b64:"+QString::fromLatin1(p.toUtf8().toBase64());
+}
+static QString LanPassDec(const QString &p)
+{
+    if (p.startsWith("b64:")) return QString::fromUtf8(QByteArray::fromBase64(p.mid(4).toLatin1()));
+    return p;
+}
 struct netTciCS
 {
 	QString srate;
@@ -268,6 +279,11 @@ HvRigControl::HvRigControl( QWidget *parent )
     netServPort[13].port="4992";		//FlexRadio SmartSDR Slice
     netServPort[14].serv="RIG IP Addr";
     netServPort[14].port="4992";		//FlexRadio SmartSDR Slice H
+    for (int i = ICOMLAN_FIRST; i < NETWORK_COUNT; ++i)//IC8TEM Icom LAN
+    {
+        netServPort[i].serv="RIG IP Addr";
+        netServPort[i].port="50001";
+    }
     //netServPort[15].serv="XXXX";
     //netServPort[15].port="9999";		//XXXX
 
@@ -278,6 +294,15 @@ HvRigControl::HvRigControl( QWidget *parent )
     TCPPort->setInputMask("9999999999");
     connect(TCPServer, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
     connect(TCPPort, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
+    l_lanuser = new QLabel(tr("LAN User")+":");//IC8TEM Icom LAN
+    le_lanuser = new QLineEdit();
+    le_lanuser->setMaxLength(16);
+    l_lanpass = new QLabel(tr("Password")+":");
+    le_lanpass = new QLineEdit();
+    le_lanpass->setMaxLength(16);
+    le_lanpass->setEchoMode(QLineEdit::Password);
+    connect(le_lanuser, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
+    connect(le_lanpass, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
 
     l_con_info = new QLabel("<font color='red'>"+tr("Disconnected")+"</font>");
     QLabel *l_server = new QLabel(tr("Server")+":");
@@ -387,6 +412,19 @@ HvRigControl::HvRigControl( QWidget *parent )
     V_net->addLayout(H_addr_port_bt);
     V_net->addLayout(H_tci1);
     V_net->addLayout(H_tci0);
+    QHBoxLayout *H_lan = new QHBoxLayout();//IC8TEM Icom LAN
+    H_lan->setContentsMargins(0,0,0,0);
+    H_lan->setSpacing(4);
+    H_lan->addWidget(l_lanuser);
+    H_lan->addWidget(le_lanuser);
+    H_lan->addWidget(l_lanpass);
+    H_lan->addWidget(le_lanpass);
+    H_lan->setAlignment(Qt::AlignLeft);
+    V_net->addLayout(H_lan);
+    l_lanuser->setHidden(true);
+    le_lanuser->setHidden(true);
+    l_lanpass->setHidden(true);
+    le_lanpass->setHidden(true);
     gb_net = new QGroupBox(tr("Network")+":");
     gb_net->setLayout(V_net);
     gb_net->setEnabled(false);
@@ -1054,6 +1092,13 @@ void HvRigControl::SetNetRigSrvPort(QString s)
             netServPort[i].serv = ls0.at(0);
             netServPort[i].port = ls0.at(1);
         }
+        if (ls0.count()==4 && i>=ICOMLAN_FIRST)//IC8TEM Icom LAN
+        {
+            netServPort[i].serv = ls0.at(0);
+            netServPort[i].port = ls0.at(1);
+            netLanUser[i] = ls0.at(2);
+            netLanPass[i] = LanPassDec(ls0.at(3));
+        }
         if (ls0.count()==7 && (i==3 || i==4))//tci 1,2
         {
             netServPort[i].serv = ls0.at(0);
@@ -1078,6 +1123,7 @@ QString HvRigControl::net_rig_srv_port()
         if (i==3 || i==4) out.append(";"+QString("%1").arg(netTciChSmp[i-3].channels)+";"+
                                          netTciChSmp[i-3].samples+";"+QString("%1").arg(netTciChSmp[i-3].type)+";"+
                                          netTciChSmp[i-3].srate+";"+QString("%1").arg(netTciChSmp[i-3].txbuff));
+        if (i>=ICOMLAN_FIRST) out.append(";"+QString(netLanUser[i]).remove(";").remove("#")+";"+LanPassEnc(netLanPass[i]));//IC8TEM
         if (i<NETWORK_COUNT-1) out.append("#");
     }
     return out;
@@ -1089,6 +1135,11 @@ void HvRigControl::TCPSPChanged(QString)
     {
         netServPort[s_net_model_id].serv = TCPServer->text();
         netServPort[s_net_model_id].port = TCPPort->text();
+        if (s_net_model_id>=ICOMLAN_FIRST)//IC8TEM Icom LAN
+        {
+            netLanUser[s_net_model_id] = le_lanuser->text();
+            netLanPass[s_net_model_id] = le_lanpass->text();
+        }
         if (s_net_model_id==3 || s_net_model_id==4)
         {
             int id = s_net_model_id - 3;
@@ -1105,7 +1156,15 @@ void HvRigControl::SetNetConnect()
     QString s = TCPServer->text()+"#"+TCPPort->text()+"#"+tci_channels->currentText()+"#"+
                 tci_samples->currentText()+"#"+tci_tcistype->currentText()+"#"+tci_rample_rate->currentText()+"#"+
                 QString("%1").arg(tci_tx_buff->value());
+    s.append("#"+le_lanuser->text()+"#"+le_lanpass->text());//IC8TEM Icom LAN fields 7 and 8
     emit EmitNetSP(s);//TCPServer->text(),TCPPort->text(),tci_channels->currentText(),tci_samples->currentText());
+}
+void HvRigControl::SetLanFieldsEnabled(bool f)//IC8TEM Icom LAN
+{
+    l_lanuser->setEnabled(f);
+    le_lanuser->setEnabled(f);
+    l_lanpass->setEnabled(f);
+    le_lanpass->setEnabled(f);
 }
 void HvRigControl::SetNetConnInfo(QString s,bool f1,bool f2)
 {
@@ -1127,6 +1186,7 @@ void HvRigControl::SetNetConnInfo(QString s,bool f1,bool f2)
         tci_samples->setEnabled(false);
         l_tcistype->setEnabled(false);
         tci_tcistype->setEnabled(false);
+        SetLanFieldsEnabled(false);//IC8TEM
 
         net_active = true;
     }
@@ -1146,6 +1206,7 @@ void HvRigControl::SetNetConnInfo(QString s,bool f1,bool f2)
         tci_samples->setEnabled(false);
         l_tcistype->setEnabled(false);
         tci_tcistype->setEnabled(false);
+        SetLanFieldsEnabled(false);//IC8TEM
 
         net_active = true;
     }
@@ -1165,6 +1226,7 @@ void HvRigControl::SetNetConnInfo(QString s,bool f1,bool f2)
         tci_samples->setEnabled(true);
         l_tcistype->setEnabled(true);
         tci_tcistype->setEnabled(true);
+        SetLanFieldsEnabled(true);//IC8TEM
 
         net_active = false;
     }
@@ -1595,12 +1657,25 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
     tci_samples->setHidden(true);
     l_tcistype->setHidden(true);
     tci_tcistype->setHidden(true);
+    l_lanuser->setHidden(true);//IC8TEM Icom LAN
+    le_lanuser->setHidden(true);
+    l_lanpass->setHidden(true);
+    le_lanpass->setHidden(true);
     if (sett.port_type==RIG_PORT_NETWORK)
     {
         if (s_net_model_id>-1 && s_net_model_id<NETWORK_COUNT)
         {
             TCPServer->setText(netServPort[s_net_model_id].serv);
             TCPPort->setText(netServPort[s_net_model_id].port);
+            if (s_net_model_id>=ICOMLAN_FIRST)//IC8TEM Icom LAN
+            {
+                le_lanuser->setText(netLanUser[s_net_model_id]);
+                le_lanpass->setText(netLanPass[s_net_model_id]);
+                l_lanuser->setHidden(false);
+                le_lanuser->setHidden(false);
+                l_lanpass->setHidden(false);
+                le_lanpass->setHidden(false);
+            }
             if (s_net_model_id==3 || s_net_model_id==4)
             {
                 int id = s_net_model_id - 3;

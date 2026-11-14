@@ -127,3 +127,9 @@ ALTRE MODIFICHE (versione 2)
    20 ms), misurata come tempo sopra la soglia di rivelazione del decoder: non e' la
    durata fisica completa della traccia. Messaggi brevi (sh) senza valore.
    FSK441/FSK315/JTMS (ms) e JT6M (secondi) hanno gia' la colonna Width.
+9) Icom LAN (dalla 2.76.7-ic8tem.4)
+   IC-7300MK2, IC-705, IC-9700, IC-7610, IC-905 collegati via rete con CAT e audio,
+   senza cavo USB. Rig Control: "Icom IC-7300MK2 LAN", Server = IP della radio,
+   Port 50001, LAN User e Password = utente di rete creato sulla radio.
+   Sound: "Icom LAN Input" e "Icom LAN Output". Sulla radio: Network Control ON,
+   DATA MOD = LAN. Guida completa: docs/ICOM_LAN.md. Riconoscimenti: README.

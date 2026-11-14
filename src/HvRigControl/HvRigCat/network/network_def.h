@@ -6,7 +6,9 @@
 #ifndef NETWORK_DEF_H
 #define NETWORK_DEF_H
 
-#define NETWORK_COUNT 15
+#define NETWORK_COUNT 20 //IC8TEM +5 Icom LAN
+#define ICOMLAN_FIRST 15 //IC8TEM Icom LAN models 15..19
+#define ICOMLAN_COUNT 5
 #if defined _NETWORK_RIGS_
 #include "../rigdef.h"
 #define NETWORK_ID 13
@@ -26,7 +28,13 @@ static RigSet rigs_network[NETWORK_COUNT] =
         {"FlexRadio SmartSDR Slice E TCP",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},
         {"FlexRadio SmartSDR Slice F TCP",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},
         {"FlexRadio SmartSDR Slice G TCP",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},   
-        {"FlexRadio SmartSDR Slice H TCP",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},        	     	        						
+        {"FlexRadio SmartSDR Slice H TCP",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},
+        //IC8TEM Icom LAN (native RS-BA1 network protocol, CAT + audio)
+        {"Icom IC-7300MK2 LAN",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},
+        {"Icom IC-705 LAN",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},
+        {"Icom IC-9700 LAN",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},
+        {"Icom IC-7610 LAN",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},
+        {"Icom IC-905 LAN",RIG_PTT_RIG,RIG_PORT_NETWORK,4800,4800,8,1,PAR_NONE,FLOW_OFF,0,0,200,3},        	     	        						
     };
 #endif
 #endif

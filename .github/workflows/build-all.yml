@@ -9,7 +9,7 @@ on:
     types: [published]
 
 env:
-  MSHV_VERSION: 2.76.7-ic8tem.3
+  MSHV_VERSION: 2.76.7-ic8tem.4
 
 permissions:
   contents: write

@@ -32,6 +32,7 @@
 #define _NETWORK_RIGS_
 #include "network/network_def.h"
 #include "network/network.h"
+#include "icomlan/icomlan.h" //IC8TEM Icom LAN
 #include "mits/mits_def.h"
 #include "mits/mits.h"
 ////// omnirig /////////////
@@ -624,6 +625,24 @@ void HvRigCat::SetRig(int index)
     }
 #endif
 ////// omnirig end /////////
+    else if (rstruc.facid == NETWORK_ID && rstruc.model >= ICOMLAN_FIRST)//IC8TEM Icom LAN
+    {
+        IcomLanRig *TIcomLan = new IcomLanRig(rstruc.model);
+        connect(this, SIGNAL(EmitNetSP(QString)), TIcomLan, SLOT(ConnectNet(QString)));
+        connect(TIcomLan, SIGNAL(EmitNetConnInfo(QString,bool,bool)), this, SIGNAL(EmitNetConnInfo(QString,bool,bool)));
+        connect(TIcomLan, SIGNAL(EmitFullRigInfo(QString)), this, SIGNAL(EmitFullRigInfo(QString)));
+        connect(this, SIGNAL(SetCmd(CmdID,ptt_t,QString)), TIcomLan, SLOT(SetCmd(CmdID,ptt_t,QString)));
+        connect(TIcomLan, SIGNAL(EmitRigSet(RigSet)), this, SLOT(SetRigSet(RigSet)));
+        connect(this, SIGNAL(DesleteRig()), TIcomLan, SLOT(deleteLater()));
+        connect(TIcomLan, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SLOT(SetReadedInfo(CmdID,QString)));
+        connect(this, SIGNAL(EmitOnOffCatCommand(bool,int,int)), TIcomLan, SLOT(SetOnOffCatCommand(bool,int,int)));
+        have_read_data_rts_on = 3;
+        s_active_model_id = rstruc.model;
+        s_active_fact_id = NETWORK_ID;
+        emit SetCmd(GET_SETT,RIG_PTT_OFF,"");
+        disconnect(TIcomLan, SIGNAL(EmitRigSet(RigSet)), this, SLOT(SetRigSet(RigSet)));
+        f_rig_activ = true;
+    }
     else if (rstruc.facid == NETWORK_ID)
     {
         Network *TNetwork = new Network(rstruc.model);

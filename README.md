@@ -14,6 +14,7 @@ Modified version of **MSHV 2.76.7** by Hrisimir Hristov, LZ2HV, with additions b
 | Decode List Filters | New **Show LoTW Users Only** option (messages addressed to you are always shown). |
 | Log | **Fictitious log reset YYYYMMDDHHmmSS (UTC)**: QSOs before that time are ignored for worked-before calls/locators (new squares) and dupe check. The log is not modified. |
 | Multi Answer | Optional **Unlock TX Slots** checkbox, **OFF by default** (original LZ2HV limits apply unless you enable it). |
+| **Icom LAN** | Native network connection to Icom radios with a LAN port — **IC-7300MK2**, IC-705, IC-9700, IC-7610, IC-905 — with **CAT and audio (RX and TX) over the network**, no USB cable, no RS-BA1, no wfview. Rig Control → `Icom IC-7300MK2 LAN` (address, port 50001, user, password); Sound → `Icom LAN Input` / `Icom LAN Output`. 48 kHz audio, resampled to 44.1 kHz for FSK441, JTMS, JT6M, ISCAT. See [docs/ICOM_LAN.md](docs/ICOM_LAN.md). |
 | MSK144 ping duration | Decode List menu → **Show/Hide Width (Ping Duration) Column MSK144**: duration of each ping in ms (20 ms steps), as in MSK144ms. FSK441, JTMS and JT6M already have the Width column. |
 | Mode switcher | Default mode buttons: FT8, FT4, Q65B, Q65C, Q65A, MSK144, JT65B. |
 | Fix | `astro()` used a non-initialized local array for the DX Doppler (`xdop[2]`); now `static`. |
@@ -40,6 +41,25 @@ MSHV is free software released under the **GNU General Public License v3** (see 
 * macOS support (PortAudio audio, Mac menus/keys, CPU meter, fixes) — code from the macOS port by Manoj Kumar R, VU2CPL (<https://github.com/vu2cpl/mshv-macos-port>, GPLv3); its FFT-pointer and Flex-tuner fixes are also used on every platform.
 * FFTW — GPL; qextserialport — MIT; Qt — LGPLv3 (dynamically linked); PortAudio — MIT.
 * Modifications — Copyright © 2026 Costantino, IC8TEM, released under GPLv3.
+
+## Credits — code and knowledge reused
+
+| What | From | License | How it is used here |
+|---|---|---|---|
+| MSHV, the whole program | Hrisimir Hristov, LZ2HV — <https://sourceforge.net/projects/mshv/> | GPLv3 | base of this version |
+| Decoders/encoders (JT6M, JT65, JTMS, ISCAT, MSK144, FT8, FT4, Q65, QRA64) and `astro()` used by Doppler tracking | Joe Taylor K1JT and the WSJT Development Group — <https://wsjt.sourceforge.io> | GPLv3 | already in MSHV |
+| TCI client | Expert Electronics, modified by LZ2HV | MIT | already in MSHV |
+| FlexRadio native VITA-49 backend | Manoj Kumar R, VU2CPL | GPLv3 | already in MSHV 2.76.7 |
+| macOS port: PortAudio audio, menus/keys, CPU meter, fonts, `mac_complex_shim.h`, `mshv_thread_helper.h`, `mshv_txtrace.h`, Boost `clang.hpp`; fixes for FFT pointers and Flex tuner | Manoj Kumar R, VU2CPL — <https://github.com/vu2cpl/mshv-macos-port> | GPLv3 (Boost files: Boost Software License 1.0) | code merged |
+| Icom LAN (RS-BA1) protocol: packet layout, login, token, CI-V and audio streams | wfview — Elliott Liggett W6EL, Phil Taylor M0VSE and contributors — <https://gitlab.com/eliggett/wfview> | GPLv3 | protocol reference; the C++ code in `src/HvRigControl/HvRigCat/icomlan/` is new |
+| Icom LAN protocol (first open implementation) | kappanhang — Norbert Varga, HA2NON — <https://github.com/nonoo/kappanhang> | MIT | protocol reference |
+| Icom LAN packet primitives | AetherSDR contributors — <https://github.com/aethersdr/AetherSDR> | GPLv3 | protocol reference (credential table, packet sizes) |
+| IC-7300MK2 LAN behaviour (48 kHz LPCM only, big-endian inner sequence for token renewal) and a synthetic MK2 used to test this code | Simon S53ZO — IC7300MK2_Lan_Splitter <https://github.com/s53zo/IC7300MK2_Lan_Splitter> and PiRO <https://github.com/s53zo/piro> | AGPLv3 / GPLv3 | reference and local test only; no code included |
+| LoTW user activity list (`lotw-user-activity.csv`) | ARRL — <https://lotw.arrl.org> | data file, downloaded by the user | read at run time |
+| Windows installer | Inno Setup — Jordan Russell and Martijn Laan | Inno Setup License | build tool |
+| AppImage | linuxdeploy and Qt plugin — <https://github.com/linuxdeploy> | MIT | build tool |
+
+Original notices are kept in every file. If you see your work here without the right credit, please tell IC8TEM and it will be fixed.
 
 This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 

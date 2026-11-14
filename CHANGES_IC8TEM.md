@@ -46,3 +46,13 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 ## 2026-11-14 — 2.76.7-ic8tem.3
 * `src/HvDecoderMs/decodermsk144.cpp` — MSK144: the ping duration is now measured for every decode (before: only in MSK144ms) and written in the Width field (20 ms steps). Also present in ALL.TXT. Short messages (sh) have no value.
 * `src/HvDecodeList/decodelist.*`, `src/main_ms.*` — menu Decode List: **Show/Hide Width (Ping Duration) Column MSK144**, OFF by default, saved in `def_msk_width_col`.
+
+## 2026-11-14 — 2.76.7-ic8tem.4: Icom LAN
+* `src/HvRigControl/HvRigCat/icomlan/icomlan.*` (new) — native Icom network protocol (RS-BA1): login, token renewal, CI-V stream, 48 kHz audio stream both ways, retransmissions, reconnection. Runs in its own thread. CAT commands are the existing MSHV Icom driver (`icom.cpp`), carried over UDP.
+* `src/HvRigControl/HvRigCat/network/network_def.h` — new rigs `Icom IC-7300MK2 LAN`, `IC-705 LAN`, `IC-9700 LAN`, `IC-7610 LAN`, `IC-905 LAN` (network models 15-19).
+* `src/HvRigControl/HvRigCat/hvrigcatw.cpp` — creates the Icom LAN rig.
+* `src/HvRigControl/hvrigcontrol.*` — Network box: LAN User and Password fields (saved with the network settings, password base64-encoded, not encrypted).
+* `src/SettingsMs/settings_ms.cpp` — sound devices `Icom LAN Input` / `Icom LAN Output`.
+* `src/HvMsCore/mscore.cpp` — `Icom LAN Input`: 48 kHz, or 44.1 kHz (resampled in the Icom LAN thread) for the modes that need 11025 Hz (FSK441, FSK315, JTMS, JT6M, ISCAT).
+* `src/HvMsPlayer/libsound/rawplayer.cpp`, `genmesage.cpp`, `src/HvRigControl/HvRigCat/network/network.cpp` — TX audio to the Icom LAN stream (44.1 kHz TX resampled to 48 kHz).
+* README: credits table for all reused code and protocol references.

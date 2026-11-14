@@ -449,6 +449,8 @@ void MsCore::FastResetSoundCardIn_p()// for pure sound cards
     //qDebug()<<"End FastReset=================================="<<QDateTime::currentDateTimeUtc().toString("hh:mm:ss");
 }
 static int tci_read_ = 0; //2.58 0=stop 1=buff 2=read
+static bool s_icomlan_in = false;//IC8TEM Icom LAN input: rate chosen here, not by TCI k_res
+extern void _IcomLanSetRx44k_(bool on);//IC8TEM
 void MsCore::SetupSettings_(QString dev_in_number,int bpsampl,int latency,int card_buffer_polls,
                             int channel,bool imidiatly)
 {
@@ -487,7 +489,28 @@ void MsCore::SetupSettings_(QString dev_in_number,int bpsampl,int latency,int ca
     //if ((QString)rad_sound_state.dev_capt_name==dev_in_number)
     //qDebug()<<"mscore="<<(QString)rad_sound_state.dev_capt_name<<dev_in_number;
     QString str_device_name = (QString)rad_sound_state.dev_capt_name; //qDebug()<<"str_device_name="<<str_device_name;
-    if (str_device_name=="TCI Client Input" || str_device_name.startsWith("Flex Native Input"))
+    s_icomlan_in = false;//IC8TEM
+    if (str_device_name=="Icom LAN Input")//IC8TEM Icom LAN: 48 kHz, or 44.1 kHz resampled for FSK/JTMS/JT6M/ISCAT
+    {
+        s_icomlan_in = true;
+        bool f44 = (s_mod_iden>0 && s_mod_iden<7);
+        _IcomLanSetRx44k_(f44);
+        if (f44)
+        {
+            fftw_sample_rate = (int)ORG_SAMPLE_RATE_11025;
+            in_sample_rate = (int)IN_SAMPLE_RATE_44100;
+            koef_resample = (int)((in_sample_rate/(int)ORG_SAMPLE_RATE_11025)-1);
+        }
+        else
+        {
+            fftw_sample_rate = (int)ORG_SAMPLE_RATE_12000;
+            in_sample_rate = (int)IN_SAMPLE_RATE_48000;
+            koef_resample = (int)((in_sample_rate/(int)ORG_SAMPLE_RATE_12000)-1);
+        }
+        ftci = true;
+        s_tci_k_res0 = -1;
+    }
+    else if (str_device_name=="TCI Client Input" || str_device_name.startsWith("Flex Native Input"))
     {     	
         fftw_sample_rate = (int)ORG_SAMPLE_RATE_12000;
         in_sample_rate = (int)IN_SAMPLE_RATE_48000;//sample_rate.toInt();
@@ -585,7 +608,7 @@ void MsCore::ResampleAndFilter(int *rawm,int crawm) //2.57
 {
     static int dat_tt[130000]; //12000*10=120000 max=10sec  120000+12000=132000    
     int k_res = koef_resample;//2.76.2 
-    if (ftci)
+    if (ftci && !s_icomlan_in)//IC8TEM Icom LAN keeps the rate set in SetupSettings_
     {
     	k_res = tci_k_res_0;
     	if (s_tci_k_res0!=k_res)

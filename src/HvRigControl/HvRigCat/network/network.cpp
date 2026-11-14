@@ -205,12 +205,15 @@ bool _SetTxAudioFlex_(int *raw)
 }
 //----- end vita49 ---------------------------------------------------
 
+extern bool _IcomLanTxActive_();//IC8TEM Icom LAN
+extern bool _SetTxAudioIcomLan_(int *raw);
 bool _SetTxAudioTci_(int *raw)//, int size
 {
     //----- vita49 ---------------------------------------------------
     // Rawplayer feeds every network transport through this one entry point;
     // hand the block to the Flex backend when that owns the output device.
     if (_FlexVitaTxActive_()) return _SetTxAudioFlex_(raw);
+    if (_IcomLanTxActive_()) return _SetTxAudioIcomLan_(raw);//IC8TEM Icom LAN
     //----- end vita49 ---------------------------------------------------
 
     exit_txaudio = 750;   //2.57 old=800x5000=4,5s old=900x4000=4,5s  max-wait-time ic53=3200 pG10=3900 ic57=3600 ic59=3700

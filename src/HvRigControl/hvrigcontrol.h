@@ -242,6 +242,11 @@ private:
 	bool net_active;
     QLineEdit *TCPServer;
     QLineEdit *TCPPort;
+    QLabel *l_lanuser;//IC8TEM Icom LAN
+    QLineEdit *le_lanuser;
+    QLabel *l_lanpass;
+    QLineEdit *le_lanpass;
+    void SetLanFieldsEnabled(bool);
 #if defined _WIN32_
     QStringList StrListToUpper(QStringList lst);
     QStringList portNamesFromHardwareDeviceMap();

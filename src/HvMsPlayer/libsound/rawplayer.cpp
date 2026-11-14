@@ -1,4 +1,5 @@
 #include "../../config.h"
+extern void _IcomLanSetTxDevice_(bool on);//IC8TEM Icom LAN
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -74,7 +75,8 @@ bool Rawplayer::initialize(char *device_name)
     buff_hv = Rawplayer::buffering;
     
     QString str_device_name = (QString)device_name;
-    if (str_device_name=="TCI Client Output" || str_device_name=="Flex Native Output")
+    _IcomLanSetTxDevice_(str_device_name=="Icom LAN Output");//IC8TEM
+    if (str_device_name=="TCI Client Output" || str_device_name=="Flex Native Output" || str_device_name=="Icom LAN Output")
     {
         _SetTciBuffReset_();
         ftci = true;
