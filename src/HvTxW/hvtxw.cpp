@@ -2181,13 +2181,28 @@ void HvTxW::SetDoQRG(QString s,QString all_txt)//2.71
 // TX period opposite to his and, when tx = 1, Auto Seq / TX on.
 void HvTxW::SetIc8temSelect(QStringList l)
 {
-    if (l.count() < 5 || s_mode != 0) return; // MSK144 only (Main_Ms switches the mode first)
+    if (l.count() < 5) return;
+    QString mode = l.count() > 5 ? l.at(5) : QString("MSK144");
+    // Main_Ms has already switched to the mode asked for: MSK144 (0) or FSK441 (2)
+    if (!((mode == "MSK144" && s_mode == 0) || (mode == "FSK441" && s_mode == 2))) return;
     QString msg = l.at(0);
     QString frq = l.at(3);
     if (frq.toLongLong() > 0) SetDefFreqGlobal(3,frq); // 3 = frequency, no rig mode change
     QString rpt = l.at(2);
     int snr = rpt.toInt();
     rpt = QString("%1%2").arg(snr < 0 ? "-" : "+").arg(qAbs(snr),2,10,QChar('0'));
+    if (s_mode == 2)
+    {
+        // FSK441: free text without FEC, MSK144-WB sends the callsign it has confirmed.
+        // Same as a double click on the callsign (then on the locator) in the MSHV list.
+        QString call = l.count() > 6 ? l.at(6) : QString();
+        QString grid = l.count() > 7 ? l.at(7) : QString();
+        if (call.isEmpty()) return;
+        DecListTextAll(msg,call,l.at(1),rpt,"");
+        if (!grid.isEmpty()) DecListTextAll(msg,grid,l.at(1),rpt,"");
+        if (l.at(4) == "1" && !f_auto_on && le_his_call->getText() == call) auto_on();
+        return;
+    }
     bool prev_auto = s_2click_list_autu_on;
     s_2click_list_autu_on = (l.at(4) == "1");
     DecListTextAll(msg,msg,l.at(1),rpt,"");

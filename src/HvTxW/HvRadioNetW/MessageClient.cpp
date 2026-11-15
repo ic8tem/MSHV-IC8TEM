@@ -183,18 +183,23 @@ void MessageClient::impl::parse_message(QByteArray const& msg)
         //qDebug() <<"In="<<in.type()<<in.id()<<schema_<<in.schema ();
         if ((quint32)in.type() == 64) // IC8TEM mod: "select" from MSK144-WB (wideband MSK144 decoder)
         {
-            // message, time, snr, dial frequency (Hz, as shown in MSHV: RF), enable TX
+            // message, time, snr, dial frequency (Hz, as shown in MSHV: RF), enable TX,
+            // then (MSK144-WB 0.2.0+) mode ("MSK144" / "FSK441"), his call, his locator
             QByteArray message;
+            QByteArray mode, call, grid;
             QTime time;
             qint32 snr {0};
             quint64 dial_hz {0};
             bool enable_tx {false};
             in >> message >> time >> snr >> dial_hz >> enable_tx;
+            if (!in.atEnd()) in >> mode >> call >> grid;
             if (check_status (in) != Fail)
             {
                 QStringList list;
                 list<<QString::fromUtf8(message)<<time.toString("hhmmss")<<QString("%1").arg(snr)
-                <<QString("%1").arg(dial_hz)<<(enable_tx ? "1" : "0");
+                <<QString("%1").arg(dial_hz)<<(enable_tx ? "1" : "0")
+                <<(mode.isEmpty() ? QString("MSK144") : QString::fromUtf8(mode).toUpper())
+                <<QString::fromUtf8(call).toUpper()<<QString::fromUtf8(grid).toUpper();
                 Q_EMIT self_->ic8tem_select(list);
             }
             return;

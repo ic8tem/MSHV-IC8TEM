@@ -3671,9 +3671,17 @@ void Main_Ms::SetUdpIc8temSelect(QStringList l)
         StopTxGlobal();
         delay = 1500;
     }
-    if (s_mode != 0)
+    // mode asked by MSK144-WB: MSK144 (0) or FSK441 (2); older MSK144-WB sends no mode = MSK144
+    int imode = 0;
+    if (l.count() > 5)
     {
-        rb_mode[0]->setChecked(true); // MSK144
+        for (int i = 0; i < COUNT_MODE; ++i)
+            if (ModeStr(i) == l.at(5)) imode = i;
+    }
+    if (imode != 0 && imode != 2) return;
+    if (s_mode != imode)
+    {
+        rb_mode[imode]->setChecked(true);
         delay = 1500;
     }
     QTimer::singleShot(delay, this, SLOT(ApplyUdpIc8temSelect()));
