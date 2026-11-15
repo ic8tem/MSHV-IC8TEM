@@ -2192,6 +2192,10 @@ void HvTxW::SetIc8temSelect(QStringList l)
     s_2click_list_autu_on = (l.at(4) == "1");
     DecListTextAll(msg,msg,l.at(1),rpt,"");
     s_2click_list_autu_on = prev_auto;
+    // "CQ 355 CALL GRID": DecListTextAll() has already done the QRG QSY on the kHz of FREQ_GLOBAL,
+    // which may still hold the frequency before the QSY above (CAT read-back not arrived yet).
+    // MSK144-WB sends the final dial (MHz of the signal + 355 kHz) for these messages: set it again.
+    if (frq.toLongLong() > 0) SetDefFreqGlobal(3,frq);
 }
 void HvTxW::DecListTextAll(QString all_txt,QString str,QString tp,QString tx_rpt,QString freq)
 {
