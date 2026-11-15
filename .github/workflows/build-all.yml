@@ -25,11 +25,15 @@ jobs:
       publish: ${{ steps.g.outputs.publish }}
       tag: ${{ steps.g.outputs.tag }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: src/mshv_ic8tem_version.h
+          sparse-checkout-cone-mode: false
       - id: g
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          HV="$(curl -fsSL "https://raw-githubusercontent-com.hhj520.top/${{ github.repository }}/${{ github.sha }}/src/mshv_ic8tem_version.h" | sed -n 's/.*MSHV_IC8TEM_VERSION "\(.*\)".*/\1/p')"
+          HV="$(sed -n 's/.*MSHV_IC8TEM_VERSION "\(.*\)".*/\1/p' src/mshv_ic8tem_version.h)"
           if [ "$HV" != "$MSHV_VERSION" ]; then echo "::error::src/mshv_ic8tem_version.h ($HV) differs from MSHV_VERSION ($MSHV_VERSION)"; exit 1; fi
           TAG="v$MSHV_VERSION"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
