@@ -61,3 +61,9 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvTxW/HvRadioNetW/hvlotwusers.*` — clickable link https://lotw.arrl.org/lotw-user-activity.csv and button **Download from ARRL and Load** (download, check, copy to settings/database, load).
 * Where Qt has no OpenSSL (Windows) the download uses the system `curl` (Windows 10/11, macOS, Linux).
 * `wiki/` + `.github/workflows/wiki.yml` — Italian wiki with all the new functions, published to the GitHub wiki.
+
+## 2026-11-15 — 2.76.7-ic8tem.6: automatic updates
+* `src/HvUpdate/mshv_updater.*` (new) — checks https://api.github.com/repos/ic8tem/MSHV-IC8TEM/releases/latest 90 s after start and every 6 hours (Help › Check for Updates, Help › Check for Updates Automatically). On *Update now*: downloads the package of this installation and `SHA256SUMS.txt`, checks SHA256, starts a helper (PowerShell on Windows, sh elsewhere) that waits for MSHV to close, installs and restarts it. Settings in `settings/ms_update`.
+* `src/mshv_ic8tem_version.h` (new) — version compiled in; the build stops if it differs from MSHV_VERSION.
+* `src/main_ms.cpp` — Help menu entries.
+* Packaging: every package carries `mshv-package.txt` (asset name of its own kind) so the updater picks the right file; Windows installer accepts `/AUTOUPDATE=1` and restarts MSHV after a silent update.

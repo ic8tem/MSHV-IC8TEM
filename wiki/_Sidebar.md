@@ -9,6 +9,7 @@
 * [[Multi Answer TX Slots|Multi-Answer-TX-Slots]]
 * [[Durata del ping MSK144|Durata-ping-MSK144]]
 * [[Icom LAN|Icom-LAN]]
+* [[Aggiornamenti automatici|Aggiornamenti-automatici]]
 * [[Novità per versione|Novita-per-versione]]
 * [[Riconoscimenti|Credits]]
 

@@ -5,6 +5,7 @@ OUT="$1"; DA="$2"; SUF="$3"; V="${MSHV_VERSION:-0.0}"
 DV="$(echo "$V" | sed 's/-ic8tem\./+ic8tem/')"
 T="$(mktemp -d)"; R="$T/root"
 sh packaging/linux/stage_root.sh "$R"
+printf '%s' "MSHV-IC8TEM-{V}-$SUF.deb" > "$R/opt/mshv-ic8tem/mshv-package.txt"   # for the updater
 mkdir -p "$T/debian" "$R/DEBIAN" "$OUT"
 printf 'Source: mshv-ic8tem\n\nPackage: mshv-ic8tem\nArchitecture: any\n' > "$T/debian/control"
 DEPS="$(cd "$T" && dpkg-shlibdeps -O "-e$R/opt/mshv-ic8tem/mshv-ic8tem" 2>/dev/null | sed 's/^shlibs:Depends=//')"

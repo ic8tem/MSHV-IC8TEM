@@ -10,6 +10,7 @@
 #include "mshv_app_path.h"
 #include "mshv_txtrace.h"
 #include "mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
+#include "HvUpdate/mshv_updater.h"//MSHV-IC8TEM automatic updates
 
 #include <QScreen>
 #include <QWindow>
@@ -1042,6 +1043,10 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     Help_abaut = new QAction(QPixmap(":pic/ms_ico.png"),tr("About")+" MSHV",this);
     connect(Help_abaut, SIGNAL(triggered()), THvAboutMsHv, SLOT(exec()));
     Help_m->addAction(Help_abaut);
+    MshvUpdater *TMshvUpdater = new MshvUpdater(App_Path,this,&f_tx_busy);//IC8TEM automatic updates
+    Help_m->addSeparator();
+    Help_m->addAction(TMshvUpdater->ActionCheck());
+    Help_m->addAction(TMshvUpdater->ActionAuto());
 
     for (int i = 0; i < COUNT_MODE; ++i) decoder_depth_all[i] = 1;
     decoder_depth_all[0]  = 2;  //MSK144 and MSK40

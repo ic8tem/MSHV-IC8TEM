@@ -71,3 +71,11 @@ Name: "{userdesktop}\MSHV-IC8TEM"; Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir
 
 [Run]
 Filename: "{app}\MSHV-IC8TEM.exe"; Description: "{cm:LaunchProgram,MSHV-IC8TEM}"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
+; automatic update started by MSHV (setup.exe /SILENT /AUTOUPDATE=1): start MSHV again
+Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir: "{app}"; Flags: nowait; Check: IsAutoUpdate
+
+[Code]
+function IsAutoUpdate(): Boolean;
+begin
+  Result := ExpandConstant('{param:AUTOUPDATE|0}') = '1';
+end;

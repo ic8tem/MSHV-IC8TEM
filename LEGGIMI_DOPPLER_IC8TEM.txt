@@ -134,3 +134,8 @@ ALTRE MODIFICHE (versione 2)
    Port 50001, LAN User e Password = utente di rete creato sulla radio.
    Sound: "Icom LAN Input" e "Icom LAN Output". Sulla radio: Network Control ON,
    DATA MOD = LAN. Guida completa: docs/ICOM_LAN.md. Riconoscimenti: README.
+10) Aggiornamenti automatici (dalla 2.76.7-ic8tem.6)
+   Ogni 6 ore (e da Help > Check for Updates) MSHV controlla GitHub; con
+   "Update now" scarica il pacchetto, verifica l'impronta SHA256, si chiude,
+   installa e riparte. Impostazioni e log restano. Per .deb/.rpm/.txz viene
+   chiesta la password di sistema. Si disattiva da Help.

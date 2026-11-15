@@ -6,6 +6,7 @@ OUT="$(mkdir -p "$1" && cd "$1" && pwd)"; SA="$2"; V="${MSHV_VERSION:-0.0}"
 SV="$(echo "$V" | tr '-' '_')"
 T="$(mktemp -d)"; R="$T/root"
 sh packaging/linux/stage_root.sh "$R"
+printf '%s' "mshv-ic8tem-{VU}-$SA-1_ic8tem.txz" > "$R/opt/mshv-ic8tem/mshv-package.txt"   # for the updater
 mkdir -p "$R/install" "$OUT"
 cat > "$R/install/slack-desc" <<'EOD'
            |-----handy-ruler------------------------------------------------------|
