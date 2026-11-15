@@ -67,3 +67,6 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/mshv_ic8tem_version.h` (new) — version compiled in; the build stops if it differs from MSHV_VERSION.
 * `src/main_ms.cpp` — Help menu entries.
 * Packaging: every package carries `mshv-package.txt` (asset name of its own kind) so the updater picks the right file; Windows installer accepts `/AUTOUPDATE=1` and restarts MSHV after a silent update.
+
+## 2026-11-15 — 2.76.7-ic8tem.7
+* macOS: the app did not start on some Macs ("Could not load the Qt platform plugin cocoa": `libbrotlicommon.1.dylib` missing — macdeployqt does not follow `@rpath` dependencies). New `packaging/macos/fix_bundle.sh` copies every missing Homebrew library into the bundle and stops the build if any reference still points outside the app.

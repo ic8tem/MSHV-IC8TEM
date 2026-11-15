@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.7
+* macOS: corretto l'avvio (mancava una libreria nel pacchetto, l'app si chiudeva subito). Chi ha la 2.76.7-ic8tem.6 su Mac deve installare questa a mano.
+
 ## 2.76.7-ic8tem.6
 * **Aggiornamenti automatici**: controllo ogni 6 ore, installazione con un clic su tutti i sistemi. Vedi [[Aggiornamenti automatici|Aggiornamenti-automatici]].
 

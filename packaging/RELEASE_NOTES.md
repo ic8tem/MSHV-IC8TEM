@@ -1,7 +1,9 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
-**New in ic8tem.6: automatic updates** — every 6 hours MSHV checks GitHub and installs new versions with one click (Help › Check for Updates). From the next version on, updates arrive by themselves.
+**ic8tem.7:** macOS start-up fixed (a library was missing from the app).
+
+**ic8tem.6: automatic updates** — every 6 hours MSHV checks GitHub and installs new versions with one click (Help › Check for Updates). From the next version on, updates arrive by themselves.
 
 **ic8tem.5:** LoTW list downloaded directly from ARRL (button, link https://lotw.arrl.org/lotw-user-activity.csv) · Italian wiki.
 
