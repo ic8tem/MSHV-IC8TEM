@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.9:** MSK144-WB — a double click in the MSK144-WB list (wideband MSK144/FSK441 decoder) sets MSHV: mode, QSY, his call, period and TX. In Network Configuration, UDP Broadcast Settings: server 127.0.0.1, port 2237.
+
 **ic8tem.8:** Icom LAN — one entry for all radios (model detected automatically), CI-V and audio UDP ports can be set.
 
 **ic8tem.7:** macOS start-up fixed (a library was missing from the app).

@@ -74,3 +74,9 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 ## 2026-11-15 — 2.76.7-ic8tem.8
 * Icom LAN: one rig entry **Icom LAN** instead of five models; the CI-V address announced by the radio at login selects the Icom model (`Icom::ModelFromCivAddr`). Old names `Icom IC-xxxx LAN` in the settings are mapped to it.
 * Icom LAN: **CI-V Port** and **Audio Port** fields in Rig Control (empty = control port + 1 / + 2), saved with the network settings.
+
+## 2026-11-15 — 2.76.7-ic8tem.9: MSK144-WB
+* UDP (WSJT-X protocol, "UDP Broadcast Settings"): new message type 64 sent by MSK144-WB (wideband MSK144/FSK441 decoder on SDRangel) on a double click: message, time, SNR, dial frequency, TX flag, mode, his call, his locator.
+  * `src/HvTxW/HvRadioNetW/MessageClient.*`, `radionetw.*` — read the message (the last three fields are optional) and pass it on.
+  * `src/main_ms.*` — stop a TX in progress, switch to MSK144 or FSK441, then (after the mode change) `HvTxW::SetIc8temSelect()`.
+  * `src/HvTxW/hvtxw.*` — `SetIc8temSelect()`: QSY with `SetDefFreqGlobal(3, …)` (transverter offset of Rig Control applied), then the same as a double click in the decode list: MSK144 via `DecListTextAll()` with Auto Seq according to the TX flag; FSK441 his call and locator, TX on with `auto_on()`. For "CQ nnn" the frequency sent by MSK144-WB (MHz of the signal + nnn kHz) is set again after the list's own QRG QSY.
