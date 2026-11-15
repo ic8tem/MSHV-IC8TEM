@@ -3,6 +3,11 @@ name: Build all distributions
 
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to the release v$MSHV_VERSION (also when it exists: missing files are added, same names replaced)"
+        type: boolean
+        default: false
   push:
     branches: [main]
   release:
@@ -46,6 +51,8 @@ jobs:
             fi
           elif [ "${{ github.event_name }}" = "release" ]; then
             echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+            echo "build=true" >> "$GITHUB_OUTPUT"; echo "publish=true" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.inputs.publish }}" = "true" ]; then
             echo "build=true" >> "$GITHUB_OUTPUT"; echo "publish=true" >> "$GITHUB_OUTPUT"
           else
             echo "build=true" >> "$GITHUB_OUTPUT"; echo "publish=false" >> "$GITHUB_OUTPUT"
@@ -137,7 +144,7 @@ jobs:
         with:
           msystem: CLANGARM64
           update: true
-          install: zip
+          install: zip make
           pacboy: >-
             toolchain:p qt5-base:p qt5-activeqt:p qt5-websockets:p qt5-tools:p fftw:p
       - name: Build
