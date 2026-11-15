@@ -181,6 +181,24 @@ void MessageClient::impl::parse_message(QByteArray const& msg)
     {
         if (schema_ < in.schema ()) schema_ = in.schema (); // negotiated schema   one time record of server's
         //qDebug() <<"In="<<in.type()<<in.id()<<schema_<<in.schema ();
+        if ((quint32)in.type() == 64) // IC8TEM mod: "select" from MSK144-WB (wideband MSK144 decoder)
+        {
+            // message, time, snr, dial frequency (Hz, as shown in MSHV: RF), enable TX
+            QByteArray message;
+            QTime time;
+            qint32 snr {0};
+            quint64 dial_hz {0};
+            bool enable_tx {false};
+            in >> message >> time >> snr >> dial_hz >> enable_tx;
+            if (check_status (in) != Fail)
+            {
+                QStringList list;
+                list<<QString::fromUtf8(message)<<time.toString("hhmmss")<<QString("%1").arg(snr)
+                <<QString("%1").arg(dial_hz)<<(enable_tx ? "1" : "0");
+                Q_EMIT self_->ic8tem_select(list);
+            }
+            return;
+        }
         switch (in.type())
         {
         case NetworkMessage::Reply:

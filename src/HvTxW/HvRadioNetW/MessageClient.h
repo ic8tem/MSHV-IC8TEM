@@ -76,6 +76,8 @@ public:
   	//Q_SIGNAL void reply (QTime, qint32 snr, float delta_time, quint32 delta_frequency, QString const& mode
                        //, QString const& message_text, bool low_confidence, quint8 modifiers);  	
     Q_SIGNAL void configure(QStringList);//,bool);
+    // IC8TEM mod: double click in MSK144-WB -> QSY, his call, TX (message type 64, see MessageClient.cpp)
+    Q_SIGNAL void ic8tem_select(QStringList);
     
     //Q_SIGNAL void annotation_info(QString const& dx_call, bool sort_order_provided, quint32 sort_order);
 

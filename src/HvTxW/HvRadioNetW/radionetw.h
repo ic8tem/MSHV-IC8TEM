@@ -290,6 +290,7 @@ signals:
     void EmitUdpBroadLoggedAll(bool,bool);
     void EmitUdpCmdDl(QStringList);
     void EmitUdpConfigure(int);//2.76.7
+    void EmitUdpIc8temSelect(QStringList);//IC8TEM mod
     void EmitUdpCmdStop(bool);
     void EmitOpenRadNetWToRecon();
     void EmitUploadClubLogInfo(QString);
@@ -524,6 +525,7 @@ private slots:
     void SetDefaultFreqs(bool f);
     void set_reply_clr(QStringList);
     void set_configure(QStringList);
+    void set_ic8tem_select(QStringList);//IC8TEM mod
     void set_halt_tx(bool);
     //void connected_clublog();
     //void disconnected_clublog();

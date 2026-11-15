@@ -857,6 +857,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvTxW, SIGNAL(EmitUdpCmdDl(QStringList)), TDecodeList2, SLOT(SetUdpCmdDl(QStringList)));//2.22
     connect(THvTxW, SIGNAL(EmitUdpCmdStop(bool)), this, SLOT(SetUdpCmdStop(bool)));//2.22
     connect(THvTxW, SIGNAL(EmitUdpConfigure(int)),this,SLOT(SetUdpConfigure(int)));//2.76.7
+    connect(THvTxW, SIGNAL(EmitUdpIc8temSelect(QStringList)),this,SLOT(SetUdpIc8temSelect(QStringList)));//IC8TEM mod
     connect(TDecodeList1, SIGNAL(EmitUdpDecClr()), THvTxW, SLOT(SetUdpDecClr()));//2.22
 
     connect(TDecodeList1, SIGNAL(EmitDetectTextInMsg(QString,QString &)), THvTxW, SLOT(DlDetectTextInMsg(QString,QString &)));//for tooltip 2.27
@@ -3657,6 +3658,31 @@ void Main_Ms::SetModeDecodeListS(bool f,bool f0,bool f1,bool f2,bool f3)//bool f
         pb_clar_list2->setHidden(true);
         pb_clar_list1->setText(tr("CLEAR MESSAGES"));
     }
+}
+// IC8TEM mod: double click in MSK144-WB. Stops a TX in progress, switches to MSK144 if needed,
+// then (after the mode change has settled) QSY + his call + TX in HvTxW::SetIc8temSelect().
+static QStringList _ic8tem_select_;
+void Main_Ms::SetUdpIc8temSelect(QStringList l)
+{
+    _ic8tem_select_ = l;
+    int delay = 50;
+    if (f_tx_busy || THvTxW->GetAutoIsOn())
+    {
+        StopTxGlobal();
+        delay = 1500;
+    }
+    if (s_mode != 0)
+    {
+        rb_mode[0]->setChecked(true); // MSK144
+        delay = 1500;
+    }
+    QTimer::singleShot(delay, this, SLOT(ApplyUdpIc8temSelect()));
+}
+void Main_Ms::ApplyUdpIc8temSelect()
+{
+    if (_ic8tem_select_.isEmpty()) return;
+    THvTxW->SetIc8temSelect(_ic8tem_select_);
+    _ic8tem_select_.clear();
 }
 void Main_Ms::SetUdpConfigure(int imode)//2.76.7
 {

@@ -272,6 +272,7 @@ HvTxW::HvTxW(QString inst,QString path,int lid,bool f,int x,int y,QWidget * pare
     connect(TRadioAndNetW,SIGNAL(FindLocFromDB(QString)),this,SLOT(ExternalFindLocFromDB(QString)));
     connect(TRadioAndNetW,SIGNAL(EmitUdpCmdDl(QStringList)),this,SIGNAL(EmitUdpCmdDl(QStringList)));
     connect(TRadioAndNetW,SIGNAL(EmitUdpConfigure(int)),this,SIGNAL(EmitUdpConfigure(int)));
+    connect(TRadioAndNetW,SIGNAL(EmitUdpIc8temSelect(QStringList)),this,SIGNAL(EmitUdpIc8temSelect(QStringList)));//IC8TEM mod
     connect(TRadioAndNetW,SIGNAL(EmitUdpCmdStop(bool)),this,SIGNAL(EmitUdpCmdStop(bool)));
     connect(TRadioAndNetW,SIGNAL(EmitOpenRadNetWToRecon()),this,SLOT(NetW_exec()));
     connect(TRadioAndNetW,SIGNAL(EmitOtpTxKey(QString)),this,SIGNAL(EmitOtpTxKey(QString)));//2.76sf
@@ -2173,6 +2174,25 @@ void HvTxW::SetDoQRG(QString s,QString all_txt)//2.71
     SetDefFreqGlobal(3,newqrg);//2.74 0=mybe frq,no mod, 1=mybe frq,mod, 2=frq,mod, 3=frq,no mod
 }
 //#include <unistd.h>//usleep x86_64
+// IC8TEM mod: MSK144-WB asks for a QSO with a station it decoded somewhere in its 96 kHz window.
+// l = [message, hhmmss, snr, dial Hz, tx 0/1]. The rig goes to the dial frequency (the transverter
+// offset of the Rig Control is applied as for any other frequency change), then the message is
+// handled exactly like a double click on it in the decode list: his call, locator, report, the
+// TX period opposite to his and, when tx = 1, Auto Seq / TX on.
+void HvTxW::SetIc8temSelect(QStringList l)
+{
+    if (l.count() < 5 || s_mode != 0) return; // MSK144 only (Main_Ms switches the mode first)
+    QString msg = l.at(0);
+    QString frq = l.at(3);
+    if (frq.toLongLong() > 0) SetDefFreqGlobal(3,frq); // 3 = frequency, no rig mode change
+    QString rpt = l.at(2);
+    int snr = rpt.toInt();
+    rpt = QString("%1%2").arg(snr < 0 ? "-" : "+").arg(qAbs(snr),2,10,QChar('0'));
+    bool prev_auto = s_2click_list_autu_on;
+    s_2click_list_autu_on = (l.at(4) == "1");
+    DecListTextAll(msg,msg,l.at(1),rpt,"");
+    s_2click_list_autu_on = prev_auto;
+}
 void HvTxW::DecListTextAll(QString all_txt,QString str,QString tp,QString tx_rpt,QString freq)
 {
     //qDebug()<<all_txt<<str<<tp<<tx_rpt<<freq;

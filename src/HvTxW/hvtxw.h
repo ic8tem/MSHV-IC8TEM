@@ -312,6 +312,7 @@ public slots:
     void SetButClrQueuedCall(); 
     void SetDoQRG(QString,QString);
     void DecListTextAll(QString,QString,QString,QString,QString);
+    void SetIc8temSelect(QStringList);//IC8TEM mod: QSY + his call + TX from MSK144-WB
     void DecListTextRpt(QString);
     //void DecListTimePeriod(QString,int,QString);
     void GenTestTones();
@@ -392,6 +393,7 @@ signals:
     void EmitMAMCalls(QStringList);
     void EmitUdpCmdDl(QStringList);
     void EmitUdpConfigure(int);//2.76.7
+    void EmitUdpIc8temSelect(QStringList);//IC8TEM mod
     void EmitUdpCmdStop(bool);
     void EmitQrgParms(QString s,bool f);//2.45 
     void EmitQrgQSY(QStringList);//2.46 

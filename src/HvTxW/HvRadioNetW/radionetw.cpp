@@ -1658,6 +1658,7 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     connect(m_messageClientBroad, SIGNAL(replay()), this, SLOT(replayDecodes()));
     connect(m_messageClientBroad, SIGNAL(reply_clr(QStringList)), this, SLOT(set_reply_clr(QStringList)));
     connect(m_messageClientBroad, SIGNAL(configure(QStringList)), this, SLOT(set_configure(QStringList)));
+    connect(m_messageClientBroad, SIGNAL(ic8tem_select(QStringList)), this, SLOT(set_ic8tem_select(QStringList)));//IC8TEM mod
     connect(m_messageClientBroad, SIGNAL(halt_tx(bool)), this, SLOT(set_halt_tx(bool)));
     connect(m_messageClientBroad, SIGNAL(ConectionInfo(QString)), this, SLOT(ConectionInfoBroad(QString)));
     connect(cb_udp_broad_log_qso, SIGNAL(toggled(bool)), this, SLOT(StartStopUdpBroad(bool)));
@@ -3620,6 +3621,11 @@ void RadioAndNetW::set_reply_clr(QStringList l)
 {
     //qDebug()<<"f_mods_accept_cmd"<<f_mods_accept_cmd<<l;
     if (f_mods_accept_cmd || l.at(0)=="CLR") emit EmitUdpCmdDl(l);
+}
+void RadioAndNetW::set_ic8tem_select(QStringList l)//IC8TEM mod
+{
+    // MSK144-WB: [message, hhmmss, snr, dial Hz, tx 0/1]. Accepted like the WSJT-X Reply command.
+    if (l.count() >= 5) emit EmitUdpIc8temSelect(l);
 }
 void RadioAndNetW::set_configure(QStringList l)//2.76.7
 {

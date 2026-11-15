@@ -96,6 +96,8 @@ private slots:
     void SetButtonDecodeAll65();
     void SetUdpCmdStop(bool);
     void SetUdpConfigure(int);//2.76.7
+    void SetUdpIc8temSelect(QStringList);//IC8TEM mod
+    void ApplyUdpIc8temSelect();//IC8TEM mod
     void SetDLogQso(bool);
     void SetPLogQso(bool);
     void SetQrgQSY(QStringList);//2.46 
