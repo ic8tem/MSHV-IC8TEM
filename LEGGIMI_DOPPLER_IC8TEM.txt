@@ -130,8 +130,8 @@ ALTRE MODIFICHE (versione 2)
    FSK441/FSK315/JTMS (ms) e JT6M (secondi) hanno gia' la colonna Width.
 9) Icom LAN (dalla 2.76.7-ic8tem.4)
    IC-7300MK2, IC-705, IC-9700, IC-7610, IC-905 collegati via rete con CAT e audio,
-   senza cavo USB. Rig Control: "Icom IC-7300MK2 LAN", Server = IP della radio,
-   Port 50001, LAN User e Password = utente di rete creato sulla radio.
+   senza cavo USB. Rig Control: "Icom LAN" (unica voce), Server = IP della radio,
+   Port 50001, CI-V Port e Audio Port (vuoti = 50002 e 50003), LAN User e Password = utente di rete creato sulla radio.
    Sound: "Icom LAN Input" e "Icom LAN Output". Sulla radio: Network Control ON,
    DATA MOD = LAN. Guida completa: docs/ICOM_LAN.md. Riconoscimenti: README.
 10) Aggiornamenti automatici (dalla 2.76.7-ic8tem.6)

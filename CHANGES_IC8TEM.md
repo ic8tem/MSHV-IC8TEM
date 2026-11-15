@@ -70,3 +70,7 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 
 ## 2026-11-15 — 2.76.7-ic8tem.7
 * macOS: the app did not start on some Macs ("Could not load the Qt platform plugin cocoa": `libbrotlicommon.1.dylib` missing — macdeployqt does not follow `@rpath` dependencies). New `packaging/macos/fix_bundle.sh` copies every missing Homebrew library into the bundle and stops the build if any reference still points outside the app.
+
+## 2026-11-15 — 2.76.7-ic8tem.8
+* Icom LAN: one rig entry **Icom LAN** instead of five models; the CI-V address announced by the radio at login selects the Icom model (`Icom::ModelFromCivAddr`). Old names `Icom IC-xxxx LAN` in the settings are mapped to it.
+* Icom LAN: **CI-V Port** and **Audio Port** fields in Rig Control (empty = control port + 1 / + 2), saved with the network settings.

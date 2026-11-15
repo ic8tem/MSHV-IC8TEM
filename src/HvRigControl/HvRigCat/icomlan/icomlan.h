@@ -77,9 +77,10 @@ public:
 signals:
     void CivReceived(QByteArray);
     void Status(QString,int);   // 0 disconnected, 1 connecting, 2 connected
+    void RadioInfo(QString,int); // radio name, CI-V address announced by the radio
 
 public slots:
-    void Start(QString host,int port,QString user,QString pass);
+    void Start(QString host,int port,QString user,QString pass,int civ_port,int audio_port);
     void Stop();
     void SendCiv(QByteArray);
     void SetTxKeyed(bool);
@@ -95,6 +96,8 @@ private slots:
 private:
     QString s_host;
     int s_port;
+    int s_civ_port;
+    int s_audio_port;
     QString s_user;
     QString s_pass;
     QHostAddress addr;
@@ -180,7 +183,7 @@ signals:
     // internal
     void IcomCmd(CmdID,ptt_t,QString);
     void IcomRead(QByteArray,int);
-    void CoreStart(QString,int,QString,QString);
+    void CoreStart(QString,int,QString,QString,int,int);
     void CoreStop();
     void CoreSendCiv(QByteArray);
     void CoreKey(bool);
@@ -195,10 +198,13 @@ private slots:
     void CivFromIcom(char*,int);
     void CivFromCore(QByteArray);
     void CoreStatus(QString,int);
+    void CoreRadioInfo(QString,int);
     void Quit();
 
 private:
     int s_ModelID;
+    int s_icom_model;
+    void MakeIcom(int im);
     Icom *icom;
     IcomLanCore *core;
     QThread thr;

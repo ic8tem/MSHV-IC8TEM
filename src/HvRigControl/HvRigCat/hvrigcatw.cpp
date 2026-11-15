@@ -798,6 +798,7 @@ void HvRigCat::PttChanget(bool)
 }*/
 void HvRigCat::SetRigName(QString s)//from read settings
 {
+    if (s.startsWith("Icom IC-") && s.endsWith(" LAN")) s = "Icom LAN";//IC8TEM ic8tem.4-.7 names
     int index = RigsBoxs->findText(s, Qt::MatchCaseSensitive);
     if (index >= 0)
     {

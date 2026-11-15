@@ -14,6 +14,7 @@ class Icom : public QWidget
 {
     Q_OBJECT
 public:
+    static int ModelFromCivAddr(int addr,const QString &hint);//IC8TEM Icom LAN: model index from the CI-V address
     Icom(int ModelID,QWidget *parent = 0);
     virtual ~Icom();
 

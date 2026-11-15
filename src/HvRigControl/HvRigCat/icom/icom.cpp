@@ -111,6 +111,17 @@ static const addr_newm icom_addr_newm[ICOM_COUNT] =
         /*Xiegu X6100*/{0xa4,true},//0x70 ?
         /*Xiegu X6200*/{0xa4,true} // ?
     };
+int Icom::ModelFromCivAddr(int addr,const QString &hint)//IC8TEM Icom LAN
+{
+    int first = -1;
+    for (int i = 0; i < ICOM_COUNT; ++i)
+    {
+        if ((int)(unsigned char)icom_addr_newm[i].addr != addr) continue;
+        if (!hint.isEmpty() && hint.contains(QString(rigs_icom[i].name), Qt::CaseInsensitive)) return i;
+        if (first < 0) first = i;
+    }
+    return first;
+}
 Icom::Icom(int ModelID,QWidget *parent)
         : QWidget(parent)
 {

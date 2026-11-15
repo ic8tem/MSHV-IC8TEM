@@ -217,6 +217,8 @@ IcomLanCore::IcomLanCore()
     connected = false;
     attempts = 0;
     s_port = 50001;
+    s_civ_port = 50002;
+    s_audio_port = 50003;
     tick = new QTimer(this);
     txtick = new QTimer(this);
     txtick->setTimerType(Qt::PreciseTimer);
@@ -249,10 +251,12 @@ qint64 IcomLanCore::Now()
 {
     return clock.elapsed();
 }
-void IcomLanCore::Start(QString host,int port,QString user,QString pass)
+void IcomLanCore::Start(QString host,int port,QString user,QString pass,int civ_port,int audio_port)
 {
     s_host = host.trimmed();
     s_port = (port > 0 && port < 65534) ? port : 50001;
+    s_civ_port = (civ_port > 0 && civ_port < 65536) ? civ_port : s_port + 1;      // empty = control + 1
+    s_audio_port = (audio_port > 0 && audio_port < 65536) ? audio_port : s_port + 2;// empty = control + 2
     s_user = user;
     s_pass = pass;
     if (!IlPasscodeValid(s_user) || !IlPasscodeValid(s_pass))
@@ -331,7 +335,7 @@ void IcomLanCore::Begin()
     il_tx_keyed.storeRelease(0);
     rx_frac = 0.0;
     for (int i = 0; i < 4; ++i) rx_x[i] = 0.0;
-    bool ok = BindStream(0,(quint16)s_port) && BindStream(1,(quint16)(s_port+1)) && BindStream(2,(quint16)(s_port+2));
+    bool ok = BindStream(0,(quint16)s_port) && BindStream(1,(quint16)s_civ_port) && BindStream(2,(quint16)s_audio_port);
     if (!ok)
     {
         CloseAll(false);
@@ -344,7 +348,7 @@ void IcomLanCore::Begin()
     StartStream(0);
     tick->start(20);
     txtick->start(5);
-    emit Status(tr("Connecting to")+" "+s_host+" "+tr("Port")+" "+QString("%1").arg(s_port)+
+    emit Status(tr("Connecting to")+" "+s_host+" "+tr("Ports")+" "+QString("%1/%2/%3").arg(s_port).arg(s_civ_port).arg(s_audio_port)+
                 (attempts>0 ? "  "+tr("Try")+": "+QString("%1").arg(attempts+1) : QString()),1);
 }
 void IcomLanCore::CloseAll(bool polite)
@@ -790,6 +794,7 @@ void IcomLanCore::MediaReady()
     attempts = 0;
     il_alive.storeRelease(1);
     QString nm = QString::fromLatin1(radio_name);
+    emit RadioInfo(nm,radio_civ_addr);
     emit Status(tr("Connected to")+" "+s_host+(nm.isEmpty() ? QString() : " ("+nm+")"),2);
 }
 void IcomLanCore::SendCiv(QByteArray civ)
@@ -985,38 +990,28 @@ void IcomLanCore::Tick()
 }
 
 // ---------------------------------------------------------------- rig (GUI side)
-static const char *il_serial_names[ICOMLAN_COUNT] = {"IC-7300MK2","IC-705","IC-9700","IC-7610","IC-905"};
 IcomLanRig::IcomLanRig(int ModelID,QWidget *parent)
         : QWidget(parent)
 {
     s_ModelID = ModelID;
     running = false;
     quit_done = false;
-    int idx = ModelID - ICOMLAN_FIRST;
-    QString serial = (idx >= 0 && idx < ICOMLAN_COUNT) ? QString(il_serial_names[idx]) : QString("IC-7300MK2");
-    int im = 0;
-    for (int i = 0; i < ICOM_COUNT; ++i)
-    {
-        if (QString(rigs_icom[i].name)==serial)
-        {
-            im = i;
-            break;
-        }
-    }
-    icom = new Icom(im);
-    connect(this, SIGNAL(IcomCmd(CmdID,ptt_t,QString)), icom, SLOT(SetCmd(CmdID,ptt_t,QString)));
-    connect(icom, SIGNAL(EmitWriteCmd(char*,int)), this, SLOT(CivFromIcom(char*,int)), Qt::DirectConnection);
-    connect(this, SIGNAL(IcomRead(QByteArray,int)), icom, SLOT(SetReadyRead(QByteArray,int)));
-    connect(icom, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SIGNAL(EmitReadedInfo(CmdID,QString)));
+    // One entry for every Icom radio with LAN: the CI-V commands follow the
+    // CI-V address the radio announces at login (IC-7300MK2 until then).
+    icom = 0;
+    s_icom_model = -1;
+    int im = Icom::ModelFromCivAddr(0xB6,"IC-7300MK2");
+    MakeIcom(im < 0 ? 0 : im);
 
     core = new IcomLanCore();
     core->moveToThread(&thr);
-    connect(this, SIGNAL(CoreStart(QString,int,QString,QString)), core, SLOT(Start(QString,int,QString,QString)));
+    connect(this, SIGNAL(CoreStart(QString,int,QString,QString,int,int)), core, SLOT(Start(QString,int,QString,QString,int,int)));
     connect(this, SIGNAL(CoreStop()), core, SLOT(Stop()));
     connect(this, SIGNAL(CoreSendCiv(QByteArray)), core, SLOT(SendCiv(QByteArray)));
     connect(this, SIGNAL(CoreKey(bool)), core, SLOT(SetTxKeyed(bool)));
     connect(core, SIGNAL(CivReceived(QByteArray)), this, SLOT(CivFromCore(QByteArray)));
     connect(core, SIGNAL(Status(QString,int)), this, SLOT(CoreStatus(QString,int)));
+    connect(core, SIGNAL(RadioInfo(QString,int)), this, SLOT(CoreRadioInfo(QString,int)));
     thr.start(QThread::TimeCriticalPriority);
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(Quit()));
 }
@@ -1024,7 +1019,29 @@ IcomLanRig::~IcomLanRig()
 {
     Quit();
     delete core;
-    delete icom;
+    if (icom) delete icom;
+}
+void IcomLanRig::MakeIcom(int im)
+{
+    if (icom && im==s_icom_model) return;
+    if (icom)
+    {
+        icom->disconnect();
+        this->disconnect(icom);
+        icom->deleteLater();
+    }
+    s_icom_model = im;
+    icom = new Icom(im);
+    connect(this, SIGNAL(IcomCmd(CmdID,ptt_t,QString)), icom, SLOT(SetCmd(CmdID,ptt_t,QString)));
+    connect(icom, SIGNAL(EmitWriteCmd(char*,int)), this, SLOT(CivFromIcom(char*,int)), Qt::DirectConnection);
+    connect(this, SIGNAL(IcomRead(QByteArray,int)), icom, SLOT(SetReadyRead(QByteArray,int)));
+    connect(icom, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SIGNAL(EmitReadedInfo(CmdID,QString)));
+}
+void IcomLanRig::CoreRadioInfo(QString name,int addr)
+{
+    if (addr <= 0) return;
+    int im = Icom::ModelFromCivAddr(addr,name);
+    if (im >= 0) MakeIcom(im);
 }
 void IcomLanRig::Quit()
 {
@@ -1044,6 +1061,8 @@ void IcomLanRig::ConnectNet(QString all)
     s_port = l.value(1).trimmed();
     QString user = l.value(7);
     QString pass = l.value(8);
+    int civ_port = l.value(9).trimmed().toInt();      // 0 = control port + 1
+    int audio_port = l.value(10).trimmed().toInt();   // 0 = control port + 2
     if (running)
     {
         running = false;
@@ -1053,7 +1072,7 @@ void IcomLanRig::ConnectNet(QString all)
     }
     running = true;
     emit EmitNetConnInfo("<font color='red'>"+tr("Connecting to")+" "+s_host+" "+tr("Port")+" "+s_port+"</font>",true,false);
-    emit CoreStart(s_host,s_port.toInt(),user,pass);
+    emit CoreStart(s_host,s_port.toInt(),user,pass,civ_port,audio_port);
 }
 void IcomLanRig::SetOnOffCatCommand(bool f,int model_id,int fact_id)
 {

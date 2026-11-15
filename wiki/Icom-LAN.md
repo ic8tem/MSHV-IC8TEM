@@ -23,12 +23,12 @@ Consigliato: impostate anche il **timeout di trasmissione** della radio (TOT): s
 
 ## 2. Impostazioni in MSHV
 
-1. **Options › Rig Control**: RIG = **Icom IC-7300MK2 LAN** (o il vostro modello `… LAN`).
-2. Nel riquadro **Network**: *Server* = indirizzo IP della radio, *Port* = 50001, *LAN User* e *Password* = l'utente creato sulla radio. Premete **Connect**: la scritta diventa verde "Connected to …".
+1. **Options › Rig Control**: RIG = **Icom LAN**. È una sola voce per tutte le radio: il modello (cioè l'indirizzo CI-V) viene riconosciuto da solo, perché la radio lo comunica al collegamento.
+2. Nel riquadro **Network**: *Server* = indirizzo IP della radio, *Port* = porta di controllo (50001), *LAN User* e *Password* = l'utente creato sulla radio, *CI-V Port* e *Audio Port* = porte seriale e audio della radio (vuoti = porta di controllo +1 e +2, cioè 50002 e 50003). Premete **Connect**: la scritta diventa verde "Connected to …".
 3. PTT: **PTT** (via CAT).
 4. **Options › Sound Settings**: Input = **Icom LAN Input**, Output = **Icom LAN Output**.
 
-Le porte CI-V e audio sono quella di controllo +1 e +2 (50002, 50003).
+Le tre porte devono essere uguali a quelle del menu di rete della radio (Control, Serial, Audio). Se passate da un router con inoltro di porte, indicate quelle inoltrate.
 
 ## 3. Cosa fa
 
@@ -58,4 +58,4 @@ Il protocollo di rete Icom non è documentato da Icom. Il codice di MSHV-IC8TEM 
 
 ## English summary
 
-Rig Control → `Icom IC-7300MK2 LAN` (or IC-705/IC-9700/IC-7610/IC-905 LAN), Server = radio IP, Port = 50001, LAN User / Password = a network user created on the radio. Sound → `Icom LAN Input` / `Icom LAN Output`. On the radio: Network Control ON, DATA MOD = LAN. CAT and 48 kHz audio both ways; FSK441/JTMS/JT6M/ISCAT are resampled to 44.1 kHz. One LAN session at a time. Tested against a protocol simulator; please report results on real radios.
+Rig Control → `Icom LAN` (one entry, the radio model is detected from its CI-V address), Server = radio IP, Port = 50001, CI-V Port / Audio Port (empty = 50002 / 50003), LAN User / Password = a network user created on the radio. Sound → `Icom LAN Input` / `Icom LAN Output`. On the radio: Network Control ON, DATA MOD = LAN. CAT and 48 kHz audio both ways; FSK441/JTMS/JT6M/ISCAT are resampled to 44.1 kHz. One LAN session at a time. Tested against a protocol simulator; please report results on real radios.

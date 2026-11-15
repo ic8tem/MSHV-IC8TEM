@@ -4,6 +4,7 @@
  */
 #define _BANDS_H_
 #include "hvrigcontrol.h"
+#include <QIntValidator>//IC8TEM
 #if defined _MACOS_
 #include <QTime>
 #include "../mshv_txtrace.h"   // MSHV_TXTRACE=1: LZ2HV asked for prints at SetPtt() and TimerTryStaticTxF()
@@ -48,6 +49,8 @@ struct netSP
 static netSP netServPort[NETWORK_COUNT];
 static QString netLanUser[NETWORK_COUNT];//IC8TEM Icom LAN
 static QString netLanPass[NETWORK_COUNT];//IC8TEM Icom LAN
+static QString netLanCiv[NETWORK_COUNT];//IC8TEM Icom LAN CI-V port, empty = control port + 1
+static QString netLanAud[NETWORK_COUNT];//IC8TEM Icom LAN audio port, empty = control port + 2
 static QString LanPassEnc(const QString &p)
 {
     return "b64:"+QString::fromLatin1(p.toUtf8().toBase64());
@@ -303,6 +306,22 @@ HvRigControl::HvRigControl( QWidget *parent )
     le_lanpass->setEchoMode(QLineEdit::Password);
     connect(le_lanuser, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
     connect(le_lanpass, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
+    l_lanciv = new QLabel(tr("CI-V Port")+":");
+    le_lanciv = new QLineEdit();
+    le_lanciv->setMaxLength(5);
+    le_lanciv->setFixedWidth(70);
+    le_lanciv->setValidator(new QIntValidator(1,65535,this));
+    le_lanciv->setPlaceholderText(tr("Port")+"+1");
+    le_lanciv->setToolTip(tr("UDP port of the CI-V (serial) stream of the radio. Empty = control port + 1 (50002)"));
+    l_lanaud = new QLabel(tr("Audio Port")+":");
+    le_lanaud = new QLineEdit();
+    le_lanaud->setMaxLength(5);
+    le_lanaud->setFixedWidth(70);
+    le_lanaud->setValidator(new QIntValidator(1,65535,this));
+    le_lanaud->setPlaceholderText(tr("Port")+"+2");
+    le_lanaud->setToolTip(tr("UDP port of the audio stream of the radio. Empty = control port + 2 (50003)"));
+    connect(le_lanciv, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
+    connect(le_lanaud, SIGNAL(textChanged(QString)), this, SLOT(TCPSPChanged(QString)));
 
     l_con_info = new QLabel("<font color='red'>"+tr("Disconnected")+"</font>");
     QLabel *l_server = new QLabel(tr("Server")+":");
@@ -425,6 +444,19 @@ HvRigControl::HvRigControl( QWidget *parent )
     le_lanuser->setHidden(true);
     l_lanpass->setHidden(true);
     le_lanpass->setHidden(true);
+    QHBoxLayout *H_lan2 = new QHBoxLayout();//IC8TEM Icom LAN ports
+    H_lan2->setContentsMargins(0,0,0,0);
+    H_lan2->setSpacing(4);
+    H_lan2->addWidget(l_lanciv);
+    H_lan2->addWidget(le_lanciv);
+    H_lan2->addWidget(l_lanaud);
+    H_lan2->addWidget(le_lanaud);
+    H_lan2->setAlignment(Qt::AlignLeft);
+    V_net->addLayout(H_lan2);
+    l_lanciv->setHidden(true);
+    le_lanciv->setHidden(true);
+    l_lanaud->setHidden(true);
+    le_lanaud->setHidden(true);
     gb_net = new QGroupBox(tr("Network")+":");
     gb_net->setLayout(V_net);
     gb_net->setEnabled(false);
@@ -1092,7 +1124,12 @@ void HvRigControl::SetNetRigSrvPort(QString s)
             netServPort[i].serv = ls0.at(0);
             netServPort[i].port = ls0.at(1);
         }
-        if (ls0.count()==4 && i>=ICOMLAN_FIRST)//IC8TEM Icom LAN
+        if (ls0.count()==6 && i>=ICOMLAN_FIRST)//IC8TEM Icom LAN ports
+        {
+            netLanCiv[i] = ls0.at(4);
+            netLanAud[i] = ls0.at(5);
+        }
+        if ((ls0.count()==4 || ls0.count()==6) && i>=ICOMLAN_FIRST)//IC8TEM Icom LAN
         {
             netServPort[i].serv = ls0.at(0);
             netServPort[i].port = ls0.at(1);
@@ -1123,7 +1160,7 @@ QString HvRigControl::net_rig_srv_port()
         if (i==3 || i==4) out.append(";"+QString("%1").arg(netTciChSmp[i-3].channels)+";"+
                                          netTciChSmp[i-3].samples+";"+QString("%1").arg(netTciChSmp[i-3].type)+";"+
                                          netTciChSmp[i-3].srate+";"+QString("%1").arg(netTciChSmp[i-3].txbuff));
-        if (i>=ICOMLAN_FIRST) out.append(";"+QString(netLanUser[i]).remove(";").remove("#")+";"+LanPassEnc(netLanPass[i]));//IC8TEM
+        if (i>=ICOMLAN_FIRST) out.append(";"+QString(netLanUser[i]).remove(";").remove("#")+";"+LanPassEnc(netLanPass[i])+";"+netLanCiv[i]+";"+netLanAud[i]);//IC8TEM
         if (i<NETWORK_COUNT-1) out.append("#");
     }
     return out;
@@ -1139,6 +1176,8 @@ void HvRigControl::TCPSPChanged(QString)
         {
             netLanUser[s_net_model_id] = le_lanuser->text();
             netLanPass[s_net_model_id] = le_lanpass->text();
+            netLanCiv[s_net_model_id] = le_lanciv->text();
+            netLanAud[s_net_model_id] = le_lanaud->text();
         }
         if (s_net_model_id==3 || s_net_model_id==4)
         {
@@ -1156,7 +1195,7 @@ void HvRigControl::SetNetConnect()
     QString s = TCPServer->text()+"#"+TCPPort->text()+"#"+tci_channels->currentText()+"#"+
                 tci_samples->currentText()+"#"+tci_tcistype->currentText()+"#"+tci_rample_rate->currentText()+"#"+
                 QString("%1").arg(tci_tx_buff->value());
-    s.append("#"+le_lanuser->text()+"#"+le_lanpass->text());//IC8TEM Icom LAN fields 7 and 8
+    s.append("#"+le_lanuser->text()+"#"+le_lanpass->text()+"#"+le_lanciv->text()+"#"+le_lanaud->text());//IC8TEM Icom LAN fields 7-10
     emit EmitNetSP(s);//TCPServer->text(),TCPPort->text(),tci_channels->currentText(),tci_samples->currentText());
 }
 void HvRigControl::SetLanFieldsEnabled(bool f)//IC8TEM Icom LAN
@@ -1165,6 +1204,10 @@ void HvRigControl::SetLanFieldsEnabled(bool f)//IC8TEM Icom LAN
     le_lanuser->setEnabled(f);
     l_lanpass->setEnabled(f);
     le_lanpass->setEnabled(f);
+    l_lanciv->setEnabled(f);
+    le_lanciv->setEnabled(f);
+    l_lanaud->setEnabled(f);
+    le_lanaud->setEnabled(f);
 }
 void HvRigControl::SetNetConnInfo(QString s,bool f1,bool f2)
 {
@@ -1661,6 +1704,10 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
     le_lanuser->setHidden(true);
     l_lanpass->setHidden(true);
     le_lanpass->setHidden(true);
+    l_lanciv->setHidden(true);
+    le_lanciv->setHidden(true);
+    l_lanaud->setHidden(true);
+    le_lanaud->setHidden(true);
     if (sett.port_type==RIG_PORT_NETWORK)
     {
         if (s_net_model_id>-1 && s_net_model_id<NETWORK_COUNT)
@@ -1675,6 +1722,12 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
                 le_lanuser->setHidden(false);
                 l_lanpass->setHidden(false);
                 le_lanpass->setHidden(false);
+                le_lanciv->setText(netLanCiv[s_net_model_id]);
+                le_lanaud->setText(netLanAud[s_net_model_id]);
+                l_lanciv->setHidden(false);
+                le_lanciv->setHidden(false);
+                l_lanaud->setHidden(false);
+                le_lanaud->setHidden(false);
             }
             if (s_net_model_id==3 || s_net_model_id==4)
             {

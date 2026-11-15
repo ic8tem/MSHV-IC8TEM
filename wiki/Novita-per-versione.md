@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.8
+* Icom LAN: una sola voce **Icom LAN** per tutte le radio (il modello si riconosce dall'indirizzo CI-V); campi **CI-V Port** e **Audio Port** per cambiare le porte UDP.
+
 ## 2.76.7-ic8tem.7
 * macOS: corretto l'avvio (mancava una libreria nel pacchetto, l'app si chiudeva subito). Chi ha la 2.76.7-ic8tem.6 su Mac deve installare questa a mano.
 

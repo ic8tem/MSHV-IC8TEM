@@ -246,6 +246,10 @@ private:
     QLineEdit *le_lanuser;
     QLabel *l_lanpass;
     QLineEdit *le_lanpass;
+    QLabel *l_lanciv;
+    QLineEdit *le_lanciv;
+    QLabel *l_lanaud;
+    QLineEdit *le_lanaud;
     void SetLanFieldsEnabled(bool);
 #if defined _WIN32_
     QStringList StrListToUpper(QStringList lst);
