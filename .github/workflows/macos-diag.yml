@@ -1,0 +1,46 @@
+name: macOS diagnostics
+# Opens the published macOS dmg on a GitHub macOS machine and starts MSHV with
+# Qt plugin debugging, to find start-up problems.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: release tag
+        required: true
+jobs:
+  diag:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: apple-silicon
+            runner: macos-15
+          - arch: intel
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Download and inspect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          T="${{ inputs.tag }}"; V="${T#v}"
+          gh release download "$T" -R "${{ github.repository }}" -p "MSHV-IC8TEM-$V-macos-${{ matrix.arch }}.dmg"
+          M=$(mktemp -d); hdiutil attach -nobrowse -mountpoint "$M" *.dmg
+          ls -la "$M"
+          APP=$(ls -d "$M"/*.app | head -1); echo "APP=$APP"
+          cp -R "$APP" ./Test.app
+          find Test.app -maxdepth 3 | head -80
+          cat Test.app/Contents/Resources/qt.conf || echo "NO qt.conf"
+          ls -la Test.app/Contents/PlugIns/platforms || echo "NO platforms dir"
+          otool -L Test.app/Contents/PlugIns/platforms/libqcocoa.dylib || true
+          otool -l Test.app/Contents/MacOS/MSHV | grep -A2 LC_RPATH || true
+          codesign -dv --verbose=2 Test.app 2>&1 || true
+          codesign --verify --deep --strict --verbose=2 Test.app 2>&1 || true
+          ls Test.app/Contents/Frameworks
+      - name: Start MSHV with plugin debug
+        run: |
+          export QT_DEBUG_PLUGINS=1
+          ( Test.app/Contents/MacOS/MSHV > run.log 2>&1 & echo $! > pid ); sleep 20
+          kill $(cat pid) 2>/dev/null || true
+          cat run.log | head -150
