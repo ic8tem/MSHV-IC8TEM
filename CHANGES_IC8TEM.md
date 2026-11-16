@@ -100,5 +100,6 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * Translations of the new strings in the 15 MSHV languages.
 
 ## 2026-11-16 — ic8tem.13
+* `src/HvTxW/HvLogW/hvlogw.cpp` — no limit on the number of QSOs in the Log (CheckLogCount warning disabled).
 * `src/HvTxW/hvmultianswermodw.*` — "Unlock TX Slots" ON by default; settings saved by older versions start unlocked (new "u1" mark marks the saved choice).
 * `packaging/make_release_body.py` — no download table; `src/HvUpdate/mshv_updater.cpp` — release page link to github.com.

@@ -1,6 +1,7 @@
 # Novità per versione
 
 ## 2.76.7-ic8tem.13
+* **Nessun limite di QSO nel Log**: sparisce l'avviso "The maximum number of QSOs in Log is 50000" e non serve più cancellare i QSO vecchi.
 * **Unlock TX Slots acceso di default** (Multi Answer): TX Slots non viene più bloccato a 1 in FT8/FT4 HF. Anche le impostazioni salvate con le versioni precedenti partono sbloccate; chi vuole i limiti originali toglie la spunta (la scelta poi resta salvata).
 * Pagina delle release senza tabella: i file si scaricano dalla sezione Assets, solo da github.com.
 

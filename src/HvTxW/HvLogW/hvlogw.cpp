@@ -2222,6 +2222,7 @@ static int MAX_LOG_COUNT = 50000; //2.69
 bool d_max_log_count = false;
 void HvLogW::CheckLogCount()
 {
+    return;//IC8TEM mod: no limit on the number of QSOs in the Log (no warning)
     if (d_max_log_count) return;
     d_max_log_count = true;
     if (THvLogList->model.rowCount()>MAX_LOG_COUNT)
