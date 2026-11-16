@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.17
+* Nuova radio **Icom IC-7300 (Hamlib)** per Windows: l'IC-7300 comandato con la libreria Hamlib (frequenza, modo, PTT, potenza, Po/ROS/ALC). Vedi [[IC-7300 con Hamlib|IC-7300-Hamlib]].
+
 ## 2.76.7-ic8tem.16
 * Corretto: **Potenza e ROS** con le Icom collegate via USB (IC-7300, IC-7610...) tramite il CAT di MSHV. La finestra diceva "non disponibile" anche con il CAT attivo, quindi non regolava la potenza e non leggeva Po, ROS e ALC.
 * Icom (USB e LAN): le risposte di frequenza e modo non vengono più scartate quando arrivano in ritardo. Con Icom LAN MSHV restava fermo su una frequenza vecchia.

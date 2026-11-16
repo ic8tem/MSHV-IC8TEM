@@ -878,6 +878,15 @@ void HvPowerSwrW::SetRigInfo(int id,QString s)
         return;
     }
     if (cb_conn->currentIndex() != 0) return;   // own connection in use
+    if (s.startsWith("f:"))   // Hamlib values: fractions 0..1, SWR as a number
+    {
+        double v = s.mid(2).toDouble();
+        if (id == READ_RFPOWER) OnRfPct((int)(v * 100.0 + 0.5));
+        else if (id == READ_PO) OnPo(v);
+        else if (id == READ_ALC) OnAlc(v);
+        else if (id == READ_SWR) OnSwr(v);
+        return;
+    }
     int raw = s.toInt();
     if (id == READ_RFPOWER) OnRfPct((int)(raw * 100.0 / 255.0 + 0.5));
     else if (id == READ_PO) OnPo(PoFraction(raw));

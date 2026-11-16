@@ -93,6 +93,8 @@ HEADERS = src/main_ms.h \
  src/HvRigControl/HvRigCat/sdrs/sdrs.h \
  src/HvRigControl/HvRigCat/network/network.h \
  src/HvRigControl/HvRigCat/icomlan/icomlan.h \
+ src/HvRigControl/HvRigCat/hamlibrig/hamlibrig.h \
+ src/HvRigControl/HvRigCat/hamlibrig/hamlib_wrap.h \
  src/HvUpdate/mshv_updater.h \
  src/HvPowerSwr/hvpowerswrw.h \
  src/HvPowerSwr/hvpwrlink.h \
@@ -215,6 +217,8 @@ SOURCES = src/main.cpp \
  src/HvRigControl/HvRigCat/sdrs/sdrs.cpp \
  src/HvRigControl/HvRigCat/network/network.cpp \
  src/HvRigControl/HvRigCat/icomlan/icomlan.cpp \
+ src/HvRigControl/HvRigCat/hamlibrig/hamlibrig.cpp \
+ src/HvRigControl/HvRigCat/hamlibrig/hamlib_wrap.cpp \
  src/HvUpdate/mshv_updater.cpp \
  src/HvPowerSwr/hvpowerswrw.cpp \
  src/HvPowerSwr/hvpwrlink.cpp \

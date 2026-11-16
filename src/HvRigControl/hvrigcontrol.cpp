@@ -282,11 +282,18 @@ HvRigControl::HvRigControl( QWidget *parent )
     netServPort[13].port="4992";		//FlexRadio SmartSDR Slice
     netServPort[14].serv="RIG IP Addr";
     netServPort[14].port="4992";		//FlexRadio SmartSDR Slice H
-    for (int i = ICOMLAN_FIRST; i < NETWORK_COUNT; ++i)//IC8TEM Icom LAN
+    for (int i = ICOMLAN_FIRST; i < ICOMLAN_FIRST+ICOMLAN_COUNT; ++i)//IC8TEM Icom LAN
     {
         netServPort[i].serv="RIG IP Addr";
         netServPort[i].port="50001";
     }
+#if defined HAVE_HAMLIB
+    if (HAMLIB_IC7300 >= 0 && HAMLIB_IC7300 < NETWORK_COUNT)//IC8TEM Icom IC-7300 (Hamlib): serial port and baud rate
+    {
+        netServPort[HAMLIB_IC7300].serv="COM3";
+        netServPort[HAMLIB_IC7300].port="115200";
+    }
+#endif
     //netServPort[15].serv="XXXX";
     //netServPort[15].port="9999";		//XXXX
 
@@ -1126,12 +1133,12 @@ void HvRigControl::SetNetRigSrvPort(QString s)
             netServPort[i].serv = ls0.at(0);
             netServPort[i].port = ls0.at(1);
         }
-        if (ls0.count()==6 && i>=ICOMLAN_FIRST)//IC8TEM Icom LAN ports
+        if (ls0.count()==6 && IS_ICOMLAN(i))//IC8TEM Icom LAN ports
         {
             netLanCiv[i] = ls0.at(4);
             netLanAud[i] = ls0.at(5);
         }
-        if ((ls0.count()==4 || ls0.count()==6) && i>=ICOMLAN_FIRST)//IC8TEM Icom LAN
+        if ((ls0.count()==4 || ls0.count()==6) && IS_ICOMLAN(i))//IC8TEM Icom LAN
         {
             netServPort[i].serv = ls0.at(0);
             netServPort[i].port = ls0.at(1);
@@ -1162,7 +1169,7 @@ QString HvRigControl::net_rig_srv_port()
         if (i==3 || i==4) out.append(";"+QString("%1").arg(netTciChSmp[i-3].channels)+";"+
                                          netTciChSmp[i-3].samples+";"+QString("%1").arg(netTciChSmp[i-3].type)+";"+
                                          netTciChSmp[i-3].srate+";"+QString("%1").arg(netTciChSmp[i-3].txbuff));
-        if (i>=ICOMLAN_FIRST) out.append(";"+QString(netLanUser[i]).remove(";").remove("#")+";"+LanPassEnc(netLanPass[i])+";"+netLanCiv[i]+";"+netLanAud[i]);//IC8TEM
+        if (IS_ICOMLAN(i)) out.append(";"+QString(netLanUser[i]).remove(";").remove("#")+";"+LanPassEnc(netLanPass[i])+";"+netLanCiv[i]+";"+netLanAud[i]);//IC8TEM
         if (i<NETWORK_COUNT-1) out.append("#");
     }
     return out;
@@ -1174,7 +1181,7 @@ void HvRigControl::TCPSPChanged(QString)
     {
         netServPort[s_net_model_id].serv = TCPServer->text();
         netServPort[s_net_model_id].port = TCPPort->text();
-        if (s_net_model_id>=ICOMLAN_FIRST)//IC8TEM Icom LAN
+        if (IS_ICOMLAN(s_net_model_id))//IC8TEM Icom LAN
         {
             netLanUser[s_net_model_id] = le_lanuser->text();
             netLanPass[s_net_model_id] = le_lanpass->text();
@@ -1716,7 +1723,17 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
         {
             TCPServer->setText(netServPort[s_net_model_id].serv);
             TCPPort->setText(netServPort[s_net_model_id].port);
-            if (s_net_model_id>=ICOMLAN_FIRST)//IC8TEM Icom LAN
+            if (s_net_model_id==HAMLIB_IC7300)//IC8TEM Icom IC-7300 (Hamlib)
+            {
+                TCPServer->setToolTip(tr("Hamlib: serial port of the radio, e.g. COM5"));
+                TCPPort->setToolTip(tr("Hamlib: baud rate, e.g. 115200 (as CI-V USB Baud Rate of the radio)"));
+            }
+            else
+            {
+                TCPServer->setToolTip(QString());
+                TCPPort->setToolTip(QString());
+            }
+            if (IS_ICOMLAN(s_net_model_id))//IC8TEM Icom LAN
             {
                 le_lanuser->setText(netLanUser[s_net_model_id]);
                 le_lanpass->setText(netLanPass[s_net_model_id]);

@@ -9,6 +9,7 @@
 * [[Multi Answer TX Slots|Multi-Answer-TX-Slots]]
 * [[Durata del ping MSK144|Durata-ping-MSK144]]
 * [[Icom LAN|Icom-LAN]]
+* [[IC-7300 con Hamlib|IC-7300-Hamlib]]
 * [[Potenza e ROS|Potenza-e-ROS]]
 * [[Aggiornamenti automatici|Aggiornamenti-automatici]]
 * [[Novità per versione|Novita-per-versione]]

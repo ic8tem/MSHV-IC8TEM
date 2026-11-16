@@ -33,6 +33,7 @@
 #include "network/network_def.h"
 #include "network/network.h"
 #include "icomlan/icomlan.h" //IC8TEM Icom LAN
+#include "hamlibrig/hamlibrig.h" //IC8TEM Icom IC-7300 (Hamlib)
 #include "mits/mits_def.h"
 #include "mits/mits.h"
 ////// omnirig /////////////
@@ -627,7 +628,25 @@ void HvRigCat::SetRig(int index)
     }
 #endif
 ////// omnirig end /////////
-    else if (rstruc.facid == NETWORK_ID && rstruc.model >= ICOMLAN_FIRST)//IC8TEM Icom LAN
+    else if (rstruc.facid == NETWORK_ID && rstruc.model == HAMLIB_IC7300)//IC8TEM Icom IC-7300 (Hamlib)
+    {
+        HamlibRig *THamlib = new HamlibRig(rstruc.model);
+        connect(this, SIGNAL(EmitNetSP(QString)), THamlib, SLOT(ConnectNet(QString)));
+        connect(THamlib, SIGNAL(EmitNetConnInfo(QString,bool,bool)), this, SIGNAL(EmitNetConnInfo(QString,bool,bool)));
+        connect(THamlib, SIGNAL(EmitFullRigInfo(QString)), this, SIGNAL(EmitFullRigInfo(QString)));
+        connect(this, SIGNAL(SetCmd(CmdID,ptt_t,QString)), THamlib, SLOT(SetCmd(CmdID,ptt_t,QString)));
+        connect(THamlib, SIGNAL(EmitRigSet(RigSet)), this, SLOT(SetRigSet(RigSet)));
+        connect(this, SIGNAL(DesleteRig()), THamlib, SLOT(deleteLater()));
+        connect(THamlib, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SLOT(SetReadedInfo(CmdID,QString)));
+        connect(this, SIGNAL(EmitOnOffCatCommand(bool,int,int)), THamlib, SLOT(SetOnOffCatCommand(bool,int,int)));
+        have_read_data_rts_on = 3;
+        s_active_model_id = rstruc.model;
+        s_active_fact_id = NETWORK_ID;
+        emit SetCmd(GET_SETT,RIG_PTT_OFF,"");
+        disconnect(THamlib, SIGNAL(EmitRigSet(RigSet)), this, SLOT(SetRigSet(RigSet)));
+        f_rig_activ = true;
+    }
+    else if (rstruc.facid == NETWORK_ID && IS_ICOMLAN(rstruc.model))//IC8TEM Icom LAN
     {
         IcomLanRig *TIcomLan = new IcomLanRig(rstruc.model);
         connect(this, SIGNAL(EmitNetSP(QString)), TIcomLan, SLOT(ConnectNet(QString)));
@@ -892,7 +911,7 @@ void HvRigCat::SetReadedInfo(CmdID i,QString str)
 bool HvRigCat::PwrCapable()//IC8TEM Power & SWR: Icom CI-V (USB) or Icom LAN, CAT running
 {
     if (!s_port_poen || !f_rig_activ) return false;
-    return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && s_active_model_id>=ICOMLAN_FIRST));
+    return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && (IS_ICOMLAN(s_active_model_id) || s_active_model_id==HAMLIB_IC7300)));
 }
 QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
 {
@@ -901,7 +920,8 @@ QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
     QString cat = s_port_poen ? "CAT ON" : "CAT OFF";
     QString kind;
     if (s_active_fact_id==ICOM_ID) kind = "Icom CI-V";
-    else if (s_active_fact_id==NETWORK_ID && s_active_model_id>=ICOMLAN_FIRST) kind = "Icom LAN";
+    else if (s_active_fact_id==NETWORK_ID && IS_ICOMLAN(s_active_model_id)) kind = "Icom LAN";
+    else if (s_active_fact_id==NETWORK_ID && s_active_model_id==HAMLIB_IC7300) kind = "Hamlib";
     else if (s_active_fact_id==11) kind = "OmniRig";//OMNIRIGHV_ID (Windows only header)
     else if (s_active_fact_id==NETWORK_ID) kind = "Network (TCI/Flex/Hamlib...)";
     else kind = "CAT";

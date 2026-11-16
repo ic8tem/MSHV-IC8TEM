@@ -59,6 +59,7 @@ MSHV is free software released under the **GNU General Public License v3** (see 
 | Icom LAN protocol (first open implementation) | kappanhang — Norbert Varga, HA2NON — <https://github.com/nonoo/kappanhang> | MIT | protocol reference |
 | Icom LAN packet primitives | AetherSDR contributors — <https://github.com/aethersdr/AetherSDR> | GPLv3 | protocol reference (credential table, packet sizes) |
 | IC-7300MK2 LAN behaviour (48 kHz LPCM only, big-endian inner sequence for token renewal) and a synthetic MK2 used to test this code | Simon S53ZO — IC7300MK2_Lan_Splitter <https://github.com/s53zo/IC7300MK2_Lan_Splitter> and PiRO <https://github.com/s53zo/piro> | AGPLv3 / GPLv3 | reference and local test only; no code included |
+| Hamlib library (`libhamlib-4.dll`, Windows packages) for "Icom IC-7300 (Hamlib)" | The Hamlib Group — <https://hamlib.github.io> | LGPL v2.1 or later | DLL shipped unchanged in the `hamlib` folder, loaded at run time; licence file next to it |
 | LoTW user activity list (`lotw-user-activity.csv`) | ARRL — <https://lotw.arrl.org> | data file, downloaded by the user | read at run time |
 | Windows installer | Inno Setup — Jordan Russell and Martijn Laan | Inno Setup License | build tool |
 | AppImage | linuxdeploy and Qt plugin — <https://github.com/linuxdeploy> | MIT | build tool |
