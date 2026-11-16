@@ -11,6 +11,7 @@
 #include "mshv_txtrace.h"
 #include "mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
 #include "HvUpdate/mshv_updater.h"//MSHV-IC8TEM automatic updates
+#include "HvPowerSwr/hvpowerswrw.h"//MSHV-IC8TEM Power & SWR
 
 #include <QScreen>
 #include <QWindow>
@@ -66,6 +67,7 @@ static void MshvAddControlKeyTwins(QMenuBar *mb)
 //// Translation ////
 #include <QTranslator>
 QTranslator _translator_;
+QTranslator _translator_ic8tem_;//IC8TEM strings added by MSHV-IC8TEM (ic8tem_<lang>.qm)
 static int lid = 0;
 static int styid = 0;
 void _ReadSSAndSet_()
@@ -130,6 +132,9 @@ void _ReadSSAndSet_()
         if (_translator_.load(istr))
         {
             QApplication::installTranslator(&_translator_);
+            QString istr8 = istr;
+            istr8.replace(":HvTranslations/mshv_",":HvTranslations/ic8tem_");
+            if (_translator_ic8tem_.load(istr8)) QApplication::installTranslator(&_translator_ic8tem_);//IC8TEM
         }
         else lid = 0;
 
@@ -160,6 +165,7 @@ void _ReadSSAndSet_()
 Main_Ms::Main_Ms(QString inst0,QWidget * parent)
         : QWidget(parent)
 {
+    THvPowerSwrW = 0;//IC8TEM Power & SWR
     //printf("--");
     InstName = inst0;
     s_id_set_to_rig = 0;//0<-from App 1<-from Rig
@@ -750,6 +756,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     Start_astro_m = new QAction(tr("View Astronomical Data"),this);
     Start_astro_m->setCheckable(true);
     Option_m->addAction(Start_astro_m);
+    Start_pwrswr_m = new QAction(tr("View Power and SWR"),this);//IC8TEM
+    Start_pwrswr_m->setCheckable(true);
+    Option_m->addAction(Start_pwrswr_m);
 
     Option_m->addSeparator();
 
@@ -802,6 +811,16 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(RadFreqW, SIGNAL(triggered()), THvTxW, SLOT(RadioFreqW_exec()));
 
     connect(Start_astro_m, SIGNAL(toggled(bool)), this, SLOT(ShowCloseAstroW(bool)));
+    THvPowerSwrW = new HvPowerSwrW(App_Path,this);//IC8TEM Power & SWR
+    connect(Start_pwrswr_m, SIGNAL(toggled(bool)), this, SLOT(ShowClosePwrSwrW(bool)));
+    connect(THvPowerSwrW, SIGNAL(EmitClosed()), this, SLOT(SetPwrSwrWIsClosed()));
+    connect(THvPowerSwrW, SIGNAL(EmitRigCmd(int,QString)), THvRigControl, SLOT(SendPwrCmd(int,QString)));
+    connect(THvRigControl, SIGNAL(EmitPwrInfo(int,QString)), THvPowerSwrW, SLOT(SetRigInfo(int,QString)));
+    connect(THvRigControl, SIGNAL(EmitPwrCapable(bool)), THvPowerSwrW, SLOT(SetCapable(bool)));
+    connect(THvRigControl, SIGNAL(EmitGetedFreq(QString)), THvPowerSwrW, SLOT(SetFreqStr(QString)));
+    connect(THvPowerSwrW, SIGNAL(EmitTune()), this, SLOT(Tune()));
+    connect(THvPowerSwrW, SIGNAL(EmitStopTx()), this, SLOT(StopTxGlobal()));
+    if (THvPowerSwrW->WasVisible()) QTimer::singleShot(1500, Start_pwrswr_m, SLOT(toggle()));
     connect(THvTxW, SIGNAL(EmitAstroWIsClosed()), this, SLOT(SetAstroWIsClosed()));
 
     //connect(THvTxW, SIGNAL(EmitLocStInfo(QString,QString,QString)), TRadioAndNetW, SLOT(SetLocalStation(QString,QString,QString)));
@@ -2294,6 +2313,22 @@ void Main_Ms::ShowCloseAstroW(bool f)
         if (!g_block_from_close_app_is_active_astro_w) is_active_astro_w = false;
     }
 }
+void Main_Ms::ShowClosePwrSwrW(bool f)//IC8TEM Power & SWR
+{
+    if (!THvPowerSwrW) return;
+    if (f)
+    {
+        THvPowerSwrW->show();
+        THvPowerSwrW->raise();
+    }
+    else if (THvPowerSwrW->isVisible()) THvPowerSwrW->close();
+}
+void Main_Ms::SetPwrSwrWIsClosed()//IC8TEM
+{
+    Start_pwrswr_m->blockSignals(true);
+    Start_pwrswr_m->setChecked(false);
+    Start_pwrswr_m->blockSignals(false);
+}
 void Main_Ms::SetAstroWIsClosed()
 {
     Start_astro_m->setChecked(false);
@@ -2814,6 +2849,7 @@ void Main_Ms::SetRigTxRx(bool f)
 #endif
 	if (f_tx_busy == f) return;//2.76.7 Protection MAC and PC from bad Machine Clock
     f_tx_busy = f;//2.47  //if (f_tx_busy == f) return;
+    if (THvPowerSwrW) THvPowerSwrW->SetTx(f);//IC8TEM Power & SWR
     THvRigControl->SetPtt(f,0);//id 0=All 1=p1 2=p2
     THvTxW->SetTxRxCountAutoSeq(f);//qDebug()<<"SetRigTxRx...................."<<f;
     if (f)
@@ -3757,6 +3793,17 @@ void Main_Ms::RbThrSetEnabled(bool f)
 void Main_Ms::ModeChanged(bool fg)
 {
     if (!fg) return; //qDebug()<<"Mode"<<fg;
+    if (THvPowerSwrW)//IC8TEM Power & SWR
+    {
+        for (int i = 0; i < COUNT_MODE; ++i)
+        {
+            if (rb_mode[i]->isChecked())
+            {
+                THvPowerSwrW->SetModeName(ModeStr(i));
+                break;
+            }
+        }
+    }
     for (int i = 0; i < 3; ++i) rb_dec_depth[i]->setEnabled(false);
     RbThrSetEnabled(false);
     cb_3intFt_d->setEnabled(false);

@@ -84,6 +84,8 @@ public:
 
     ////////////////////////////////////////////////////////new read com
     void set_freq(QString);
+    void SendPwrCmd(int,QString);//IC8TEM Power & SWR
+    bool PwrCapable();//IC8TEM
     void SetReadyRead(QByteArray,int);
     void StartStopPollingTimer(bool popen);/*, bool read_data_rts_on*/
     void set_mode(QString);
@@ -118,6 +120,8 @@ signals:
     ////////////////////////////////////////////////////////new read com
     void EmitReadyRead(QByteArray,int);
     void EmitGetedFreq(QString);
+    void EmitPwrInfo(int,QString);//IC8TEM Power & SWR
+    void EmitPwrCapable(bool);//IC8TEM
     void EmitGetedMode(QString);
     void EmitOnOffCatCommand(bool,int,int);
     void EmitRigCatActiveAndReadF(bool);

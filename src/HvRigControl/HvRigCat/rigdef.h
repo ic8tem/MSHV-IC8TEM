@@ -76,6 +76,13 @@ typedef enum
     GET_FREQ,
     SET_MODE,
     GET_MODE,          
+    SET_RFPOWER,    //IC8TEM Power & SWR: str = level 0-255
+    GET_RFPOWER,    //IC8TEM
+    GET_METERS,     //IC8TEM read Po, SWR, ALC
+    READ_RFPOWER,   //IC8TEM answers (EmitReadedInfo), raw 0-255
+    READ_PO,
+    READ_SWR,
+    READ_ALC,
 }CmdID;
 
 #endif

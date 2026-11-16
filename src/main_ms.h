@@ -5,6 +5,7 @@
 #ifndef MAIN_MS_H
 #define MAIN_MS_H
 
+#include "HvPowerSwr/hvpowerswrw.h"//IC8TEM Power & SWR
 #include "config.h"
 
 #include <QWidget>
@@ -70,6 +71,8 @@ private slots:
     void SetShowMskWidthColl(bool);//IC8TEM
     void SetTwoDecList(bool f);
     void ShowCloseAstroW(bool);
+    void ShowClosePwrSwrW(bool);//IC8TEM
+    void SetPwrSwrWIsClosed();//IC8TEM
     void SetAstroWIsClosed();
     void Open();
     void InDevChanged(QString,int,int,int,int,int,int);//QString rate
@@ -221,6 +224,8 @@ private:
     HvFilterDialog *FilterDialog;
     DecoderMs *TDecoderMs;
     HvRigControl *THvRigControl;
+    HvPowerSwrW *THvPowerSwrW;//IC8TEM Power & SWR
+    QAction *Start_pwrswr_m;//IC8TEM
     bool global_start_moni;
     LabW *TPicW;
     bool f_auto_on;
@@ -431,6 +436,11 @@ protected:
         if (THvHelpSkMs->isVisible()) THvHelpSkMs->close();
         if (THvHelpMs->isVisible()) THvHelpMs->close();
         THvTxW->CloseAllWidget();
+        if (THvPowerSwrW)//IC8TEM Power & SWR: remember if it was open
+        {
+            THvPowerSwrW->SaveSettings();
+            THvPowerSwrW->hide();
+        }
 #if defined _LINUX_ || defined _MACOS_
         if (THvMixerMain->isVisible()) THvMixerMain->close();
 #endif

@@ -44,7 +44,22 @@
 						   <file>HvTranslations/mshv_ptbr.qm</file> 
 						   <file>HvTranslations/mshv_nbno.qm</file> 
 						   <file>HvTranslations/mshv_itit.qm</file>
-						   <file>HvTranslations/mshv_cscz.qm</file>						   
+						   <file>HvTranslations/mshv_cscz.qm</file>
+						   <file>HvTranslations/ic8tem_bg.qm</file>
+						   <file>HvTranslations/ic8tem_ru.qm</file>
+						   <file>HvTranslations/ic8tem_zh.qm</file>
+						   <file>HvTranslations/ic8tem_zhhk.qm</file>
+						   <file>HvTranslations/ic8tem_eses.qm</file>
+						   <file>HvTranslations/ic8tem_caes.qm</file>
+						   <file>HvTranslations/ic8tem_ptpt.qm</file>
+						   <file>HvTranslations/ic8tem_roro.qm</file>
+						   <file>HvTranslations/ic8tem_dadk.qm</file>
+						   <file>HvTranslations/ic8tem_plpl.qm</file>
+						   <file>HvTranslations/ic8tem_frfr.qm</file>
+						   <file>HvTranslations/ic8tem_ptbr.qm</file>
+						   <file>HvTranslations/ic8tem_nbno.qm</file>
+						   <file>HvTranslations/ic8tem_itit.qm</file>
+						   <file>HvTranslations/ic8tem_cscz.qm</file>						   
                            </qresource>                                     
                            </RCC>  
                            

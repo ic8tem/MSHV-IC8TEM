@@ -155,6 +155,8 @@ signals:
 	void EmitNetSP(QString); 
     void EmitTxWatchdogParms(int,int,int);
     void EmitGetedFreq(QString s);
+    void EmitPwrInfo(int,QString);//IC8TEM Power & SWR
+    void EmitPwrCapable(bool);//IC8TEM
     void EmitGetedMode(QString s); 
     void EmitModSetFrqToRig(bool);
     void EmitQrgActive(int i);//2.45
@@ -216,6 +218,7 @@ private slots:
     void SetRigModeFreq();
     void SetFullRigInfo(QString);//2.76.1
 public slots:
+    void SendPwrCmd(int,QString);//IC8TEM Power & SWR
     void SetDopplerFreqs(bool active,double rx_hz,double tx_hz);//Doppler tracking (IC8TEM mod)
 private slots:
     void DopResendRx();//Doppler tracking (IC8TEM mod)

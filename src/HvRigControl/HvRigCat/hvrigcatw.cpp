@@ -884,7 +884,19 @@ void HvRigCat::SetReadedInfo(CmdID i,QString str)
         emit EmitGetedFreq(str);
     }
     else if (i==GET_MODE) emit EmitGetedMode(str);
+    else if (i==READ_RFPOWER || i==READ_PO || i==READ_SWR || i==READ_ALC) emit EmitPwrInfo((int)i,str);//IC8TEM
     //qDebug()<<"READ INFO="<<i<<str;
+}
+bool HvRigCat::PwrCapable()//IC8TEM Power & SWR: Icom CI-V (USB) or Icom LAN, CAT running
+{
+    if (!s_port_poen || !f_rig_activ) return false;
+    return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && s_active_model_id>=ICOMLAN_FIRST));
+}
+void HvRigCat::SendPwrCmd(int id,QString str)//IC8TEM
+{
+    if (!PwrCapable()) return;
+    if (id!=SET_RFPOWER && id!=GET_RFPOWER && id!=GET_METERS) return;
+    emit SetCmd((CmdID)id,RIG_PTT_OFF,str);
 }
 void HvRigCat::StartStopPollingTimer(bool popen)/*, bool read_data_rts_on*/
 {
@@ -906,6 +918,7 @@ void HvRigCat::StartStopPollingTimer(bool popen)/*, bool read_data_rts_on*/
         polling_timer->stop();
         emit EmitOnOffCatCommand(false,s_active_model_id,s_active_fact_id);
     }
+    emit EmitPwrCapable(PwrCapable());//IC8TEM Power & SWR
 
     bool fl = false;
     if (!popen) fl = true;  //qDebug()<<"UPDATE="<<fl;

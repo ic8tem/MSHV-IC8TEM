@@ -259,6 +259,37 @@ void Icom::SetCmd(CmdID i,ptt_t ptt,QString str)
         s_CmdID = GET_MODE;
         get_mode();
         break;
+    case SET_RFPOWER://IC8TEM Power & SWR: 14 0A + level 0000-0255 (BCD)
+    {
+        int lv = str.toInt();
+        if (lv < 0) lv = 0;
+        if (lv > 255) lv = 255;
+        unsigned char cmd[4];
+        cmd[0] = 0x14;
+        cmd[1] = 0x0A;
+        cmd[2] = (unsigned char)(((lv/1000)%10)<<4 | ((lv/100)%10));
+        cmd[3] = (unsigned char)(((lv/10)%10)<<4 | (lv%10));
+        make_cmd_all(cmd,4);
+        break;
+    }
+    case GET_RFPOWER://IC8TEM
+    {
+        unsigned char cmd[2] = {0x14,0x0A};
+        make_cmd_all(cmd,2);
+        break;
+    }
+    case GET_METERS://IC8TEM 15 11 Po, 15 12 SWR, 15 13 ALC
+    {
+        unsigned char cmd[2] = {0x15,0x11};
+        make_cmd_all(cmd,2);
+        cmd[1] = 0x12;
+        make_cmd_all(cmd,2);
+        cmd[1] = 0x13;
+        make_cmd_all(cmd,2);
+        break;
+    }
+    default:
+        break;
     }
 }
 void Icom::make_cmd_all(unsigned char *comand_subcomand,int count_c)
@@ -453,6 +484,17 @@ void Icom::SetReadyRead(QByteArray ar,int size0)
                     emit EmitReadedInfo(GET_FREQ,QString("%1").arg(f));
                     s_CmdID = -1;//I Find my answer no need more
                 }
+            }
+            if (size==8 && (s_read_array[4]==(char)0x14 || s_read_array[4]==(char)0x15))//IC8TEM Power & SWR answers
+            {
+                unsigned char sc = (unsigned char)s_read_array[5];
+                unsigned char b6 = (unsigned char)s_read_array[6];
+                unsigned char b7 = (unsigned char)s_read_array[7];
+                int v = (b6>>4)*1000 + (b6&0x0f)*100 + (b7>>4)*10 + (b7&0x0f);
+                if (s_read_array[4]==(char)0x14 && sc==0x0A) emit EmitReadedInfo(READ_RFPOWER,QString::number(v));
+                else if (s_read_array[4]==(char)0x15 && sc==0x11) emit EmitReadedInfo(READ_PO,QString::number(v));
+                else if (s_read_array[4]==(char)0x15 && sc==0x12) emit EmitReadedInfo(READ_SWR,QString::number(v));
+                else if (s_read_array[4]==(char)0x15 && sc==0x13) emit EmitReadedInfo(READ_ALC,QString::number(v));
             }
             if (newSRMod)
             {
