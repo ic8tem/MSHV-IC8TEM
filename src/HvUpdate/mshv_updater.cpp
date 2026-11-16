@@ -30,7 +30,7 @@
 
 #define UPD_REPO        "ic8tem/MSHV-IC8TEM"
 #define UPD_API_LATEST  "https://api.github.com/repos/" UPD_REPO "/releases/latest"
-#define UPD_PAGE        "https://gh.hhj520.top/" UPD_REPO "/releases/latest"
+#define UPD_PAGE        "https://github.com/" UPD_REPO "/releases/latest"
 #define UPD_INTERVAL_MS (6*3600*1000)       // every 6 hours
 #define UPD_FIRST_MS    (90*1000)           // first check 90 s after start
 

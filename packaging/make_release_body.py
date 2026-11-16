@@ -30,7 +30,6 @@ ROWS = [  # (system, installer suffix, archive suffix)
 def main():
     ver, repo = sys.argv[1], sys.argv[2]
     files = set(os.path.basename(f) for f in sys.argv[3:])
-    base = "https://gh.hhj520.top/%s/releases/download/v%s/" % (repo, ver)
     def cell(suf):
         if not suf:
             return "-"
@@ -39,18 +38,11 @@ def main():
         if name not in files:
             return None
         return "[%s](%s%s)" % (name, base, name)
-    out = ["## Scarica la versione per il tuo sistema", "",
-           "| Sistema | Installatore / pacchetto | Zip / archivio (senza installare) |",
-           "|---|---|---|"]
-    for system, inst, arch in ROWS:
-        a, b = cell(inst), cell(arch)
-        if a is None and b is None:
-            continue
-        out.append("| %s | %s | %s |" % (system, a or "-", b or "-"))
-    out += ["",
-            "Impronte di controllo: `SHA256SUMS.txt`. Dalla 2.76.7-ic8tem.6 MSHV-IC8TEM si aggiorna da solo "
-            "(*Help › Check for Updates*). Guida in italiano: [wiki](https://gh.hhj520.top/%s/wiki)." % repo,
-            "", "---", ""]
+    # Niente tabella di collegamenti: i file sono nella sezione «Assets» della release, su github.com
+    out = ["I file per tutti i sistemi sono qui sotto, nella sezione **Assets** di questa pagina.", "",
+           "Impronte di controllo: `SHA256SUMS.txt`. Dalla 2.76.7-ic8tem.6 MSHV-IC8TEM si aggiorna da solo "
+           "(*Help › Check for Updates*). Guida in italiano: [wiki](https://github.com/%s/wiki)." % repo,
+           "", "---", ""]
     notes = os.path.join(os.path.dirname(os.path.abspath(__file__)), "RELEASE_NOTES.md")
     with open(notes, encoding="utf-8") as f:
         out.append(f.read())
