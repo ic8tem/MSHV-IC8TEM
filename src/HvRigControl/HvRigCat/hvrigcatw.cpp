@@ -407,6 +407,8 @@ void HvRigCat::SetRig(int index)
         have_read_data_rts_on = 3; //2.56 need to be here
         //s_active_model_id = lst_outb.at(2).toInt();
         //s_active_fact_id = ICOM_ID;
+        s_active_model_id = rstruc.model;//IC8TEM mod: needed by the Power & SWR window (was never set for Icom)
+        s_active_fact_id = ICOM_ID;//IC8TEM mod
         ////////////////////////////////////////////////////////end new read com
 
         //SetPttCaps(false);

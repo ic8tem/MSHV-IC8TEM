@@ -107,3 +107,6 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 ## 2026-11-16 — ic8tem.15
 * `src/HvPowerSwr/hvpwrlink.*` (new) — own connection of the Power & SWR window: Hamlib rigctld (TCP) or Icom CI-V on its own serial port, independent from the MSHV CAT.
 * `src/HvPowerSwr/hvpowerswrw.*` — Settings › Connection, meters routed through the chosen connection; translations updated.
+
+## 2026-11-16 — ic8tem.16
+* `src/HvRigControl/HvRigCat/hvrigcatw.cpp` — the active rig type is now set also for the Icom CI-V radios (it was never set), so the Power & SWR window works with them.
