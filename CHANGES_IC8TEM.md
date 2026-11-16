@@ -118,3 +118,6 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `network/network_def.h`, `hvrigcatw.cpp`, `hvrigcontrol.cpp` — new network entry (Server = COM port, Port = baud rate); Icom LAN checks limited to its own entry.
 * `.github/workflows/build-all.yml` — Windows x64/x86 download the official Hamlib Windows package and ship its DLLs in `hamlib\`.
 * `src/HvDecoderMs/decoderjt65.cpp`, `decoderms.*`, `main_ms.cpp` — JT65 deep search: calls heard in the last 24 h (any decoded mode) first, most recent first, then the database in alphabetical order (limit 15000 calls unchanged).
+
+## 2026-11-17 — ic8tem.18
+* CI: HAMLIB_DIR passed to qmake before the project file (with -after the Windows builds had no HAVE_HAMLIB); the build fails if Hamlib was downloaded but not enabled.

@@ -1,6 +1,6 @@
 # IC-7300 con Hamlib
 
-Dalla versione **2.76.7-ic8tem.17**, solo **Windows** (64 e 32 bit): in *Options › Rig Control* c'è la radio **Icom IC-7300 (Hamlib)**. MSHV comanda l'IC-7300 con la libreria **Hamlib**, la stessa usata da WSJT-X e da IP-TRX-CTRL, al posto dei comandi Icom scritti da LZ2HV.
+Dalla versione **2.76.7-ic8tem.18**, solo **Windows** (64 e 32 bit): in *Options › Rig Control* c'è la radio **Icom IC-7300 (Hamlib)**. MSHV comanda l'IC-7300 con la libreria **Hamlib**, la stessa usata da WSJT-X e da IP-TRX-CTRL, al posto dei comandi Icom scritti da LZ2HV.
 
 ## Impostazione
 

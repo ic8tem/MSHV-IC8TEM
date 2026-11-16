@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.18:** fix: the radio **Icom IC-7300 (Hamlib)** was missing from the Rig Control list in the Windows packages of ic8tem.17.
+
 **ic8tem.17:** new radio **Icom IC-7300 (Hamlib)** (Windows): the IC-7300 driven by the Hamlib library — frequency, mode, PTT, RF power and Po/SWR/ALC in the Power & SWR window. Rig Control › Network: Server = COM port, Port = baud rate. · JT65 Deep Search: the calls heard in the last 24 hours (any mode) come first in the list of 15000 calls taken from the database (CALL3.TXT).
 
 **ic8tem.16:** fix: Power & SWR now works with the Icom radios on USB (IC-7300, IC-7610...) through the MSHV CAT: power setting and Po/SWR/ALC meters (the window said "not available" with CAT ON) · Icom (USB and LAN): frequency and mode answers are no longer lost when they arrive late (MSHV kept showing an old frequency over LAN) · CAT Log shows every CI-V frame (frequency, mode, PTT) and, with Icom LAN, how much TX audio reached the radio.

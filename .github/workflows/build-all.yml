@@ -14,7 +14,7 @@ on:
     types: [published]
 
 env:
-  MSHV_VERSION: 2.76.7-ic8tem.17
+  MSHV_VERSION: 2.76.7-ic8tem.18
 
 permissions:
   contents: write
@@ -122,8 +122,9 @@ jobs:
         shell: cmd
         run: |
           set PATH=%IQTA_TOOLS%\${{ matrix.mingw }}\bin;%PATH%
-          if defined HAMLIB_DIR (qmake ${{ matrix.pro }} -after "TARGET=MSHV-IC8TEM" "HAMLIB_DIR=%HAMLIB_DIR%") else (qmake ${{ matrix.pro }} -after "TARGET=MSHV-IC8TEM")
+          if defined HAMLIB_DIR (qmake ${{ matrix.pro }} "HAMLIB_DIR=%HAMLIB_DIR%" -after "TARGET=MSHV-IC8TEM") else (qmake ${{ matrix.pro }} -after "TARGET=MSHV-IC8TEM")
           mingw32-make -j4
+          if defined HAMLIB_DIR (findstr /M /C:"HAVE_HAMLIB" Makefile* >nul && (echo Hamlib: HAVE_HAMLIB ON) || (echo Hamlib: HAVE_HAMLIB missing & exit /b 1))
       - name: Package
         shell: pwsh
         run: |
