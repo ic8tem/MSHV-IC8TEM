@@ -405,11 +405,13 @@ jobs:
           path: dist
           merge-multiple: true
       - run: ls -la dist && (cd dist && sha256sum * > SHA256SUMS.txt)
+      - name: Release text with the download table
+        run: python3 packaging/make_release_body.py "$MSHV_VERSION" "${{ github.repository }}" dist/* > release_body.md && cat release_body.md
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.gate.outputs.tag }}
           target_commitish: ${{ github.sha }}
           name: MSHV-IC8TEM ${{ env.MSHV_VERSION }}
-          body_path: packaging/RELEASE_NOTES.md
+          body_path: release_body.md
           files: dist/*
           fail_on_unmatched_files: false

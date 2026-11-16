@@ -1,0 +1,24 @@
+name: Update release text
+# Rewrites the text of an existing release: download table (from the files it
+# really holds) + packaging/RELEASE_NOTES.md.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: release tag (e.g. v2.76.7-ic8tem.10)
+        required: true
+permissions:
+  contents: write
+jobs:
+  text:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          T="${{ inputs.tag }}"; V="${T#v}"
+          NAMES=$(gh release view "$T" -R "${{ github.repository }}" --json assets -q '.assets[].name')
+          python3 packaging/make_release_body.py "$V" "${{ github.repository }}" $NAMES > body.md
+          cat body.md
+          gh release edit "$T" -R "${{ github.repository }}" --notes-file body.md
