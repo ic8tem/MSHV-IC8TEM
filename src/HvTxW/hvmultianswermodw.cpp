@@ -517,13 +517,13 @@ MultiAnswerModW::MultiAnswerModW(bool f,QWidget * parent )
     V_sb->addWidget(SBqueueLimit);
     V_sb->addWidget(SBslots);
     V_sb->addWidget(SBmaxTP);
-    //IC8TEM mod: optional unlock, default OFF
-    f_unlock_slots = false;
+    //IC8TEM mod: optional unlock, default ON
+    f_unlock_slots = true;
     cb_unlock_slots = new QCheckBox(tr("Unlock TX Slots"));
     cb_unlock_slots->setToolTip(tr("Allows more than one TX slot also in the standard FT8/FT4 HF sub-bands,")+"\n"+
                                 tr("in Q65 and in EU VHF contests (MSHV-IC8TEM option, default OFF).")+"\n"+
                                 tr("Use with care: several slots occupy more of the band."));
-    cb_unlock_slots->setChecked(false);
+    cb_unlock_slots->setChecked(true);
     V_sb->addWidget(cb_unlock_slots);
 
     Cbcqtype = new QComboBox();
@@ -792,7 +792,10 @@ void MultiAnswerModW::SetSettings(QString s)
 {
     QStringList ls = s.split("#");
     if (ls.count()<12) return;  //ls<<"0"<<"1"<<"1"<<"0"; //not possyble -> support for old ver
-    if (ls.count()>12) cb_unlock_slots->setChecked(ls.at(12)=="1");//IC8TEM mod, before TX Slots value
+    //IC8TEM mod, before TX Slots value: the saved choice counts only with the "u1" mark,
+    //older settings (written when the default was OFF) start unlocked
+    if (ls.count()>13 && ls.at(13)=="u1") cb_unlock_slots->setChecked(ls.at(12)=="1");
+    else cb_unlock_slots->setChecked(true);
     SBqueueLimit->setValue(ls.at(0).toInt());
     SBslots->setValue(ls.at(1).toInt());
     SBmaxTP->setValue(ls.at(2).toInt());

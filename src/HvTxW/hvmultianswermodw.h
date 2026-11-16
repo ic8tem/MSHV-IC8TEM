@@ -186,6 +186,7 @@ public:
         out.append("#");
         out.append(QString("%1").arg(cb_unlock_slots->isChecked()));//IC8TEM mod (was reserved)
         out.append("#"); //2.71 2.70 reserved            
+        out.append("u1#");//IC8TEM mod: marks that field 12 is the user's Unlock choice
         return out;
     }
     void SetFont(QFont f);

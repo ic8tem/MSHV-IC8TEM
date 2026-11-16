@@ -98,3 +98,7 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * Fix: availability is asked every second (`HvRigControl::AskPwrCapable()`); before, the window stayed "not available" when the CAT had started before it was connected.
 * `icom.cpp`: frames 14/15 sent and 14/15/FA received are reported as LOG_TX / LOG_RX.
 * Translations of the new strings in the 15 MSHV languages.
+
+## 2026-11-16 — ic8tem.13
+* `src/HvTxW/hvmultianswermodw.*` — "Unlock TX Slots" ON by default; settings saved by older versions start unlocked (new "u1" mark marks the saved choice).
+* `packaging/make_release_body.py` — no download table; `src/HvUpdate/mshv_updater.cpp` — release page link to github.com.

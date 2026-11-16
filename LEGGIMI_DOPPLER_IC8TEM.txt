@@ -90,7 +90,8 @@ ALTRE MODIFICHE (versione 2)
 ============================
 
 1) MULTI ANSWER AUTO SEQ PROTOCOL - "Unlock TX Slots"
-   Nuova spunta sotto TX Slots, DISATTIVATA di default (comportamento originale LZ2HV).
+   Nuova spunta sotto TX Slots, ATTIVA di default dalla 2.76.7-ic8tem.13
+   (togliendola si torna al comportamento originale LZ2HV).
    Se la attivi, TX Slots e' sempre abilitato e non viene limitato a 1 nelle sotto-bande
    FT8/FT4 HF, in Q65 e in EU VHF. Massimo: 6 in FT8, 4 in FT4, 3 in FT2.
 

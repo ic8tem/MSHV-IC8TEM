@@ -45,4 +45,4 @@ jobs:
             gh release create "$T" -R "$R" --verify-tag --title "MSHV-IC8TEM $V" --notes-file release_body.md
           fi
           gh release upload "$T" -R "$R" --clobber dist/*
-          gh release edit "$T" -R "$R" --notes-file release_body.md --latest
+          gh release edit "$T" -R "$R" --notes-file release_body.md

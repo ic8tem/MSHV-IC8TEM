@@ -1,10 +1,14 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.13
+* **Unlock TX Slots acceso di default** (Multi Answer): TX Slots non viene più bloccato a 1 in FT8/FT4 HF. Anche le impostazioni salvate con le versioni precedenti partono sbloccate; chi vuole i limiti originali toglie la spunta (la scelta poi resta salvata).
+* Pagina delle release senza tabella: i file si scaricano dalla sezione Assets, solo da github.com.
+
 ## 2.76.7-ic8tem.12
 * Potenza e ROS: nuova scheda **CAT Log** con i comandi CI-V inviati alla radio e le risposte (in esadecimale e tradotte), pulsante **Leggi ora**; in alto la radio scelta, il tipo di CAT e se è attivo. Corretto: la finestra poteva restare "non disponibile" se il CAT partiva prima della finestra.
 
 ## 2.76.7-ic8tem.11
-* Nuovi pacchetti: **rpm ARM64** (Fedora/openSUSE ARM), **Alpine Linux / musl** x86_64 e ARM64, **zip per macOS**. Nella pagina di ogni release c'è la tabella "Scarica la versione per il tuo sistema", con anche le righe per Windows 7/8/8.1.
+* Nuovi pacchetti: **rpm ARM64** (Fedora/openSUSE ARM), **Alpine Linux / musl** x86_64 e ARM64, **zip per macOS**. 
 
 ## 2.76.7-ic8tem.10
 * Nuova finestra **Potenza e ROS** (Options › View Power and SWR): potenza di uscita, Po, ROS, ALC, memoria per banda e per modo, Tune a potenza ridotta, protezione ROS che ferma il TX. Radio Icom via USB o LAN. Tradotta nelle lingue di MSHV.
