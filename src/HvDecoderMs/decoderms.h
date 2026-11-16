@@ -16,6 +16,9 @@
 #include "../HvMsPlayer/libsound/HvGenFt8/gen_ft8.h"
 #include "../HvMsPlayer/libsound/HvGenFt8/gen_sfox.h"
 #include <QObject> //2.53
+#include <QHash>
+#include <QMutex>
+#include <QDateTime>
 
 #define ALL_MSG_SNR 200  //2.70 from 120
 #define MAXDEC 200 		 //2.70 from 120
@@ -793,6 +796,7 @@ public slots:
     void SetClearAvgPi4();
     void SetTxFreq(double);
     void Set65DeepSearchDb(QStringList);
+    void AddHeardCalls(QStringList,bool,bool);//IC8TEM: deep search JT65, recently heard calls first
 
     ///  FT8 and JT65 ////////////////////////
     void SetQSOProgress(int);
@@ -1138,6 +1142,11 @@ private:
     int s_aggres_lev_ftd;
     int s_aggres_lev_deeps;
     QStringList db_call_loc4_list;
+    QStringList db_ordered_list;//IC8TEM: deep search order, recently heard calls first
+    QHash<QString,qint64> heard_calls;//IC8TEM: call -> last time heard (ms since epoch)
+    bool db_order_dirty;//IC8TEM
+    QMutex db_mutex;//IC8TEM
+    void RebuildDeepOrder();//IC8TEM
     double s_nfqso_all;
     double s_f00;
     double s_f01;

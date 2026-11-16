@@ -117,3 +117,4 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvRigControl/HvRigCat/hamlibrig/` (new) — "Icom IC-7300 (Hamlib)": Hamlib library loaded at run time (Windows builds with HAVE_HAMLIB), worker thread, frequency/mode/PTT/RF power/meters.
 * `network/network_def.h`, `hvrigcatw.cpp`, `hvrigcontrol.cpp` — new network entry (Server = COM port, Port = baud rate); Icom LAN checks limited to its own entry.
 * `.github/workflows/build-all.yml` — Windows x64/x86 download the official Hamlib Windows package and ship its DLLs in `hamlib\`.
+* `src/HvDecoderMs/decoderjt65.cpp`, `decoderms.*`, `main_ms.cpp` — JT65 deep search: calls heard in the last 24 h (any decoded mode) first, most recent first, then the database in alphabetical order (limit 15000 calls unchanged).

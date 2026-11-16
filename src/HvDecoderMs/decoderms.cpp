@@ -22,7 +22,8 @@ static const double DEC_SAMPLE_RATE_12000 = 12000.0;
 
 DecoderMs::DecoderMs(QString p)//QObject *parent
 //: QObject(parent)
-{	
+{
+    db_order_dirty = true;//IC8TEM deep search order	
 	//ttt.start();
 	//f2a.InitPlansAllStatic();//2.76.2 time = 182ms + destroy = 192ms
 	//qDebug()<<ttt.elapsed();

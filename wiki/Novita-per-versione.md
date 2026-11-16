@@ -2,6 +2,7 @@
 
 ## 2.76.7-ic8tem.17
 * Nuova radio **Icom IC-7300 (Hamlib)** per Windows: l'IC-7300 comandato con la libreria Hamlib (frequenza, modo, PTT, potenza, Po/ROS/ALC). Vedi [[IC-7300 con Hamlib|IC-7300-Hamlib]].
+* **JT65 Deep Search**: la ricerca profonda usa al massimo 15.000 nominativi del database (CALL3.TXT). Prima vengono quelli sentiti nelle ultime 24 ore in qualsiasi modo, dal più recente; poi gli altri in ordine alfabetico. Così con un CALL3.TXT grande non restano esclusi i nominativi che stai sentendo.
 
 ## 2.76.7-ic8tem.16
 * Corretto: **Potenza e ROS** con le Icom collegate via USB (IC-7300, IC-7610...) tramite il CAT di MSHV. La finestra diceva "non disponibile" anche con il CAT attivo, quindi non regolava la potenza e non leggeva Po, ROS e ALC.

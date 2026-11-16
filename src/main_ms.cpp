@@ -393,6 +393,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
 
     connect(TDecoderMs, SIGNAL(EmitBackColor(bool)), TDecodeList1, SLOT(SetBackColor(bool)));
     connect(TDecoderMs, SIGNAL(EmitDecodetText(QStringList,bool,bool)), TDecodeList1, SLOT(InsertItem_hv(QStringList,bool,bool))); //1.27 psk rep   fopen bool true    false no file open
+    connect(TDecoderMs, SIGNAL(EmitDecodetText(QStringList,bool,bool)), TDecoderMs, SLOT(AddHeardCalls(QStringList,bool,bool)));//IC8TEM deep search JT65: recently heard calls first
     connect(TDecodeList1, SIGNAL(EmitLstNexColor(bool)), TDecoderMs, SLOT(SetNexColor(bool)));
     connect(TDecoderMs, SIGNAL(EmitTimeElapsed(float)), TDecodeList1, SLOT(SetTimeElapsed(float)));//2.33
 

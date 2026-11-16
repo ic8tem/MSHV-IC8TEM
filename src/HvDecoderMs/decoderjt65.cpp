@@ -11,6 +11,8 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 
+#include <QRegExp>//IC8TEM
+#include <algorithm>//IC8TEM
 #include "decoderms.h"
 //#include <QtGui>
 
@@ -474,15 +476,79 @@ finish:
 
 void DecoderMs::Set65DeepSearchDb(QStringList lst)
 {
+    QMutexLocker lk(&db_mutex);//IC8TEM
+    db_order_dirty = true;//IC8TEM
     db_call_loc4_list = lst;
     //qDebug()<<"db_call_loc4_list="<<db_call_loc4_list.count();//<<db_call_loc_list.at(0);
+}
+//IC8TEM: calls heard in the last 24 hours (any mode) go first in the JT65 deep search list,
+//most recent first; then the rest of the database in alphabetical order (limit 15000 calls)
+void DecoderMs::AddHeardCalls(QStringList l,bool,bool)
+{
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    QMutexLocker lk(&db_mutex);
+    for (int i = 0; i < l.count(); ++i)
+    {
+        QStringList w = l.at(i).toUpper().split(QRegExp("[\\s<>]+"),QString::SkipEmptyParts);
+        for (int j = 0; j < w.count(); ++j)
+        {
+            QStringList parts = w.at(j).split("/",QString::SkipEmptyParts);
+            for (int k = 0; k < parts.count(); ++k)
+            {
+                const QString &c = parts.at(k);
+                if (c.length() < 3 || c.length() > 10) continue;
+                bool dig = false, let = false, ok = true;
+                for (int x = 0; x < c.length(); ++x)
+                {
+                    QChar ch = c.at(x);
+                    if (ch >= '0' && ch <= '9') dig = true;
+                    else if (ch >= 'A' && ch <= 'Z') let = true;
+                    else { ok = false; break; }
+                }
+                if (!ok || !dig || !let) continue;
+                heard_calls.insert(c,now);
+                db_order_dirty = true;
+            }
+        }
+    }
+    if (heard_calls.count() > 20000)//forget the oldest (older than 24 h)
+    {
+        QHash<QString,qint64>::iterator it = heard_calls.begin();
+        while (it != heard_calls.end())
+        {
+            if (now - it.value() > 86400000) it = heard_calls.erase(it);
+            else ++it;
+        }
+    }
+}
+void DecoderMs::RebuildDeepOrder()//IC8TEM, db_mutex locked
+{
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    QList<QPair<qint64,QString> > recent;
+    QStringList rest;
+    for (int i = 0; i < db_call_loc4_list.count(); ++i)
+    {
+        const QString &e = db_call_loc4_list.at(i);
+        QString call = e.section(',',0,0);
+        QHash<QString,qint64>::const_iterator it = heard_calls.constFind(call);
+        if (it != heard_calls.constEnd() && now - it.value() <= 86400000)
+            recent.append(qMakePair(-it.value(),e));
+        else rest.append(e);
+    }
+    std::sort(recent.begin(),recent.end());
+    db_ordered_list.clear();
+    for (int i = 0; i < recent.count(); ++i) db_ordered_list.append(recent.at(i).second);
+    db_ordered_list.append(rest);
+    db_order_dirty = false;
 }
 void DecoderMs::hint65(double s3_[63][64],int nadd,int nflip,QString mycall,QString hiscall,
                        QString hisgrid,double &qual,QString &decoded)
 {
     QString msg = "";
     int MAXRPT = 63;
-    int MAXCALLS = db_call_loc4_list.count();
+    QMutexLocker lk_db(&db_mutex);//IC8TEM
+    if (db_order_dirty || db_ordered_list.count() != db_call_loc4_list.count()) RebuildDeepOrder();//IC8TEM
+    int MAXCALLS = db_ordered_list.count();//IC8TEM was db_call_loc4_list
     int MAXMSG = (2*MAXCALLS + 2 + MAXRPT);
     //wsjt-x max=20065 maxcalls=10000  mshv max=30065 maxcalls=15000
     const int hv_limit = 30065;
@@ -547,7 +613,7 @@ void DecoderMs::hint65(double s3_[63][64],int nadd,int nflip,QString mycall,QStr
             }
             else
             {
-                QString t_cal_loc4 = db_call_loc4_list.at(i);
+                QString t_cal_loc4 = db_ordered_list.at(i);//IC8TEM was db_call_loc4_list
                 QStringList call_loc4 = t_cal_loc4.split(",");
                 //QString loc_4 = call_loc.at(1).mid(0,4);
                 if (m==1)  msg=mycall+" "+call_loc4.at(0)+" "+call_loc4.at(1); //if(m.eq.1)  msg=mycall//' '//call2(i)//' '//grid2(i)
