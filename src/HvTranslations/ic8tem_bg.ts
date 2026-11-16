@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC над 50 %: намалете нивото на звука</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>CAT дневник</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>CI-V кадри за мощност и измерватели, изпратени към радиото, и неговите отговори. FA = радиото отказа командата (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Прочети сега (мощност и измерватели)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Изчисти</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копирай</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Пауза</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>не е изпратено: мощност и КСВ не са налични за това радио</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: радиото отказа командата</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>чети RF мощност</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>чети Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>чети КСВ</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>чети ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>RF мощност</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

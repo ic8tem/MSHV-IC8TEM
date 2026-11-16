@@ -92,3 +92,9 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `.github/workflows/build-all.yml` — rpm also for aarch64 (openSUSE Leap 15.6 on ARM runner); Alpine Linux 3.20 / musl tar.gz for x86_64 and aarch64; macOS zip next to the dmg.
 * `packaging/make_release_body.py` + `.github/workflows/release-text.yml` — release page starts with the table "Scarica la versione per il tuo sistema" (system, installer, zip), built from the files really published; rows for Windows 7 SP1/8/8.1 point to the Windows 10/11 files.
 * Windows installer: `MinVersion=6.1sp1` (Windows 7 SP1).
+
+## 2026-11-16 — 2.76.7-ic8tem.12
+* Power & SWR: tab **CAT Log** with the CI-V frames of power/meters sent and received (hex + decoded; `FA` = NG), *Read now*, *Copy*, *Pause*, *Clear*; status line with rig, connection type and CAT state (`HvRigCat::PwrStatus()`).
+* Fix: availability is asked every second (`HvRigControl::AskPwrCapable()`); before, the window stayed "not available" when the CAT had started before it was connected.
+* `icom.cpp`: frames 14/15 sent and 14/15/FA received are reported as LOG_TX / LOG_RX.
+* Translations of the new strings in the 15 MSHV languages.

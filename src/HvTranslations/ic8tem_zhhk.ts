@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC 高於 50 %：請降低音頻電平</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>CAT 記錄</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>發送到電台的功率及儀表 CI-V 幀及其應答。FA = 電台拒絕了命令（NG）。</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>立即讀取（功率及儀表）</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>複製</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>暫停</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>未發送：此電台不支援功率及駐波比</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG：電台拒絕了命令</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>讀取射頻功率</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>讀取 Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>讀取駐波比</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>讀取 ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>射頻功率</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

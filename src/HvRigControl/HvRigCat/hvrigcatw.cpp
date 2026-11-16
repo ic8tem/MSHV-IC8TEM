@@ -884,13 +884,26 @@ void HvRigCat::SetReadedInfo(CmdID i,QString str)
         emit EmitGetedFreq(str);
     }
     else if (i==GET_MODE) emit EmitGetedMode(str);
-    else if (i==READ_RFPOWER || i==READ_PO || i==READ_SWR || i==READ_ALC) emit EmitPwrInfo((int)i,str);//IC8TEM
+    else if (i==READ_RFPOWER || i==READ_PO || i==READ_SWR || i==READ_ALC || i==LOG_TX || i==LOG_RX) emit EmitPwrInfo((int)i,str);//IC8TEM
     //qDebug()<<"READ INFO="<<i<<str;
 }
 bool HvRigCat::PwrCapable()//IC8TEM Power & SWR: Icom CI-V (USB) or Icom LAN, CAT running
 {
     if (!s_port_poen || !f_rig_activ) return false;
     return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && s_active_model_id>=ICOMLAN_FIRST));
+}
+QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
+{
+    QString rig = get_rig_name();
+    if (rig.isEmpty() || rig=="None") rig = "-";
+    QString cat = s_port_poen ? "CAT ON" : "CAT OFF";
+    QString kind;
+    if (s_active_fact_id==ICOM_ID) kind = "Icom CI-V";
+    else if (s_active_fact_id==NETWORK_ID && s_active_model_id>=ICOMLAN_FIRST) kind = "Icom LAN";
+    else if (s_active_fact_id==11) kind = "OmniRig";//OMNIRIGHV_ID (Windows only header)
+    else if (s_active_fact_id==NETWORK_ID) kind = "Network (TCI/Flex/Hamlib...)";
+    else kind = "CAT";
+    return rig+"  |  "+kind+"  |  "+cat;
 }
 void HvRigCat::SendPwrCmd(int id,QString str)//IC8TEM
 {

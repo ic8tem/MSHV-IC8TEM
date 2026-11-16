@@ -817,6 +817,8 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvPowerSwrW, SIGNAL(EmitRigCmd(int,QString)), THvRigControl, SLOT(SendPwrCmd(int,QString)));
     connect(THvRigControl, SIGNAL(EmitPwrInfo(int,QString)), THvPowerSwrW, SLOT(SetRigInfo(int,QString)));
     connect(THvRigControl, SIGNAL(EmitPwrCapable(bool)), THvPowerSwrW, SLOT(SetCapable(bool)));
+    connect(THvRigControl, SIGNAL(EmitPwrStatus(QString)), THvPowerSwrW, SLOT(SetStatus(QString)));
+    connect(THvPowerSwrW, SIGNAL(EmitAskCapable()), THvRigControl, SLOT(AskPwrCapable()));
     connect(THvRigControl, SIGNAL(EmitGetedFreq(QString)), THvPowerSwrW, SLOT(SetFreqStr(QString)));
     connect(THvPowerSwrW, SIGNAL(EmitTune()), this, SLOT(Tune()));
     connect(THvPowerSwrW, SIGNAL(EmitStopTx()), this, SLOT(StopTxGlobal()));

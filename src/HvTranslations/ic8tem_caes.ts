@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC per sobre del 50 %: abaixeu el nivell d'àudio</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>Registre CAT</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>Trames CI-V de potència i mesuradors enviades a la ràdio i les seves respostes. FA = la ràdio ha rebutjat l'ordre (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Llegeix ara (potència i mesuradors)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Esborra</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copia</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pausa</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>no enviat: potència i ROE no disponibles amb aquesta ràdio</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: la ràdio ha rebutjat l'ordre</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>llegeix potència RF</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>llegeix Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>llegeix ROE</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>llegeix ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>Potència RF</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

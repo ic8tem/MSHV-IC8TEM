@@ -86,6 +86,7 @@ public:
     void set_freq(QString);
     void SendPwrCmd(int,QString);//IC8TEM Power & SWR
     bool PwrCapable();//IC8TEM
+    QString PwrStatus();//IC8TEM
     void SetReadyRead(QByteArray,int);
     void StartStopPollingTimer(bool popen);/*, bool read_data_rts_on*/
     void set_mode(QString);

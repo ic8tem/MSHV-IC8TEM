@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC peste 50 %: reduceți nivelul audio</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>Jurnal CAT</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>Cadre CI-V de putere și instrumente trimise stației și răspunsurile ei. FA = stația a refuzat comanda (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Citește acum (putere și instrumente)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Șterge</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copiază</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pauză</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>netrimis: putere și SWR indisponibile cu această stație</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: stația a refuzat comanda</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>citește puterea RF</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>citește Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>citește SWR</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>citește ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>Putere RF</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

@@ -15,6 +15,8 @@
 #include <QTextStream>
 #include <QTime>
 #include <QFontDatabase>
+#include <QApplication>
+#include <QClipboard>
 
 // ---------------------------------------------------------------- meter
 HvPwrMeter::HvPwrMeter(int kind,QWidget *parent)
@@ -246,8 +248,12 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     QHBoxLayout *H_main = new QHBoxLayout();
     H_main->addWidget(gb_pwr,1);
     H_main->addWidget(gb_met,1);
+    l_status = new QLabel();
+    l_status->setFont(mono);
+    l_status->setStyleSheet("QLabel{color:rgb(55,65,81);}");
     QVBoxLayout *V_w1 = new QVBoxLayout(w1);
     V_w1->addLayout(H_head);
+    V_w1->addWidget(l_status);
     V_w1->addWidget(l_notcap);
     V_w1->addLayout(H_main,1);
     w1->setLayout(V_w1);
@@ -334,6 +340,33 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     tabs = new QTabWidget();
     tabs->addTab(w1,tr("Power and SWR"));
     tabs->addTab(w2,tr("Settings"));
+    // ---------------- tab 3: CAT log
+    QWidget *w3 = new QWidget();
+    QLabel *l_loginfo = new QLabel(tr("CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG)."));
+    l_loginfo->setWordWrap(true);
+    te_log = new QPlainTextEdit();
+    te_log->setReadOnly(true);
+    te_log->setMaximumBlockCount(1000);
+    te_log->setFont(mono);
+    QPushButton *pb_readnow = new QPushButton(tr("Read now (power and meters)"));
+    QPushButton *pb_clear = new QPushButton(tr("Clear"));
+    QPushButton *pb_copy = new QPushButton(tr("Copy"));
+    cb_log_pause = new QCheckBox(tr("Pause"));
+    QHBoxLayout *H_log = new QHBoxLayout();
+    H_log->addWidget(pb_readnow);
+    H_log->addStretch(1);
+    H_log->addWidget(cb_log_pause);
+    H_log->addWidget(pb_copy);
+    H_log->addWidget(pb_clear);
+    QVBoxLayout *V_w3 = new QVBoxLayout(w3);
+    V_w3->addWidget(l_loginfo);
+    V_w3->addWidget(te_log,1);
+    V_w3->addLayout(H_log);
+    w3->setLayout(V_w3);
+    tabs->addTab(w3,tr("CAT Log"));
+    connect(pb_readnow, SIGNAL(clicked()), this, SLOT(ReadNow()));
+    connect(pb_clear, SIGNAL(clicked()), this, SLOT(LogClear()));
+    connect(pb_copy, SIGNAL(clicked()), this, SLOT(LogCopy()));
     QVBoxLayout *V_all = new QVBoxLayout(this);
     V_all->setContentsMargins(6,6,6,6);
     V_all->addWidget(tabs);
@@ -344,6 +377,9 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     connect(t_send, SIGNAL(timeout()), this, SLOT(SendPower()));
     t_poll = new QTimer(this);
     connect(t_poll, SIGNAL(timeout()), this, SLOT(PollMeters()));
+    t_cap = new QTimer(this);//ask the rig state every second (CAT may start before this window is connected)
+    connect(t_cap, SIGNAL(timeout()), this, SIGNAL(EmitAskCapable()));
+    t_cap->start(1000);
 
     connect(sl_pwr, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
     connect(pb_minus, SIGNAL(clicked()), this, SLOT(Minus()));
@@ -677,8 +713,59 @@ void HvPowerSwrW::PollMeters()
     if (cb_only_tx->isChecked() && !f_tx) return;
     emit EmitRigCmd(GET_METERS,QString());
 }
+void HvPowerSwrW::SetStatus(QString s)
+{
+    l_status->setText(s);
+}
+void HvPowerSwrW::ReadNow()
+{
+    if (!f_capable)
+    {
+        Log(true,tr("not sent: Power and SWR not available with this rig")+" ("+l_status->text()+")");
+        return;
+    }
+    emit EmitRigCmd(GET_RFPOWER,QString());
+    emit EmitRigCmd(GET_METERS,QString());
+}
+void HvPowerSwrW::LogClear()
+{
+    te_log->clear();
+}
+void HvPowerSwrW::LogCopy()
+{
+    QApplication::clipboard()->setText(te_log->toPlainText());
+}
+QString HvPowerSwrW::Decode(const QString &hex)
+{
+    QStringList b = hex.split(' ',QString::SkipEmptyParts);
+    if (b.count() < 6) return QString();
+    QString c = b.at(4), sc = b.at(5);
+    if (c=="FA") return tr("NG: the radio refused the command");
+    if (b.count() < 9) return (c=="14" && sc=="0A") ? tr("read RF power") :
+                                  (c=="15" && sc=="11") ? tr("read Po") :
+                                  (c=="15" && sc=="12") ? tr("read SWR") :
+                                  (c=="15" && sc=="13") ? tr("read ALC") : QString();
+    int v = (b.at(6)+b.at(7)).toInt();
+    if (c=="14" && sc=="0A") return tr("RF power")+" "+QString::number(v)+" = "+QString::number((int)(v*100.0/255.0+0.5))+" %";
+    if (c=="15" && sc=="11") return "Po "+QString::number(v)+" = "+QString::number(PoFraction(v)*sb_maxw->value(),'f',0)+" W";
+    if (c=="15" && sc=="12") return tr("SWR")+" "+QString::number(v)+" = "+QString::number(SwrValue(v),'f',1);
+    if (c=="15" && sc=="13") return "ALC "+QString::number(v)+" = "+QString::number(v/120.0*100.0,'f',0)+" %";
+    return QString();
+}
+void HvPowerSwrW::Log(bool tx,const QString &hex)
+{
+    if (cb_log_pause->isChecked()) return;
+    QString d = hex.contains("FE FE") ? Decode(hex) : QString();
+    te_log->appendPlainText(QTime::currentTime().toString("HH:mm:ss.zzz")+(tx ? "  >> " : "  << ")+hex+
+                            (d.isEmpty() ? QString() : "   "+d));
+}
 void HvPowerSwrW::SetRigInfo(int id,QString s)
 {
+    if (id == LOG_TX || id == LOG_RX)
+    {
+        Log(id == LOG_TX,s);
+        return;
+    }
     int raw = s.toInt();
     qint64 now = clock.elapsed();
     if (id == READ_RFPOWER)

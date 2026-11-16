@@ -261,6 +261,7 @@ void Icom::SetCmd(CmdID i,ptt_t ptt,QString str)
         break;
     case SET_RFPOWER://IC8TEM Power & SWR: 14 0A + level 0000-0255 (BCD)
     {
+        s_CmdID_log = true;
         int lv = str.toInt();
         if (lv < 0) lv = 0;
         if (lv > 255) lv = 255;
@@ -274,12 +275,14 @@ void Icom::SetCmd(CmdID i,ptt_t ptt,QString str)
     }
     case GET_RFPOWER://IC8TEM
     {
+        s_CmdID_log = true;
         unsigned char cmd[2] = {0x14,0x0A};
         make_cmd_all(cmd,2);
         break;
     }
     case GET_METERS://IC8TEM 15 11 Po, 15 12 SWR, 15 13 ALC
     {
+        s_CmdID_log = true;
         unsigned char cmd[2] = {0x15,0x11};
         make_cmd_all(cmd,2);
         cmd[1] = 0x12;
@@ -313,6 +316,8 @@ void Icom::make_cmd_all(unsigned char *comand_subcomand,int count_c)
 
     cmd_all[count]=FI;
     count++;
+    if (count_c >= 2 && (comand_subcomand[0]==0x14 || comand_subcomand[0]==0x15) && (s_CmdID_log))//IC8TEM CAT log
+        emit EmitReadedInfo(LOG_TX,QString(QByteArray((char *)cmd_all,count).toHex(' ').toUpper()));
     emit EmitWriteCmd((char *)cmd_all,count);
 }
 void Icom::set_ptt(ptt_t ptt)
@@ -485,6 +490,8 @@ void Icom::SetReadyRead(QByteArray ar,int size0)
                     s_CmdID = -1;//I Find my answer no need more
                 }
             }
+            if (size >= 5 && (s_read_array[4]==(char)0x14 || s_read_array[4]==(char)0x15 || s_read_array[4]==(char)0xFA))//IC8TEM CAT log
+                emit EmitReadedInfo(LOG_RX,QString(s_read_array.toHex(' ').toUpper())+" FD");
             if (size==8 && (s_read_array[4]==(char)0x14 || s_read_array[4]==(char)0x15))//IC8TEM Power & SWR answers
             {
                 unsigned char sc = (unsigned char)s_read_array[5];

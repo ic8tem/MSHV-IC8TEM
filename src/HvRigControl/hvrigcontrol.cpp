@@ -2002,6 +2002,11 @@ void HvRigControl::SendPwrCmd(int id,QString s)//IC8TEM Power & SWR
 {
     THvRigCat->SendPwrCmd(id,s);
 }
+void HvRigControl::AskPwrCapable()//IC8TEM
+{
+    emit EmitPwrStatus(THvRigCat->PwrStatus());
+    emit EmitPwrCapable(THvRigCat->PwrCapable());
+}
 void HvRigControl::SetPttCatType(QString s)
 {
     THvRigCat->SetPttCatType(s);

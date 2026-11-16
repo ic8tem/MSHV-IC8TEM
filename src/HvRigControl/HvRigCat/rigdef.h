@@ -83,6 +83,8 @@ typedef enum
     READ_PO,
     READ_SWR,
     READ_ALC,
+    LOG_TX,         //IC8TEM CAT log of Power & SWR: frame sent (hex)
+    LOG_RX,         //IC8TEM frame received (hex)
 }CmdID;
 
 #endif

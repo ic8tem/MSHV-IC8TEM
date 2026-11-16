@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC powyżej 50 %: zmniejsz poziom audio</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>Dziennik CAT</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>Ramki CI-V mocy i mierników wysłane do radia oraz jego odpowiedzi. FA = radio odrzuciło polecenie (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Odczytaj teraz (moc i mierniki)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Wyczyść</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopiuj</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Wstrzymaj</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>nie wysłano: moc i WFS niedostępne dla tego radia</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: radio odrzuciło polecenie</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>odczyt mocy RF</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>odczyt Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>odczyt WFS</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>odczyt ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>Moc RF</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

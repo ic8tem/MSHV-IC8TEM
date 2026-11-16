@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC over 50 %: senk lydnivået</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>CAT-logg</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>CI-V-rammer for effekt og målere sendt til radioen og svarene. FA = radioen avviste kommandoen (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Les nå (effekt og målere)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Tøm</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopier</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pause</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>ikke sendt: effekt og SWR er ikke tilgjengelig med denne radioen</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: radioen avviste kommandoen</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>les RF-effekt</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>les Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>les SWR</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>les ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>RF-effekt</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

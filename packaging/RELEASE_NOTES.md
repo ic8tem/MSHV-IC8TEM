@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.12:** Power & SWR — CAT Log tab (CI-V frames sent and received, decoded), Read now, rig/CAT status; fix: window could stay "not available" when the CAT started first.
+
 **ic8tem.11:** new packages — rpm ARM64, Alpine Linux (musl) x86_64 and ARM64, macOS zip.
 
 **ic8tem.10: Power & SWR window** (Options › View Power and SWR) — RF power, Po/SWR/ALC meters, per-band memory, SWR protection. Icom USB and LAN.

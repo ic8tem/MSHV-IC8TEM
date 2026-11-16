@@ -31,6 +31,7 @@ private slots:
     //void SetOnOffCatCommand(bool,int,int);
 
 private:
+    bool s_CmdID_log = false;//IC8TEM CAT log of Power & SWR commands
 	bool newSRMod;
     int  s_ModelID;
     QString s_rig_name;

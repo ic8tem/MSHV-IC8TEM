@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC por encima del 50 %: baje el nivel de audio</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>Registro CAT</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>Tramas CI-V de potencia y medidores enviadas a la radio y sus respuestas. FA = la radio rechazó el comando (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Leer ahora (potencia y medidores)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Borrar</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copiar</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pausa</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>no enviado: potencia y ROE no disponibles con esta radio</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: la radio rechazó el comando</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>leer potencia RF</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>leer Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>leer ROE</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>leer ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>Potencia RF</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

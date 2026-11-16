@@ -20,6 +20,12 @@ Funziona con le radio **Icom**, sia con il cavo USB (CI-V) sia con **Icom LAN**,
 * Potenza memorizzata applicata al cambio di banda; memoria separata per modo (es. 2 m MSK144 e 2 m FT8).
 * Avvisi: ALC sopra il 50 % (audio troppo alto nei modi digitali), Po sotto metà della potenza impostata.
 
+## Scheda "CAT Log"
+
+Mostra ogni comando CI-V di potenza e strumenti inviato alla radio (`>>`) e ogni risposta (`<<`), in esadecimale e tradotta (es. `FE FE E0 98 15 12 00 30 FD   SWR 30 = 1.3`). **Leggi ora** chiede subito potenza e strumenti, anche senza trasmettere. Una risposta `FA` significa che la radio ha rifiutato il comando. *Copia* mette tutto negli appunti, per inviarlo a chi deve controllare.
+
+In alto nella prima scheda si vede la radio scelta in Rig Control, il tipo di collegamento (Icom CI-V, Icom LAN, OmniRig, rete...) e se il CAT è attivo: la finestra funziona solo con **Icom CI-V** o **Icom LAN** e CAT attivo.
+
 ## Da sapere
 
 * **Con il transverter** (es. 144 → 28 MHz) la radio misura la potenza di pilotaggio e il ROS verso il transverter, **non** in antenna. Per il ROS dell'antenna serve un misuratore esterno.

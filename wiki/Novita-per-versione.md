@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.12
+* Potenza e ROS: nuova scheda **CAT Log** con i comandi CI-V inviati alla radio e le risposte (in esadecimale e tradotte), pulsante **Leggi ora**; in alto la radio scelta, il tipo di CAT e se è attivo. Corretto: la finestra poteva restare "non disponibile" se il CAT partiva prima della finestra.
+
 ## 2.76.7-ic8tem.11
 * Nuovi pacchetti: **rpm ARM64** (Fedora/openSUSE ARM), **Alpine Linux / musl** x86_64 e ARM64, **zip per macOS**. Nella pagina di ogni release c'è la tabella "Scarica la versione per il tuo sistema", con anche le righe per Windows 7/8/8.1.
 

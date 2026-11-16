@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC nad 50 %: snižte úroveň zvuku</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>Záznam CAT</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>Rámce CI-V výkonu a měřidel odeslané do rádia a jeho odpovědi. FA = rádio příkaz odmítlo (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Načíst nyní (výkon a měřidla)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Vymazat</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopírovat</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pozastavit</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>neodesláno: výkon a PSV nejsou s tímto rádiem dostupné</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: rádio příkaz odmítlo</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>čtení výkonu RF</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>čtení Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>čtení PSV</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>čtení ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>Výkon RF</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>

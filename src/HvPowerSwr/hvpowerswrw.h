@@ -23,6 +23,7 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QMap>
+#include <QPlainTextEdit>
 
 class HvPwrMeter : public QWidget
 {
@@ -54,6 +55,7 @@ signals:
     void EmitTune();                    // toggle the MSHV Tune
     void EmitStopTx();
     void EmitClosed();
+    void EmitAskCapable();
 
 public slots:
     void SetRigInfo(int,QString);
@@ -61,6 +63,7 @@ public slots:
     void SetTx(bool);
     void SetFreqStr(QString);
     void SetModeName(QString);
+    void SetStatus(QString);
 
 protected:
     void closeEvent(QCloseEvent *);
@@ -78,6 +81,9 @@ private slots:
     void PollMeters();
     void SettingsChanged();
     void TableChanged(QTableWidgetItem *);
+    void ReadNow();
+    void LogClear();
+    void LogCopy();
 
 private:
     QString s_set_path;
@@ -141,6 +147,12 @@ private:
 
     QTimer *t_send;
     QTimer *t_poll;
+    QTimer *t_cap;
+    QLabel *l_status;
+    QPlainTextEdit *te_log;
+    QCheckBox *cb_log_pause;
+    void Log(bool tx,const QString &hex);
+    QString Decode(const QString &hex);
 
     void ReadSettings();
     void FillTable();

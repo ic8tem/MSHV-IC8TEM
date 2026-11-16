@@ -151,6 +151,58 @@
         <source>ALC above 50 %: lower the audio level</source>
         <translation>ALC acima de 50 %: abaixe o nível de áudio</translation>
     </message>
+    <message>
+        <source>CAT Log</source>
+        <translation>Registro CAT</translation>
+    </message>
+    <message>
+        <source>CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG).</source>
+        <translation>Quadros CI-V de potência e medidores enviados ao rádio e suas respostas. FA = o rádio recusou o comando (NG).</translation>
+    </message>
+    <message>
+        <source>Read now (power and meters)</source>
+        <translation>Ler agora (potência e medidores)</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Limpar</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copiar</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pausar</translation>
+    </message>
+    <message>
+        <source>not sent: Power and SWR not available with this rig</source>
+        <translation>não enviado: potência e ROE indisponíveis com este rádio</translation>
+    </message>
+    <message>
+        <source>NG: the radio refused the command</source>
+        <translation>NG: o rádio recusou o comando</translation>
+    </message>
+    <message>
+        <source>read RF power</source>
+        <translation>ler potência RF</translation>
+    </message>
+    <message>
+        <source>read Po</source>
+        <translation>ler Po</translation>
+    </message>
+    <message>
+        <source>read SWR</source>
+        <translation>ler ROE</translation>
+    </message>
+    <message>
+        <source>read ALC</source>
+        <translation>ler ALC</translation>
+    </message>
+    <message>
+        <source>RF power</source>
+        <translation>Potência RF</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>
