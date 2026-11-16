@@ -30,7 +30,7 @@ jobs:
           V: ${{ inputs.version }}
           R: ${{ github.repository }}
         run: |
-          SHA=$(gh api "repos/$R/actions/runs/${{ inputs.run_id }}" -q .head_sha)
+          SHA="${{ github.sha }}"   # tip of main: same sources as the build (later commits change only CI/docs)
           echo "commit $SHA"
           ls -la dist
           (cd dist && sha256sum * > SHA256SUMS.txt)
