@@ -108,6 +108,7 @@ HEADERS = src/main_ms.h \
  src/HvRigControl/HvRigCat/icomlan/icomlan.h \
  src/HvUpdate/mshv_updater.h \
  src/HvPowerSwr/hvpowerswrw.h \
+ src/HvPowerSwr/hvpwrlink.h \
  src/HvRigControl/HvRigCat/network/flexpanel.h \
  src/HvRigControl/HvRigCat/mits/mits.h \
  src/LabWidget/labw.h \
@@ -228,6 +229,7 @@ SOURCES = src/main.cpp \
  src/HvRigControl/HvRigCat/icomlan/icomlan.cpp \
  src/HvUpdate/mshv_updater.cpp \
  src/HvPowerSwr/hvpowerswrw.cpp \
+ src/HvPowerSwr/hvpwrlink.cpp \
  src/HvRigControl/HvRigCat/network/flexpanel.cpp \
  src/HvRigControl/HvRigCat/mits/mits.cpp \
  src/LabWidget/labw.cpp \

@@ -2,7 +2,13 @@
 
 Dalla versione **2.76.7-ic8tem.10**: **Options › View Power and SWR** apre una finestra a parte per comandare la potenza di uscita e leggere Po, ROS e ALC.
 
-Funziona con le radio **Icom**, sia con il cavo USB (CI-V) sia con **Icom LAN**, con il CAT attivo. Con altre radio la finestra lo dice e i comandi restano disattivati.
+Si collega alla radio in tre modi (scheda *Impostazioni › Connessione*, dalla versione **2.76.7-ic8tem.15**):
+
+* **CAT di MSHV**: radio Icom con il cavo USB (CI-V) o **Icom LAN**, con il CAT di MSHV attivo.
+* **Hamlib rigctld (TCP)**: qualsiasi radio supportata da Hamlib, **anche senza il CAT di MSHV**. Si indica indirizzo e porta di rigctld (di solito `127.0.0.1` e `4532`). Comandi usati: `l RFPOWER`, `L RFPOWER`, `l RFPOWER_METER`, `l SWR`, `l ALC`, `f`. rigctld può servire più programmi insieme: per esempio `rigctld -m 3073 -r COM5 -s 115200` per l'IC-7300 (IC-7610: `-m 3078`), poi MSHV (Rig Control › *Hamlib NET rigctl*) e questa finestra si collegano entrambi a rigctld.
+* **Icom CI-V su porta seriale propria**: la finestra apre da sola la porta COM della radio (velocità e indirizzo CI-V: IC-7300 `94`, IC-7300MK2 `B6`, IC-7610 `98`, IC-705 `A4`, IC-9700 `A2`), **anche senza il CAT di MSHV**. Una porta seriale può essere aperta da un solo programma: se il CAT di MSHV o un altro programma usa già quella porta, la finestra lo segnala.
+
+Se nessuna connessione funziona, la finestra lo dice e i comandi restano disattivati.
 
 ## Scheda "Potenza e ROS"
 
@@ -24,7 +30,9 @@ Funziona con le radio **Icom**, sia con il cavo USB (CI-V) sia con **Icom LAN**,
 
 Mostra ogni comando CI-V di potenza e strumenti inviato alla radio (`>>`) e ogni risposta (`<<`), in esadecimale e tradotta (es. `FE FE E0 98 15 12 00 30 FD   SWR 30 = 1.3`). **Leggi ora** chiede subito potenza e strumenti, anche senza trasmettere. Una risposta `FA` significa che la radio ha rifiutato il comando. *Copia* mette tutto negli appunti, per inviarlo a chi deve controllare.
 
-In alto nella prima scheda si vede la radio scelta in Rig Control, il tipo di collegamento (Icom CI-V, Icom LAN, OmniRig, rete...) e se il CAT è attivo: la finestra funziona solo con **Icom CI-V** o **Icom LAN** e CAT attivo.
+Con rigctld il registro mostra i comandi di testo e le risposte di Hamlib.
+
+In alto nella prima scheda si vede lo stato della connessione: con il CAT di MSHV la radio scelta in Rig Control, il tipo di collegamento e se il CAT è attivo; con la connessione propria rigctld o la porta CI-V e se risponde.
 
 ## Da sapere
 

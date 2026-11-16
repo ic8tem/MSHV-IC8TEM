@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.15
+* **Potenza e ROS anche senza il CAT di MSHV**: in *Impostazioni › Connessione* si sceglie **Hamlib rigctld** (qualsiasi radio supportata da Hamlib) o **Icom CI-V su porta seriale propria**. Il CAT Log mostra anche i comandi di rigctld. Vedi [[Potenza e ROS|Potenza-e-ROS]].
+
 ## 2.76.7-ic8tem.14
 * **Nessun limite di QSO nel Log**: sparisce l'avviso "The maximum number of QSOs in Log is 50000" e non serve più cancellare i QSO vecchi.
 

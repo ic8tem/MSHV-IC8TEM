@@ -17,6 +17,7 @@
 #include <QFontDatabase>
 #include <QApplication>
 #include <QClipboard>
+#include "../HvRigControl/qexsp_1_2rc/qextserialenumerator.h"
 
 // ---------------------------------------------------------------- meter
 HvPwrMeter::HvPwrMeter(int kind,QWidget *parent)
@@ -119,6 +120,8 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     s_set_path = app_path+"/settings/ms_pwrswr";
     f_block = true;
     f_capable = false;
+    f_cat_capable = false;
+    f_link_ok = false;
     f_tx = false;
     f_blocked = false;
     f_tune = false;
@@ -144,7 +147,8 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     H_head->addWidget(l_head,1);
     H_head->addWidget(l_tx);
 
-    l_notcap = new QLabel(tr("Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT."));
+    l_notcap = new QLabel(tr("Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.")+"\n"+
+                          tr("Or, in Settings, Connection: Hamlib rigctld (any radio) or Icom CI-V on its own serial port, also without the MSHV CAT."));
     l_notcap->setWordWrap(true);
     l_notcap->setStyleSheet("QLabel{background-color:rgb(254,243,199);color:rgb(120,53,15);padding:4px;}");
 
@@ -330,7 +334,76 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     l_xv->setWordWrap(true);
     l_xv->setStyleSheet("QLabel{background-color:rgb(254,243,199);color:rgb(120,53,15);padding:4px;}");
 
+    // connection: MSHV CAT or own connection
+    QGroupBox *gb_conn = new QGroupBox(tr("Connection"));
+    cb_conn = new QComboBox();
+    cb_conn->addItem(tr("MSHV CAT (Icom CI-V on USB or Icom LAN)"));
+    cb_conn->addItem(tr("Hamlib rigctld (TCP) - any radio, also without the MSHV CAT"));
+    cb_conn->addItem(tr("Icom CI-V on its own serial port, without the MSHV CAT"));
+    le_host = new QLineEdit("127.0.0.1");
+    le_host->setMaximumWidth(150);
+    sb_port = new QSpinBox();
+    sb_port->setRange(1,65535);
+    sb_port->setValue(4532);
+    cb_com = new QComboBox();
+    cb_com->setEditable(true);
+    cb_com->setMinimumWidth(110);
+    QPushButton *pb_rescan = new QPushButton(tr("Refresh"));
+    cb_baud = new QComboBox();
+    QStringList bl;
+    bl << "4800" << "9600" << "19200" << "38400" << "57600" << "115200";
+    cb_baud->addItems(bl);
+    cb_baud->setCurrentIndex(5);
+    le_civ = new QLineEdit("94");
+    le_civ->setMaximumWidth(50);
+    le_civ->setInputMask("HH");
+    le_civ->setToolTip(tr("CI-V address of the radio in hex: IC-7300 94, IC-7300MK2 B6, IC-7610 98, IC-705 A4, IC-9700 A2, IC-7100 88, IC-905 AC"));
+    pb_conn = new QPushButton(tr("Connect"));
+    l_conn = new QLabel();
+    l_conn->setWordWrap(true);
+    l_conn->setFont(mono);
+    QHBoxLayout *H_c1 = new QHBoxLayout();
+    H_c1->addWidget(cb_conn,1);
+    H_c1->addWidget(pb_conn);
+    QHBoxLayout *H_c2 = new QHBoxLayout();
+    H_c2->addWidget(new QLabel("rigctld:"));
+    H_c2->addWidget(le_host);
+    H_c2->addWidget(new QLabel(tr("Port")+":"));
+    H_c2->addWidget(sb_port);
+    H_c2->addSpacing(16);
+    H_c2->addWidget(new QLabel("CI-V:"));
+    H_c2->addWidget(cb_com);
+    H_c2->addWidget(pb_rescan);
+    H_c2->addWidget(cb_baud);
+    H_c2->addWidget(new QLabel(tr("Address")+":"));
+    H_c2->addWidget(le_civ);
+    H_c2->addStretch(1);
+    QLabel *l_cinfo = new QLabel(tr("A serial port can be used by one program only: with the own CI-V port the MSHV CAT must use another port or be off. Hamlib rigctld can be shared by several programs (e.g. rigctld -m 3073 -r COM5 -s 115200 for the IC-7300)."));
+    l_cinfo->setWordWrap(true);
+    QVBoxLayout *V_c = new QVBoxLayout();
+    V_c->addLayout(H_c1);
+    V_c->addLayout(H_c2);
+    V_c->addWidget(l_conn);
+    V_c->addWidget(l_cinfo);
+    gb_conn->setLayout(V_c);
+    connect(cb_conn, SIGNAL(currentIndexChanged(int)), this, SLOT(ConnChanged()));
+    connect(pb_conn, SIGNAL(clicked()), this, SLOT(ConnApply()));
+    connect(pb_rescan, SIGNAL(clicked()), this, SLOT(RefreshCom()));
+    link = new HvPwrLink(this);
+    connect(link, SIGNAL(Status(bool,QString)), this, SLOT(LinkStatus(bool,QString)));
+    connect(link, SIGNAL(LogLine(bool,QString)), this, SLOT(LinkLog(bool,QString)));
+    connect(link, SIGNAL(RfPct(int)), this, SLOT(OnRfPct(int)));
+    connect(link, SIGNAL(Po(double)), this, SLOT(OnPo(double)));
+    connect(link, SIGNAL(Swr(double)), this, SLOT(OnSwr(double)));
+    connect(link, SIGNAL(Alc(double)), this, SLOT(OnAlc(double)));
+    connect(link, SIGNAL(FreqHz(double)), this, SLOT(LinkFreq(double)));
+    t_freq = new QTimer(this);
+    connect(t_freq, SIGNAL(timeout()), this, SLOT(PollFreq()));
+    t_freq->start(3000);
+    RefreshCom();
+
     QVBoxLayout *V_w2 = new QVBoxLayout(w2);
+    V_w2->addWidget(gb_conn);
     V_w2->addLayout(H_s1);
     V_w2->addWidget(gb_bands,1);
     V_w2->addWidget(gb_prot);
@@ -412,6 +485,8 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     pb_unlock->setHidden(true);
     l_block->setHidden(true);
     Event(QString(),false);
+    UpdateConnWidgets();
+    if (cb_conn->currentIndex() != 0) QTimer::singleShot(500, this, SLOT(ConnApply()));
 }
 HvPowerSwrW::~HvPowerSwrW()
 {}
@@ -449,6 +524,12 @@ void HvPowerSwrW::ReadSettings()
         else if (k=="alc_warn") cb_alc_warn->setChecked(v=="1");
         else if (k=="po_warn") cb_po_warn->setChecked(v=="1");
         else if (k=="pct") sl_pwr->setValue(v.toInt());
+        else if (k=="conn") cb_conn->setCurrentIndex(qBound(0,v.toInt(),2));
+        else if (k=="host") le_host->setText(v);
+        else if (k=="port") sb_port->setValue(v.toInt());
+        else if (k=="com") cb_com->setEditText(v);
+        else if (k=="baud") { int bi = cb_baud->findText(v); if (bi >= 0) cb_baud->setCurrentIndex(bi); }
+        else if (k=="civ") le_civ->setText(v);
         else if (k=="geom") restoreGeometry(QByteArray::fromBase64(v.toLatin1()));
         else if (k=="visible") f_was_visible = (v=="1");
         else if (k.startsWith("mem:")) mem_pwr.insert(k.mid(4),v.toInt());
@@ -474,6 +555,12 @@ void HvPowerSwrW::SaveSettings()
     out << "alc_warn=" << (cb_alc_warn->isChecked() ? "1" : "0") << "\n";
     out << "po_warn=" << (cb_po_warn->isChecked() ? "1" : "0") << "\n";
     out << "pct=" << (f_tune ? s_saved_pct : sl_pwr->value()) << "\n";
+    out << "conn=" << cb_conn->currentIndex() << "\n";
+    out << "host=" << le_host->text().trimmed() << "\n";
+    out << "port=" << sb_port->value() << "\n";
+    out << "com=" << cb_com->currentText().trimmed() << "\n";
+    out << "baud=" << cb_baud->currentText() << "\n";
+    out << "civ=" << le_civ->text().trimmed() << "\n";
     out << "geom=" << QString::fromLatin1(saveGeometry().toBase64()) << "\n";
     out << "visible=" << ((isVisible() && !f_closing) ? "1" : "0") << "\n";
     for (QMap<QString,int>::const_iterator it = mem_pwr.constBegin(); it != mem_pwr.constEnd(); ++it)
@@ -559,7 +646,7 @@ void HvPowerSwrW::SliderChanged(int)
 void HvPowerSwrW::SendPower()
 {
     int lv = (int)(sl_pwr->value() * 255.0 / 100.0 + 0.5);
-    emit EmitRigCmd(SET_RFPOWER,QString::number(lv));
+    RigCmd(SET_RFPOWER,QString::number(lv));
     SaveSettings();
 }
 void HvPowerSwrW::SetPct(int pct,bool send)
@@ -608,7 +695,7 @@ void HvPowerSwrW::ApplyBandMemory()
 }
 void HvPowerSwrW::ReadFromRadio()
 {
-    emit EmitRigCmd(GET_RFPOWER,QString());
+    RigCmd(GET_RFPOWER,QString());
 }
 void HvPowerSwrW::TuneClicked()
 {
@@ -649,6 +736,12 @@ void HvPowerSwrW::Event(const QString &s,bool bad)
 }
 void HvPowerSwrW::SetCapable(bool f)
 {
+    f_cat_capable = f;
+    UpdateCapable();
+}
+void HvPowerSwrW::UpdateCapable()
+{
+    bool f = (cb_conn->currentIndex() == 0) ? f_cat_capable : f_link_ok;
     bool was = f_capable;
     f_capable = f;
     UpdateEnabled();
@@ -711,11 +804,12 @@ void HvPowerSwrW::PollMeters()
 {
     if (!f_capable || (!isVisible() && !cb_prot->isChecked())) return;
     if (cb_only_tx->isChecked() && !f_tx) return;
-    emit EmitRigCmd(GET_METERS,QString());
+    RigCmd(GET_METERS,QString());
 }
 void HvPowerSwrW::SetStatus(QString s)
 {
-    l_status->setText(s);
+    s_cat_status = s;
+    if (cb_conn->currentIndex() == 0) l_status->setText(s);
 }
 void HvPowerSwrW::ReadNow()
 {
@@ -724,8 +818,8 @@ void HvPowerSwrW::ReadNow()
         Log(true,tr("not sent: Power and SWR not available with this rig")+" ("+l_status->text()+")");
         return;
     }
-    emit EmitRigCmd(GET_RFPOWER,QString());
-    emit EmitRigCmd(GET_METERS,QString());
+    RigCmd(GET_RFPOWER,QString());
+    RigCmd(GET_METERS,QString());
 }
 void HvPowerSwrW::LogClear()
 {
@@ -766,16 +860,22 @@ void HvPowerSwrW::SetRigInfo(int id,QString s)
         Log(id == LOG_TX,s);
         return;
     }
+    if (cb_conn->currentIndex() != 0) return;   // own connection in use
     int raw = s.toInt();
+    if (id == READ_RFPOWER) OnRfPct((int)(raw * 100.0 / 255.0 + 0.5));
+    else if (id == READ_PO) OnPo(PoFraction(raw));
+    else if (id == READ_ALC) OnAlc(raw / 120.0);
+    else if (id == READ_SWR) OnSwr(SwrValue(raw));
+}
+void HvPowerSwrW::OnRfPct(int pct)
+{
+    if (!f_tune) SetPct(qBound(0,pct,100),false);
+}
+void HvPowerSwrW::OnPo(double frac)
+{
     qint64 now = clock.elapsed();
-    if (id == READ_RFPOWER)
     {
-        if (!f_tune) SetPct((int)(raw * 100.0 / 255.0 + 0.5),false);
-        return;
-    }
-    if (id == READ_PO)
-    {
-        last_po = PoFraction(raw);
+        last_po = qMax(0.0,frac);
         if (last_po > po_peak || now - po_peak_at > 2000)
         {
             po_peak = last_po;
@@ -786,20 +886,23 @@ void HvPowerSwrW::SetRigInfo(int id,QString s)
         if (cb_po_warn->isChecked() && f_tx && !f_tune && now - tx_since > 1500 && sl_pwr->value() > 0 &&
                 last_po*100.0 < 0.5*sl_pwr->value())
             Event(tr("Po is below half of the set power"),true);
-        return;
     }
-    if (id == READ_ALC)
+}
+void HvPowerSwrW::OnAlc(double a)
+{
     {
-        last_alc = raw / 120.0;
+        last_alc = qMax(0.0,a);
         m_alc->SetValue(last_alc);
         l_alc->setText(QString::number(qMin(999.0,last_alc*100.0),'f',0)+" %");
         if (cb_alc_warn->isChecked() && f_tx && !f_tune && last_alc > 0.5)
             Event(tr("ALC above 50 %: lower the audio level"),true);
-        return;
     }
-    if (id == READ_SWR)
+}
+void HvPowerSwrW::OnSwr(double swr)
+{
+    qint64 now = clock.elapsed();
     {
-        last_swr = SwrValue(raw);
+        last_swr = swr;
         m_swr->SetValue(last_swr);
         l_swr->setText(last_swr >= 3.0 ? QString(QString::number(last_swr,'f',1)+"+") : QString::number(last_swr,'f',1));
         l_swr->setStyleSheet(last_swr < 1.8 ? "QLabel{color:rgb(22,101,52);}" :
@@ -830,4 +933,100 @@ void HvPowerSwrW::SetRigInfo(int id,QString s)
                       QString::number(last_swr,'f',1)+"  ALC "+QString::number(last_alc*100.0,'f',0)+" %  OK",false);
         }
     }
+}
+
+// ---------------------------------------------------------------- own connection
+void HvPowerSwrW::RigCmd(int id,const QString &s)
+{
+    if (cb_conn->currentIndex() == 0)
+    {
+        emit EmitRigCmd(id,s);
+        return;
+    }
+    if (!f_link_ok) return;
+    if (id == SET_RFPOWER) link->SetPower((int)(s.toInt()*100.0/255.0+0.5));
+    else if (id == GET_RFPOWER) link->ReadPower();
+    else if (id == GET_METERS) link->ReadMeters();
+}
+void HvPowerSwrW::UpdateConnWidgets()
+{
+    int k = cb_conn->currentIndex();
+    le_host->setEnabled(k == 1);
+    sb_port->setEnabled(k == 1);
+    cb_com->setEnabled(k == 2);
+    cb_baud->setEnabled(k == 2);
+    le_civ->setEnabled(k == 2);
+    pb_conn->setEnabled(k != 0);
+}
+void HvPowerSwrW::ConnChanged()
+{
+    UpdateConnWidgets();
+    if (f_block) return;
+    if (cb_conn->currentIndex() == 0)
+    {
+        link->Close();
+        f_link_ok = false;
+        l_conn->setText(QString());
+        l_status->setText(s_cat_status);
+        UpdateCapable();
+    }
+    else ConnApply();
+    SaveSettings();
+}
+void HvPowerSwrW::ConnApply()
+{
+    int k = cb_conn->currentIndex();
+    if (k == 0) return;
+    bool ok = false;
+    int civ = le_civ->text().trimmed().toInt(&ok,16);
+    if (!ok) civ = 0x94;
+    link->Open(k == 1 ? HvPwrLink::RIGCTLD : HvPwrLink::ICOM_SERIAL, le_host->text(), sb_port->value(),
+               cb_com->currentText(), cb_baud->currentText().toInt(), civ);
+    SaveSettings();
+}
+void HvPowerSwrW::RefreshCom()
+{
+    QString cur = cb_com->currentText();
+    QStringList l;
+    QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
+    for (int i = 0; i < ports.count(); ++i)
+    {
+        QString n = ports.at(i).portName;
+        if (n.isEmpty() || n.endsWith(".init") || n.endsWith(".lock")) continue;
+#if !defined(Q_OS_WIN)
+        if (!n.startsWith("/")) n = "/dev/"+n;
+#endif
+        if (!l.contains(n)) l << n;
+    }
+    l.sort();
+    cb_com->clear();
+    cb_com->addItems(l);
+    cb_com->setEditText(cur);
+}
+void HvPowerSwrW::LinkStatus(bool ok,QString s)
+{
+    bool was = f_link_ok;
+    f_link_ok = ok;
+    s_link_status = s;
+    l_conn->setText(s);
+    l_conn->setStyleSheet(ok ? "QLabel{color:rgb(22,101,52);}" : "QLabel{color:rgb(153,27,27);}");
+    if (cb_conn->currentIndex() != 0)
+    {
+        l_status->setText(s);
+        if (ok && !was) Log(true,s);
+        UpdateCapable();
+        if (ok && !was) link->ReadFreq();
+    }
+}
+void HvPowerSwrW::LinkLog(bool tx,QString s)
+{
+    Log(tx,s);
+}
+void HvPowerSwrW::LinkFreq(double hz)
+{
+    if (hz > 0.0) SetFreqStr(QString::number(hz,'f',0));
+}
+void HvPowerSwrW::PollFreq()
+{
+    if (cb_conn->currentIndex() != 0 && f_link_ok && !f_tx) link->ReadFreq();
 }

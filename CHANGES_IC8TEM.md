@@ -103,3 +103,7 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * (ic8tem.14) `src/HvTxW/HvLogW/hvlogw.cpp` — no limit on the number of QSOs in the Log (CheckLogCount warning disabled).
 * `src/HvTxW/hvmultianswermodw.*` — "Unlock TX Slots" ON by default; settings saved by older versions start unlocked (new "u1" mark marks the saved choice).
 * `packaging/make_release_body.py` — no download table; `src/HvUpdate/mshv_updater.cpp` — release page link to github.com.
+
+## 2026-11-16 — ic8tem.15
+* `src/HvPowerSwr/hvpwrlink.*` (new) — own connection of the Power & SWR window: Hamlib rigctld (TCP) or Icom CI-V on its own serial port, independent from the MSHV CAT.
+* `src/HvPowerSwr/hvpowerswrw.*` — Settings › Connection, meters routed through the chosen connection; translations updated.

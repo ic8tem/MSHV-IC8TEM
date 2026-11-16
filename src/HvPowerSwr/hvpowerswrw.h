@@ -24,6 +24,9 @@
 #include <QElapsedTimer>
 #include <QMap>
 #include <QPlainTextEdit>
+#include <QComboBox>
+#include <QLineEdit>
+#include "hvpwrlink.h"
 
 class HvPwrMeter : public QWidget
 {
@@ -84,6 +87,18 @@ private slots:
     void ReadNow();
     void LogClear();
     void LogCopy();
+    // own connection (independent from the MSHV CAT)
+    void OnRfPct(int);
+    void OnPo(double);
+    void OnSwr(double);
+    void OnAlc(double);
+    void LinkStatus(bool,QString);
+    void LinkLog(bool,QString);
+    void LinkFreq(double);
+    void ConnChanged();
+    void ConnApply();
+    void RefreshCom();
+    void PollFreq();
 
 private:
     QString s_set_path;
@@ -151,6 +166,23 @@ private:
     QLabel *l_status;
     QPlainTextEdit *te_log;
     QCheckBox *cb_log_pause;
+    HvPwrLink *link;
+    QComboBox *cb_conn;
+    QLineEdit *le_host;
+    QSpinBox *sb_port;
+    QComboBox *cb_com;
+    QComboBox *cb_baud;
+    QLineEdit *le_civ;
+    QPushButton *pb_conn;
+    QLabel *l_conn;
+    QTimer *t_freq;
+    bool f_cat_capable;
+    bool f_link_ok;
+    QString s_cat_status;
+    QString s_link_status;
+    void RigCmd(int id,const QString &s);
+    void UpdateCapable();
+    void UpdateConnWidgets();
     void Log(bool tx,const QString &hex);
     QString Decode(const QString &hex);
 

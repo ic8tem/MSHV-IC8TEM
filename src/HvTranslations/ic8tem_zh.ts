@@ -203,12 +203,87 @@
         <source>RF power</source>
         <translation>射频功率</translation>
     </message>
+    <message>
+        <source>Or, in Settings, Connection: Hamlib rigctld (any radio) or Icom CI-V on its own serial port, also without the MSHV CAT.</source>
+        <translation>或在设置的连接中选择：Hamlib rigctld（任何电台）或独立串口上的 Icom CI-V，无需 MSHV CAT。</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <source>MSHV CAT (Icom CI-V on USB or Icom LAN)</source>
+        <translation>MSHV CAT（USB 上的 Icom CI-V 或 Icom LAN）</translation>
+    </message>
+    <message>
+        <source>Hamlib rigctld (TCP) - any radio, also without the MSHV CAT</source>
+        <translation>Hamlib rigctld (TCP) - 任何电台，无需 MSHV CAT</translation>
+    </message>
+    <message>
+        <source>Icom CI-V on its own serial port, without the MSHV CAT</source>
+        <translation>独立串口上的 Icom CI-V，无需 MSHV CAT</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>端口</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>地址</translation>
+    </message>
+    <message>
+        <source>CI-V address of the radio in hex: IC-7300 94, IC-7300MK2 B6, IC-7610 98, IC-705 A4, IC-9700 A2, IC-7100 88, IC-905 AC</source>
+        <translation>电台的 CI-V 地址（十六进制）：IC-7300 94, IC-7300MK2 B6, IC-7610 98, IC-705 A4, IC-9700 A2, IC-7100 88, IC-905 AC</translation>
+    </message>
+    <message>
+        <source>A serial port can be used by one program only: with the own CI-V port the MSHV CAT must use another port or be off. Hamlib rigctld can be shared by several programs (e.g. rigctld -m 3073 -r COM5 -s 115200 for the IC-7300).</source>
+        <translation>一个串口只能由一个程序使用：使用独立 CI-V 端口时，MSHV CAT 必须使用其他端口或关闭。Hamlib rigctld 可由多个程序共享（例如 IC-7300：rigctld -m 3073 -r COM5 -s 115200）。</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>
     <message>
         <source>View Power and SWR</source>
         <translation>查看功率和驻波比</translation>
+    </message>
+</context>
+<context>
+    <name>HvPwrLink</name>
+    <message>
+        <source>cannot open the port (used by another program?)</source>
+        <translation>无法打开端口（被其他程序占用？）</translation>
+    </message>
+    <message>
+        <source>address</source>
+        <translation>地址</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>无应答</translation>
+    </message>
+    <message>
+        <source>the radio does not answer (check CI-V address and baud rate)</source>
+        <translation>电台无应答（请检查 CI-V 地址和波特率）</translation>
+    </message>
+    <message>
+        <source>retry in 5 s</source>
+        <translation>5 秒后重试</translation>
+    </message>
+    <message>
+        <source>the radio answers with address</source>
+        <translation>电台应答地址为</translation>
+    </message>
+    <message>
+        <source>set it in Settings</source>
+        <translation>请在设置中设定</translation>
     </message>
 </context>
 </TS>

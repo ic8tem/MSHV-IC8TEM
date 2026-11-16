@@ -203,12 +203,87 @@
         <source>RF power</source>
         <translation>Potencia RF</translation>
     </message>
+    <message>
+        <source>Or, in Settings, Connection: Hamlib rigctld (any radio) or Icom CI-V on its own serial port, also without the MSHV CAT.</source>
+        <translation>O bien, en Ajustes, Conexión: Hamlib rigctld (cualquier radio) o Icom CI-V en su propio puerto serie, también sin el CAT de MSHV.</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>Conexión</translation>
+    </message>
+    <message>
+        <source>MSHV CAT (Icom CI-V on USB or Icom LAN)</source>
+        <translation>CAT de MSHV (Icom CI-V por USB o Icom LAN)</translation>
+    </message>
+    <message>
+        <source>Hamlib rigctld (TCP) - any radio, also without the MSHV CAT</source>
+        <translation>Hamlib rigctld (TCP) - cualquier radio, también sin el CAT de MSHV</translation>
+    </message>
+    <message>
+        <source>Icom CI-V on its own serial port, without the MSHV CAT</source>
+        <translation>Icom CI-V en su propio puerto serie, sin el CAT de MSHV</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Actualizar</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>Conectar</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Puerto</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Dirección</translation>
+    </message>
+    <message>
+        <source>CI-V address of the radio in hex: IC-7300 94, IC-7300MK2 B6, IC-7610 98, IC-705 A4, IC-9700 A2, IC-7100 88, IC-905 AC</source>
+        <translation>Dirección CI-V de la radio (hex): IC-7300 94, IC-7300MK2 B6, IC-7610 98, IC-705 A4, IC-9700 A2, IC-7100 88, IC-905 AC</translation>
+    </message>
+    <message>
+        <source>A serial port can be used by one program only: with the own CI-V port the MSHV CAT must use another port or be off. Hamlib rigctld can be shared by several programs (e.g. rigctld -m 3073 -r COM5 -s 115200 for the IC-7300).</source>
+        <translation>Un puerto serie solo puede usarlo un programa: con el puerto CI-V propio el CAT de MSHV debe usar otro puerto o estar apagado. Hamlib rigctld se puede compartir entre varios programas (p. ej. rigctld -m 3073 -r COM5 -s 115200 para el IC-7300).</translation>
+    </message>
 </context>
 <context>
     <name>Main_Ms</name>
     <message>
         <source>View Power and SWR</source>
         <translation>Ver potencia y ROE</translation>
+    </message>
+</context>
+<context>
+    <name>HvPwrLink</name>
+    <message>
+        <source>cannot open the port (used by another program?)</source>
+        <translation>no se puede abrir el puerto (¿lo usa otro programa?)</translation>
+    </message>
+    <message>
+        <source>address</source>
+        <translation>dirección</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>sin respuesta</translation>
+    </message>
+    <message>
+        <source>the radio does not answer (check CI-V address and baud rate)</source>
+        <translation>la radio no responde (compruebe la dirección CI-V y la velocidad)</translation>
+    </message>
+    <message>
+        <source>retry in 5 s</source>
+        <translation>reintento en 5 s</translation>
+    </message>
+    <message>
+        <source>the radio answers with address</source>
+        <translation>la radio responde con la dirección</translation>
+    </message>
+    <message>
+        <source>set it in Settings</source>
+        <translation>configúrela en Ajustes</translation>
     </message>
 </context>
 </TS>
