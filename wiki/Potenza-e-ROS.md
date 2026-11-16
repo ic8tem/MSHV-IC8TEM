@@ -1,6 +1,6 @@
 # Potenza e ROS
 
-Dalla versione **2.76.7-ic8tem.9**: **Options › View Power and SWR** apre una finestra a parte per comandare la potenza di uscita e leggere Po, ROS e ALC.
+Dalla versione **2.76.7-ic8tem.10**: **Options › View Power and SWR** apre una finestra a parte per comandare la potenza di uscita e leggere Po, ROS e ALC.
 
 Funziona con le radio **Icom**, sia con il cavo USB (CI-V) sia con **Icom LAN**, con il CAT attivo. Con altre radio la finestra lo dice e i comandi restano disattivati.
 

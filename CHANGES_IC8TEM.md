@@ -80,3 +80,10 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
   * `src/HvTxW/HvRadioNetW/MessageClient.*`, `radionetw.*` — read the message (the last three fields are optional) and pass it on.
   * `src/main_ms.*` — stop a TX in progress, switch to MSK144 or FSK441, then (after the mode change) `HvTxW::SetIc8temSelect()`.
   * `src/HvTxW/hvtxw.*` — `SetIc8temSelect()`: QSY with `SetDefFreqGlobal(3, …)` (transverter offset of Rig Control applied), then the same as a double click in the decode list: MSK144 via `DecListTextAll()` with Auto Seq according to the TX flag; FSK441 his call and locator, TX on with `auto_on()`. For "CQ nnn" the frequency sent by MSK144-WB (MHz of the signal + nnn kHz) is set again after the list's own QRG QSY.
+
+## 2026-11-16 — 2.76.7-ic8tem.10: Power & SWR
+* `src/HvPowerSwr/hvpowerswrw.*` (new) — window Options › View Power and SWR: RF power (slider, presets, per-band and optional per-mode memory, read from radio), Po/SWR/ALC meters while transmitting (every 200 ms), tune at the per-band tune power with restore, SWR protection (stop and block TX until Unlock), ALC and low Po warnings. Settings in `settings/ms_pwrswr`.
+* `src/HvRigControl/HvRigCat/rigdef.h`, `icom/icom.*` — new CAT commands SET_RFPOWER, GET_RFPOWER, GET_METERS (CI-V 14 0A, 15 11/12/13) and their answers.
+* `src/HvRigControl/HvRigCat/hvrigcatw.*`, `src/HvRigControl/hvrigcontrol.*` — commands and answers forwarded; available only with Icom CI-V or Icom LAN and the CAT running.
+* `src/main_ms.*` — menu entry, TX state, mode, tune and stop TX connected to the window.
+* Translations: `packaging/i18n/ic8tem_strings.py` + `make_qm.py` build `src/HvTranslations/ic8tem_<lang>.qm/.ts` for the 15 MSHV languages; loaded next to the original `mshv_<lang>.qm`.

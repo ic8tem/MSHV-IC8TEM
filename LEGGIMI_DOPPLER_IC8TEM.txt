@@ -139,3 +139,8 @@ ALTRE MODIFICHE (versione 2)
    "Update now" scarica il pacchetto, verifica l'impronta SHA256, si chiude,
    installa e riparte. Impostazioni e log restano. Per .deb/.rpm/.txz viene
    chiesta la password di sistema. Si disattiva da Help.
+11) Potenza e ROS (dalla 2.76.7-ic8tem.10)
+   Options > View Power and SWR: potenza di uscita, Po, ROS e ALC in TX,
+   memoria per banda/modo, Tune a potenza ridotta, protezione ROS che ferma e
+   blocca il TX. Radio Icom via USB o Icom LAN. Con il transverter le misure
+   sono quelle verso il transverter, non in antenna.

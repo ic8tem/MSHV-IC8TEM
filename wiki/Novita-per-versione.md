@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.10
+* Nuova finestra **Potenza e ROS** (Options › View Power and SWR): potenza di uscita, Po, ROS, ALC, memoria per banda e per modo, Tune a potenza ridotta, protezione ROS che ferma il TX. Radio Icom via USB o LAN. Tradotta nelle lingue di MSHV.
+
 ## 2.76.7-ic8tem.9
 * **MSK144-WB**: il doppio clic su una decodifica di MSK144-WB (decodificatore MSK144/FSK441 a larga banda su SDRangel) porta MSHV sul modo (MSK144 o FSK441), sulla frequenza (spostamento del transverter compreso), imposta nominativo, locatore e periodo e accende il TX. In UDP Broadcast Settings: server 127.0.0.1, porta 2237.
 
