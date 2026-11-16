@@ -1,7 +1,9 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
-**ic8tem.13:** no limit on the number of QSOs in the Log (the 50000 QSOs warning is gone) · Unlock TX Slots ON by default (older settings start unlocked; untick it for the original limits) · release page without the download table, links only to github.com.
+**ic8tem.14:** no limit on the number of QSOs in the Log (the 50000 QSOs warning is gone).
+
+**ic8tem.13:** Unlock TX Slots ON by default (older settings start unlocked; untick it for the original limits) · release page without the download table, links only to github.com.
 
 **ic8tem.12:** Power & SWR — CAT Log tab (CI-V frames sent and received, decoded), Read now, rig/CAT status; fix: window could stay "not available" when the CAT started first.
 
