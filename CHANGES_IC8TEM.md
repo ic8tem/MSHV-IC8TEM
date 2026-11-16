@@ -110,3 +110,5 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 
 ## 2026-11-16 — ic8tem.16
 * `src/HvRigControl/HvRigCat/hvrigcatw.cpp` — the active rig type is now set also for the Icom CI-V radios (it was never set), so the Power & SWR window works with them.
+* `src/HvRigControl/HvRigCat/icom/icom.cpp` — frequency (03) and mode (04/26) answers accepted also when they arrive after the next poll command (Icom LAN latency); CAT Log of every frame.
+* `src/HvRigControl/HvRigCat/icomlan/icomlan.*` — TX audio statistics in the CAT Log.

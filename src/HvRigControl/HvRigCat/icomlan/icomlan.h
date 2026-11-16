@@ -78,6 +78,7 @@ signals:
     void CivReceived(QByteArray);
     void Status(QString,int);   // 0 disconnected, 1 connecting, 2 connected
     void RadioInfo(QString,int); // radio name, CI-V address announced by the radio
+    void TxInfo(QString);        // IC8TEM: TX audio statistics for the CAT Log
 
 public slots:
     void Start(QString host,int port,QString user,QString pass,int civ_port,int audio_port);
@@ -133,6 +134,11 @@ private:
     // TX
     bool tx_keyed;
     bool tx_primed;
+    int tx_stat_frames;
+    int tx_stat_peak;
+    qint64 tx_stat_since;
+    qint64 tx_stat_last;
+    void TxReport(bool end);
     qint64 tx_next;
     double tx_frac;
     double tx_x[4];
@@ -199,6 +205,7 @@ private slots:
     void CivFromCore(QByteArray);
     void CoreStatus(QString,int);
     void CoreRadioInfo(QString,int);
+    void CoreTxInfo(QString);
     void Quit();
 
 private:

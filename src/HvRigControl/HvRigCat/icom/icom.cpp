@@ -316,8 +316,8 @@ void Icom::make_cmd_all(unsigned char *comand_subcomand,int count_c)
 
     cmd_all[count]=FI;
     count++;
-    if (count_c >= 2 && (comand_subcomand[0]==0x14 || comand_subcomand[0]==0x15) && (s_CmdID_log))//IC8TEM CAT log
-        emit EmitReadedInfo(LOG_TX,QString(QByteArray((char *)cmd_all,count).toHex(' ').toUpper()));
+    //IC8TEM CAT log: every frame sent to the radio
+    emit EmitReadedInfo(LOG_TX,QString(QByteArray((char *)cmd_all,count).toHex(' ').toUpper()));
     emit EmitWriteCmd((char *)cmd_all,count);
 }
 void Icom::set_ptt(ptt_t ptt)
@@ -468,13 +468,18 @@ void Icom::SetReadyRead(QByteArray ar,int size0)
                 s_read_array.clear();//qDebug()<<"NO ICOM IN NETWORK";
                 continue;//return; <- stop 2.73 odl icom start -> FFFFFFFFFFFF.FFFFFFFF.FF.0000000000.FF
             }
+            //IC8TEM CAT log: every frame from the radio (echoes of our own commands excluded)
+            if (s_read_array[3]!=(char)CTRLID)
+                emit EmitReadedInfo(LOG_RX,QString(s_read_array.toHex(' ').toUpper())+" FD"+
+                                    ((s_read_array[3]!=(char)s_model_addr) ?
+                                     QString("   <- CI-V address %1, expected %2").arg((int)(unsigned char)s_read_array[3],2,16,QChar('0')).arg((int)s_model_addr,2,16,QChar('0')).toUpper() : QString()));
             //rejekt no my correspondent in network or my full duplex signal
             if (s_read_array[2]!=(char)CTRLID || s_read_array[3]!=(char)s_model_addr)
             {
                 s_read_array.clear();//qDebug()<<"NO MAY CORRESPONDENT OR FULL DUPLEX SIGNAL";
                 continue;//2.55 may be no end, try to end,  may be echo is ON
             }
-            if (s_CmdID==GET_FREQ && s_read_array[4]==(char)C_RD_FREQ)//my qestion for freq and freq filter
+            if (s_read_array[4]==(char)C_RD_FREQ)//my qestion for freq and freq filter //IC8TEM: any 03 answer (LAN latency)
             {
                 if (size==10 || size==9)//bez fd=fi (size==10 || size==9)
                 {
@@ -487,11 +492,9 @@ void Icom::SetReadyRead(QByteArray ar,int size0)
                     }
                     unsigned long long f = from_bcd_(fbsd, cfbsd*2);
                     emit EmitReadedInfo(GET_FREQ,QString("%1").arg(f));
-                    s_CmdID = -1;//I Find my answer no need more
+                    if (s_CmdID==GET_FREQ) s_CmdID = -1;//I Find my answer no need more
                 }
             }
-            if (size >= 5 && (s_read_array[4]==(char)0x14 || s_read_array[4]==(char)0x15 || s_read_array[4]==(char)0xFA))//IC8TEM CAT log
-                emit EmitReadedInfo(LOG_RX,QString(s_read_array.toHex(' ').toUpper())+" FD");
             if (size==8 && (s_read_array[4]==(char)0x14 || s_read_array[4]==(char)0x15))//IC8TEM Power & SWR answers
             {
                 unsigned char sc = (unsigned char)s_read_array[5];
@@ -505,7 +508,7 @@ void Icom::SetReadyRead(QByteArray ar,int size0)
             }
             if (newSRMod)
             {
-                if (s_CmdID==GET_MODE && s_read_array[4]==(char)N_SETRD_MOD)
+                if (s_read_array[4]==(char)N_SETRD_MOD)//IC8TEM: any 26 answer (LAN latency)
                 {
                     if (size==9)//bez fd=fi FEFE94E0.26.00.01.01.03.FD  
                     {
@@ -522,7 +525,7 @@ void Icom::SetReadyRead(QByteArray ar,int size0)
             }
             else
             {
-                if (s_CmdID==GET_MODE && s_read_array[4]==(char)C_RD_MODE)//my qestion for mode and mode filter
+                if (s_read_array[4]==(char)C_RD_MODE)//my qestion for mode and mode filter //IC8TEM: any 04 answer
                 {
                     if (size==7)//bez fd=fi  FEFE94E0.06.00.01.FD
                     {

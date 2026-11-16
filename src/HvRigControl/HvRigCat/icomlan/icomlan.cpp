@@ -230,6 +230,10 @@ IcomLanCore::IcomLanCore()
     clock.start();
     for (int i = 0; i < 3; ++i) st[i].role = i;
     tx_keyed = false;
+    tx_stat_frames = 0;
+    tx_stat_peak = 0;
+    tx_stat_since = 0;
+    tx_stat_last = 0;
     tx_primed = false;
     tx_next = 0;
     tx_frac = 0.0;
@@ -819,9 +823,15 @@ void IcomLanCore::SetTxKeyed(bool on)
         for (int i = 0; i < 4; ++i) tx_x[i] = 0.0;
         tx_keyed = true;
         il_tx_keyed.storeRelease(1);
+        tx_stat_frames = 0;
+        tx_stat_peak = 0;
+        tx_stat_since = Now();
+        tx_stat_last = tx_stat_since;
+        emit TxInfo(QString("Icom LAN: PTT ON, audio stream ")+(st[2].ready ? "ready" : "NOT ready (no audio to the radio)"));
     }
     else
     {
+        if (tx_keyed) TxReport(true);
         tx_keyed = false;
         il_tx_keyed.storeRelease(0);
     }
@@ -870,6 +880,8 @@ void IcomLanCore::TxTick()
             if (v > 32767) v = 32767;
             if (v < -32768) v = -32768;
             PutLE16(pcm,2*k,(quint16)(qint16)v);
+            if (v > tx_stat_peak) tx_stat_peak = v;
+            else if (-v > tx_stat_peak) tx_stat_peak = -v;
             tx_frac += step;
             while (tx_frac >= 1.0)
             {
@@ -883,9 +895,25 @@ void IcomLanCore::TxTick()
         }
         il_r.storeRelease(rp);
         SendAudioFrame(pcm);
+        tx_stat_frames++;
         tx_next += 20;
     }
     if (now - tx_next > 40) tx_next = now + 20;
+    if (now - tx_stat_last >= 3000) TxReport(false);
+}
+void IcomLanCore::TxReport(bool end)//IC8TEM: what reached the radio, for the CAT Log
+{
+    qint64 now = Now();
+    double sec = (now - tx_stat_since) / 1000.0;
+    QString s = QString("Icom LAN audio TX%1: %2 frames of 20 ms in %3 s (expected %4), peak %5 %")
+                .arg(end ? " end" : "").arg(tx_stat_frames).arg(sec,0,'f',1).arg((int)(sec*50.0))
+                .arg(tx_stat_peak*100/32767);
+    if (tx_stat_frames == 0)
+        s += " - NO AUDIO FROM MSHV: choose Icom LAN Output in Options > Sound Settings";
+    else if (tx_stat_peak < 300)
+        s += " - audio almost silent: raise the TX level slider";
+    emit TxInfo(s);
+    tx_stat_last = now;
 }
 void IcomLanCore::AudioPayload(const QByteArray &p)
 {
@@ -1012,6 +1040,7 @@ IcomLanRig::IcomLanRig(int ModelID,QWidget *parent)
     connect(core, SIGNAL(CivReceived(QByteArray)), this, SLOT(CivFromCore(QByteArray)));
     connect(core, SIGNAL(Status(QString,int)), this, SLOT(CoreStatus(QString,int)));
     connect(core, SIGNAL(RadioInfo(QString,int)), this, SLOT(CoreRadioInfo(QString,int)));
+    connect(core, SIGNAL(TxInfo(QString)), this, SLOT(CoreTxInfo(QString)));
     thr.start(QThread::TimeCriticalPriority);
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(Quit()));
 }
@@ -1036,6 +1065,10 @@ void IcomLanRig::MakeIcom(int im)
     connect(icom, SIGNAL(EmitWriteCmd(char*,int)), this, SLOT(CivFromIcom(char*,int)), Qt::DirectConnection);
     connect(this, SIGNAL(IcomRead(QByteArray,int)), icom, SLOT(SetReadyRead(QByteArray,int)));
     connect(icom, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SIGNAL(EmitReadedInfo(CmdID,QString)));
+}
+void IcomLanRig::CoreTxInfo(QString s)
+{
+    emit EmitReadedInfo(LOG_RX,s);
 }
 void IcomLanRig::CoreRadioInfo(QString name,int addr)
 {

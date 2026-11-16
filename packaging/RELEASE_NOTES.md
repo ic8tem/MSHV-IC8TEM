@@ -1,7 +1,7 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
-**ic8tem.16:** fix: Power & SWR now works with the Icom radios on USB (IC-7300, IC-7610...) through the MSHV CAT: power setting and Po/SWR/ALC meters (the window said "not available" with CAT ON).
+**ic8tem.16:** fix: Power & SWR now works with the Icom radios on USB (IC-7300, IC-7610...) through the MSHV CAT: power setting and Po/SWR/ALC meters (the window said "not available" with CAT ON) · Icom (USB and LAN): frequency and mode answers are no longer lost when they arrive late (MSHV kept showing an old frequency over LAN) · CAT Log shows every CI-V frame (frequency, mode, PTT) and, with Icom LAN, how much TX audio reached the radio.
 
 **ic8tem.15:** Power & SWR — own connection, also without the MSHV CAT: Hamlib rigctld (any radio) or Icom CI-V on its own serial port (Settings › Connection).
 

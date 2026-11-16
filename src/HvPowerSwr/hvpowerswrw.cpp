@@ -835,6 +835,23 @@ QString HvPowerSwrW::Decode(const QString &hex)
     if (b.count() < 6) return QString();
     QString c = b.at(4), sc = b.at(5);
     if (c=="FA") return tr("NG: the radio refused the command");
+    if (c=="FB") return "OK";
+    if ((c=="03" || c=="05" || c=="00") && b.count() >= 11)
+    {
+        double hz = 0.0, m = 1.0;
+        for (int i = 5; i < 10; ++i)
+        {
+            bool ok = false;
+            int v = b.at(i).toInt(&ok,16);
+            if (!ok) return QString();
+            hz += ((v>>4)*10 + (v&15)) * m;
+            m *= 100.0;
+        }
+        return (c=="05" ? QString("set ") : QString())+QString::number(hz/1e6,'f',6)+" MHz";
+    }
+    if (c=="03") return "read frequency";
+    if (c=="04" || c=="26") return (b.count() <= 7 && c=="26") || b.count() <= 6 ? QString("read mode") : QString("mode");
+    if (c=="1C" && sc=="00") return b.count() >= 8 ? QString(b.at(6)=="01" ? "PTT ON" : "PTT OFF") : QString("read PTT");
     if (b.count() < 9) return (c=="14" && sc=="0A") ? tr("read RF power") :
                                   (c=="15" && sc=="11") ? tr("read Po") :
                                   (c=="15" && sc=="12") ? tr("read SWR") :

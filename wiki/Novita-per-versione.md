@@ -2,6 +2,8 @@
 
 ## 2.76.7-ic8tem.16
 * Corretto: **Potenza e ROS** con le Icom collegate via USB (IC-7300, IC-7610...) tramite il CAT di MSHV. La finestra diceva "non disponibile" anche con il CAT attivo, quindi non regolava la potenza e non leggeva Po, ROS e ALC.
+* Icom (USB e LAN): le risposte di frequenza e modo non vengono più scartate quando arrivano in ritardo. Con Icom LAN MSHV restava fermo su una frequenza vecchia.
+* **CAT Log**: ora mostra tutti i comandi CI-V (frequenza, modo, PTT), segnala una risposta con indirizzo CI-V diverso da quello atteso e, con Icom LAN, quanto audio di trasmissione è arrivato alla radio (con l'avviso se MSHV non manda audio a "Icom LAN Output").
 
 ## 2.76.7-ic8tem.15
 * **Potenza e ROS anche senza il CAT di MSHV**: in *Impostazioni › Connessione* si sceglie **Hamlib rigctld** (qualsiasi radio supportata da Hamlib) o **Icom CI-V su porta seriale propria**. Il CAT Log mostra anche i comandi di rigctld. Vedi [[Potenza e ROS|Potenza-e-ROS]].
