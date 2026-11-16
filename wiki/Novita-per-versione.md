@@ -2,6 +2,7 @@
 
 ## 2.76.7-ic8tem.18
 * Corretto: nella .17 la radio **Icom IC-7300 (Hamlib)** non compariva nell'elenco di Rig Control (Windows).
+* La barra **Txing** si riempie da sinistra a destra con lo scorrere del periodo: verde in ricezione, rossa in trasmissione.
 
 ## 2.76.7-ic8tem.17
 * Nuova radio **Icom IC-7300 (Hamlib)** per Windows: l'IC-7300 comandato con la libreria Hamlib (frequenza, modo, PTT, potenza, Po/ROS/ALC). Vedi [[IC-7300 con Hamlib|IC-7300-Hamlib]].

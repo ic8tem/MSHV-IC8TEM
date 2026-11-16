@@ -121,3 +121,4 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 
 ## 2026-11-17 — ic8tem.18
 * CI: HAMLIB_DIR passed to qmake before the project file (with -after the Windows builds had no HAVE_HAMLIB); the build fails if Hamlib was downloaded but not enabled.
+* `src/main_ms.*` — "Txing" bar shows the progress of the T/R period (green RX, red TX), updated every 100 ms.

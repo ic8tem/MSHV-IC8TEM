@@ -7,6 +7,7 @@
 #define _SHKY_H_
 #define _BANDS_H_
 #include "main_ms.h"
+#include <cmath>//IC8TEM fmod
 #include "mshv_app_path.h"
 #include "mshv_txtrace.h"
 #include "mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
@@ -357,6 +358,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     //l_tx_text->setFont(tx_font);
     l_tx_text->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     l_tx_text->setMinimumWidth(202);//215 1.30 from 215 240 zaradi nai dalgia texta na iskat
+    t_txbar = new QTimer(this);//IC8TEM: period progress in the "Txing" bar
+    connect(t_txbar, SIGNAL(timeout()), this, SLOT(UpdateTxBar()));
+    t_txbar->start(100);
 
     MainDisplay = new DisplayMs(0,dsty);
     connect(TMsCore, SIGNAL(Set_Raw(int*,int,bool)), MainDisplay, SLOT(SetRaw(int*,int,bool)));  //1.27 psk rep   fopen bool true    false no file open
@@ -2857,14 +2861,13 @@ void Main_Ms::SetRigTxRx(bool f)
     THvTxW->SetTxRxCountAutoSeq(f);//qDebug()<<"SetRigTxRx...................."<<f;
     if (f)
     {
-        if (dsty) l_tx_text->setStyleSheet("QLabel{background-color:rgb(170,0,0);}");
-        else l_tx_text->setStyleSheet("QLabel{background-color:rgb(255,0,0);}");
+        UpdateTxBar();//IC8TEM was solid red
         Band_m->setDisabled(true);
         W_band_bt_sw->setDisabled(true);
     }
     else
     {
-        l_tx_text->setStyleSheet("QLabel{background-color:palette(Button);}");
+        UpdateTxBar();//IC8TEM was palette(Button)
         Band_m->setDisabled(false);
         W_band_bt_sw->setDisabled(false); //qDebug()<<g_block_mam<<g_ub_m_k;
     }
@@ -5565,4 +5568,27 @@ void Main_Ms::keyPressEvent(QKeyEvent* event)
         QWidget::keyPressEvent(event);
     }
     //qDebug()<<"KeyHex="<<QString::number(event->key(),16);
+}
+//IC8TEM: the "Txing" bar fills from left to right as the T/R period goes by:
+//green while receiving, red while transmitting
+void Main_Ms::UpdateTxBar()
+{
+    if (!l_tx_text) return;
+    double per = period_time_sec;
+    if (per < 1.0) per = 15.0;
+    qint64 ms = getDateTime().toMSecsSinceEpoch();//same clock as the MSHV periods
+    double t = fmod((double)ms/1000.0,per);
+    double p = t/per;
+    if (p < 0.0) p = 0.0;
+    if (p > 1.0) p = 1.0;
+    QString fill;
+    if (f_tx_busy) fill = dsty ? "rgb(170,0,0)" : "rgb(255,70,70)";
+    else fill = dsty ? "rgb(0,110,40)" : "rgb(120,220,120)";
+    QString rest = f_tx_busy ? (dsty ? QString("rgb(90,20,20)") : QString("rgb(255,200,200)"))
+                   : l_tx_text->palette().color(QPalette::Button).name();
+    double p2 = p + 0.001;
+    if (p2 > 1.0) p2 = 1.0;
+    l_tx_text->setStyleSheet(QString("QLabel{background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
+                                     "stop:0 %1,stop:%2 %1,stop:%3 %4,stop:1 %4);}")
+                             .arg(fill).arg(p,0,'f',4).arg(p2,0,'f',4).arg(rest));
 }

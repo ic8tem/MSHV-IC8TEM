@@ -60,6 +60,7 @@ public:
 //signals:
         
 private slots:
+    void UpdateTxBar();//IC8TEM: "Txing" bar filled as the period goes by (green RX, red TX)
     // Native Flex VITA-49: live forward power / SWR straight off the radio.
     void UpdateFlexMeter(bool,bool,double,double);
     
@@ -268,6 +269,7 @@ private:
     QPushButton *pb_clear_avgQ65;
     bool f_tune;
     QLabel *l_tx_text;
+    QTimer *t_txbar;//IC8TEM
     
     QLabel *l_flex_meter;        // Flex fwd power / SWR; hidden unless active
     QPushButton *pb_flex_panel;  // opens the Flex control/monitor panel
