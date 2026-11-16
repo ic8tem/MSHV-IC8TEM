@@ -452,7 +452,8 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.gate.outputs.tag }}
-          target_commitish: ${{ github.sha }}
+          # no target_commitish: the tag goes on the tip of main (tagging an older commit after a
+          # workflow change on main is refused to the GITHUB_TOKEN: 403 Resource not accessible)
           name: MSHV-IC8TEM ${{ env.MSHV_VERSION }}
           body_path: release_body.md
           files: dist/*
