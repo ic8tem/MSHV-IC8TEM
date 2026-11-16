@@ -1,0 +1,48 @@
+name: Publish a finished build
+# Creates the release from the artifacts of an already finished "Build all distributions" run
+# (used when the build succeeded but its release step failed).
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: id of the "Build all distributions" run
+        required: true
+      version:
+        description: version (e.g. 2.76.7-ic8tem.12)
+        required: true
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          V: ${{ inputs.version }}
+          R: ${{ github.repository }}
+        run: |
+          SHA=$(gh api "repos/$R/actions/runs/${{ inputs.run_id }}" -q .head_sha)
+          echo "commit $SHA"
+          ls -la dist
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+          python3 packaging/make_release_body.py "$V" "$R" dist/* > release_body.md
+          T="v$V"
+          if ! gh release view "$T" -R "$R" >/dev/null 2>&1; then
+            if ! gh api "repos/$R/git/refs/tags/$T" >/dev/null 2>&1; then
+              echo "--- create tag $T"
+              gh api -X POST "repos/$R/git/refs" -f ref="refs/tags/$T" -f sha="$SHA" || echo "tag creation failed"
+            fi
+            echo "--- create release $T"
+            gh release create "$T" -R "$R" --verify-tag --title "MSHV-IC8TEM $V" --notes-file release_body.md
+          fi
+          gh release upload "$T" -R "$R" --clobber dist/*
+          gh release edit "$T" -R "$R" --notes-file release_body.md --latest
