@@ -14,7 +14,7 @@ on:
     types: [published]
 
 env:
-  MSHV_VERSION: 2.76.7-ic8tem.10
+  MSHV_VERSION: 2.76.7-ic8tem.11
 
 permissions:
   contents: write
@@ -276,9 +276,17 @@ jobs:
   rpm:
     needs: gate
     if: needs.gate.outputs.build == 'true'
-    name: rpm-x86_64
-    runs-on: ubuntu-24.04
+    name: rpm-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
     container: opensuse/leap:15.6
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
     steps:
       - name: Dependencies
         run: |
@@ -292,15 +300,44 @@ jobs:
         run: |
           ROOT="$PWD/rpmroot"
           sh packaging/linux/stage_root.sh "$ROOT"
-          printf '%s' 'MSHV-IC8TEM-{V}-fedora-opensuse-x86_64.rpm' > "$ROOT/opt/mshv-ic8tem/mshv-package.txt"
+          printf '%s' 'MSHV-IC8TEM-{V}-fedora-opensuse-${{ matrix.arch }}.rpm' > "$ROOT/opt/mshv-ic8tem/mshv-package.txt"
           rpmbuild -bb --define "_topdir $PWD/rpmbuild" --define "stage $ROOT" \
             --define "mshv_ver ${MSHV_VERSION%%-*}" --define "mshv_rel ${MSHV_VERSION#*-}" packaging/linux/mshv-ic8tem.spec
           mkdir -p dist
-          cp rpmbuild/RPMS/*/*.rpm "dist/MSHV-IC8TEM-$MSHV_VERSION-fedora-opensuse-x86_64.rpm"
+          cp rpmbuild/RPMS/*/*.rpm "dist/MSHV-IC8TEM-$MSHV_VERSION-fedora-opensuse-${{ matrix.arch }}.rpm"
           ls -la dist
       - uses: actions/upload-artifact@v4
         with:
-          name: rpm-x86_64
+          name: rpm-${{ matrix.arch }}
+          path: dist/*
+
+  # ---------------------------------------------------------------- Alpine Linux / musl (x86_64, aarch64)
+  alpine:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
+    name: alpine-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and package (Alpine container, musl libc)
+        run: |
+          docker run --rm -e MSHV_VERSION -v "$PWD":/src -w /src alpine:3.20 sh -ec '
+            apk add --no-cache build-base qt5-qtbase-dev qt5-qtwebsockets-dev alsa-lib-dev pulseaudio-dev fftw-dev tar gzip file
+            QMAKE=/usr/lib/qt5/bin/qmake sh packaging/linux/build_unix.sh MSHV_x86_64.pro
+            sh packaging/linux/make_tar.sh dist linux-musl-${{ matrix.arch }}
+            chown -R '"$(id -u):$(id -g)"' dist bin build'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alpine-${{ matrix.arch }}
           path: dist/*
 
   # ---------------------------------------------------------------- FreeBSD amd64
@@ -387,6 +424,7 @@ jobs:
           codesign --force --deep -s - bin/MSHV.app
           mkdir -p dist
           hdiutil create -volname MSHV-IC8TEM -srcfolder bin/MSHV.app -ov -format UDZO "dist/MSHV-IC8TEM-$MSHV_VERSION-macos-${{ matrix.arch }}.dmg"
+          (cd bin && ditto -c -k --keepParent MSHV.app "../dist/MSHV-IC8TEM-$MSHV_VERSION-macos-${{ matrix.arch }}.zip")
       - uses: actions/upload-artifact@v4
         with:
           name: macos-${{ matrix.arch }}
@@ -396,7 +434,7 @@ jobs:
   release:
     name: GitHub Release
     if: always() && needs.gate.outputs.publish == 'true' && needs.windows.result == 'success' && needs.linux.result == 'success'
-    needs: [gate, windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, freebsd, openbsd, macos]
+    needs: [gate, windows, windows-arm64, linux, linux-i686, linux-armhf, rpm, alpine, freebsd, openbsd, macos]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

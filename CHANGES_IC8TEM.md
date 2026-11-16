@@ -87,3 +87,8 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvRigControl/HvRigCat/hvrigcatw.*`, `src/HvRigControl/hvrigcontrol.*` — commands and answers forwarded; available only with Icom CI-V or Icom LAN and the CAT running.
 * `src/main_ms.*` — menu entry, TX state, mode, tune and stop TX connected to the window.
 * Translations: `packaging/i18n/ic8tem_strings.py` + `make_qm.py` build `src/HvTranslations/ic8tem_<lang>.qm/.ts` for the 15 MSHV languages; loaded next to the original `mshv_<lang>.qm`.
+
+## 2026-11-16 — 2.76.7-ic8tem.11: more packages
+* `.github/workflows/build-all.yml` — rpm also for aarch64 (openSUSE Leap 15.6 on ARM runner); Alpine Linux 3.20 / musl tar.gz for x86_64 and aarch64; macOS zip next to the dmg.
+* `packaging/make_release_body.py` + `.github/workflows/release-text.yml` — release page starts with the table "Scarica la versione per il tuo sistema" (system, installer, zip), built from the files really published; rows for Windows 7 SP1/8/8.1 point to the Windows 10/11 files.
+* Windows installer: `MinVersion=6.1sp1` (Windows 7 SP1).

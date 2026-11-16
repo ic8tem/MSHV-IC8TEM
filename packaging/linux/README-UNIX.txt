@@ -9,6 +9,7 @@ Required system libraries (Qt 5.15, ALSA, PulseAudio, FFTW3):
   Fedora:    sudo dnf install qt5-qtbase qt5-qtwebsockets alsa-lib pulseaudio-libs fftw-libs-double
   openSUSE:  sudo zypper in libQt5Widgets5 libQt5Network5 libQt5WebSockets5 alsa libpulse0 libfftw3-3
   Slackware: qt5, alsa-lib, pulseaudio, fftw (included in a full install)
+  Alpine:    doas apk add qt5-qtbase qt5-qtbase-x11 qt5-qtwebsockets alsa-lib libpulse fftw-double-libs
   FreeBSD:   pkg install qt5-widgets qt5-network qt5-websockets alsa-lib pulseaudio fftw3
   OpenBSD:   pkg_add qtbase qtwebsockets portaudio-svn fftw3
              audio input is off by default: doas sysctl kern.audio.record=1

@@ -1,7 +1,9 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
-**New in ic8tem.10: Power & SWR window** (Options › View Power and SWR) — RF power, Po/SWR/ALC meters, per-band memory, SWR protection. Icom USB and LAN.
+**ic8tem.11:** new packages — rpm ARM64, Alpine Linux (musl) x86_64 and ARM64, macOS zip.
+
+**ic8tem.10: Power & SWR window** (Options › View Power and SWR) — RF power, Po/SWR/ALC meters, per-band memory, SWR protection. Icom USB and LAN.
 
 **ic8tem.9:** MSK144-WB — a double click in the MSK144-WB list (wideband MSK144/FSK441 decoder) sets MSHV: mode, QSY, his call, period and TX. In Network Configuration, UDP Broadcast Settings: server 127.0.0.1, port 2237.
 

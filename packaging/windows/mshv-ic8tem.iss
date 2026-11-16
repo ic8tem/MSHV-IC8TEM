@@ -37,6 +37,7 @@ WizardStyle=modern
 CloseApplications=yes
 #if Arch == "x64"
 ArchitecturesAllowed=x64compatible
+MinVersion=6.1sp1
 ArchitecturesInstallIn64BitMode=x64compatible
 #elif Arch == "arm64"
 ArchitecturesAllowed=arm64
