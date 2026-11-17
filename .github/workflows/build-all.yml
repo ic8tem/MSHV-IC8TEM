@@ -164,6 +164,7 @@ jobs:
     name: windows-arm64
     runs-on: windows-11-arm
     continue-on-error: true
+    timeout-minutes: 90
     defaults:
       run:
         shell: msys2 {0}
@@ -184,6 +185,7 @@ jobs:
           $QM MSHV_WIN64.pro -after "TARGET=MSHV-IC8TEM" "LIBS=-ldsound -lfftw3 -lsetupapi -lpthread" "QMAKE_CXXFLAGS-=-pedantic-errors"
           (command -v mingw32-make >/dev/null && mingw32-make -j4) || make -j4
       - name: Package
+        timeout-minutes: 30
         run: |
           WDQ=""
           for c in windeployqt-qt5 windeployqt /clangarm64/qt5/bin/windeployqt /clangarm64/lib/qt5/bin/windeployqt; do command -v $c >/dev/null 2>&1 && { WDQ=$(command -v $c); break; }; done
