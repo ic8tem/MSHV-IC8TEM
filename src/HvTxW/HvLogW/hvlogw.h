@@ -257,6 +257,7 @@ private slots:
     void FictResetChanged();//IC8TEM mod
 
     void DeleteSelected();
+    void FindDuplicates();//IC8TEM: duplicate QSOs
     void End_Edit();
     //void SetEditText();
     void SetCorrContact(QStringList list,int index_edit);

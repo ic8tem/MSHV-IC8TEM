@@ -6,6 +6,7 @@
 * [[LoTW]]
 * [[Filtri]]
 * [[Annullamento fittizio del log|Annullamento-fittizio-del-log]]
+* [[QSO doppi|QSO-doppi]]
 * [[Multi Answer TX Slots|Multi-Answer-TX-Slots]]
 * [[Durata del ping MSK144|Durata-ping-MSK144]]
 * [[Icom LAN|Icom-LAN]]

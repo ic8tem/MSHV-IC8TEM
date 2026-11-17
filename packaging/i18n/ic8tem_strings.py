@@ -12,6 +12,7 @@ LANGS = ["bg", "ru", "zh", "zhhk", "eses", "caes", "ptpt", "roro", "dadk",
 P = "HvPowerSwrW"
 M = "Main_Ms"
 L = "HvPwrLink"
+G = "HvLogW"
 
 def T(bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz):
     return dict(zip(LANGS, [bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz]))
@@ -396,4 +397,49 @@ MESSAGES = [
     "configúrela en Ajustes", "configureu-la a Configuració", "defina-o em Definições", "setați-o în Setări", "angiv den i Indstillinger",
     "ustaw go w Ustawieniach", "réglez-la dans Paramètres", "defina-o em Configurações", "angi den i Innstillinger",
     "impostalo in Impostazioni", "nastavte ji v Nastavení")),
+(G, "Find And Delete Duplicate QSOs", T("Намери и изтрий дублираните QSO", "Найти и удалить повторные QSO", "查找并删除重复 QSO",
+    "查找並刪除重複 QSO", "Buscar y borrar QSO duplicados", "Cerca i esborra QSO duplicats", "Procurar e apagar QSO duplicados",
+    "Găsește și șterge QSO duplicate", "Find og slet dublerede QSO'er", "Znajdź i usuń zduplikowane QSO", "Rechercher et supprimer les QSO en double",
+    "Procurar e excluir QSOs duplicados", "Finn og slett dupliserte QSO-er", "Trova e cancella i QSO doppi", "Najít a smazat duplicitní QSO")),
+(G, "Duplicate QSOs", T("Дублирани QSO", "Повторные QSO", "重复 QSO", "重複 QSO", "QSO duplicados", "QSO duplicats", "QSO duplicados",
+    "QSO duplicate", "Dublerede QSO'er", "Zduplikowane QSO", "QSO en double", "QSOs duplicados", "Dupliserte QSO-er", "QSO doppi", "Duplicitní QSO")),
+(G, "Duplicates are QSOs with the same callsign, band and mode, and:", T(
+    "Дублирани са QSO със същия позивен, лента и вид, и:", "Повторные — это QSO с тем же позывным, диапазоном и видом, и:",
+    "重复是指呼号、波段和模式相同，并且：", "重複是指呼號、波段和模式相同，並且：", "Son duplicados los QSO con el mismo indicativo, banda y modo, y:",
+    "Són duplicats els QSO amb el mateix indicatiu, banda i mode, i:", "São duplicados os QSO com o mesmo indicativo, banda e modo, e:",
+    "Sunt duplicate QSO-urile cu același indicativ, bandă și mod, și:", "Dubletter er QSO'er med samme kaldesignal, bånd og mode, og:",
+    "Duplikaty to QSO z tym samym znakiem, pasmem i emisją, oraz:", "Les doublons sont les QSO avec le même indicatif, bande et mode, et :",
+    "São duplicados os QSOs com o mesmo indicativo, banda e modo, e:", "Duplikater er QSO-er med samme kallesignal, bånd og mode, og:",
+    "Sono doppi i QSO con lo stesso nominativo, banda e modo, e:", "Duplicitní jsou QSO se stejnou značkou, pásmem a druhem provozu, a:")),
+(G, "the same start time (identical QSOs)", T("същото начално време (еднакви QSO)", "то же время начала (одинаковые QSO)",
+    "相同的开始时间（完全相同的 QSO）", "相同的開始時間（完全相同的 QSO）", "la misma hora de inicio (QSO idénticos)", "la mateixa hora d'inici (QSO idèntics)",
+    "a mesma hora de início (QSO idênticos)", "aceeași oră de început (QSO identice)", "samme starttid (identiske QSO'er)",
+    "ten sam czas rozpoczęcia (identyczne QSO)", "la même heure de début (QSO identiques)", "o mesmo horário de início (QSOs idênticos)",
+    "samme starttid (identiske QSO-er)", "la stessa ora di inizio (QSO identici)", "stejný čas začátku (shodná QSO)")),
+(G, "start within", T("начало в рамките на", "начало в пределах", "开始时间相差不超过", "開始時間相差不超過", "inicio dentro de",
+    "inici dins de", "início dentro de", "început în interval de", "start inden for", "początek w ciągu", "début à moins de",
+    "início dentro de", "start innen", "inizio entro", "začátek do")),
+(G, "the same UTC day", T("същия ден UTC", "тот же день UTC", "同一 UTC 日", "同一 UTC 日", "el mismo día UTC", "el mateix dia UTC",
+    "o mesmo dia UTC", "aceeași zi UTC", "samme UTC-dag", "ten sam dzień UTC", "le même jour UTC", "o mesmo dia UTC", "samme UTC-dag",
+    "lo stesso giorno UTC", "stejný den UTC")),
+(G, "In every group the most complete QSO is kept (locator, reports, comment). The others are selected in the log and you confirm before they are deleted. Make a log backup first (Menu > Create Log Backup).", T(
+    "Във всяка група се запазва най-пълното QSO (локатор, рапорти, коментар). Останалите се маркират в лога и потвърждавате преди изтриването. Първо направете резервно копие (Menu > Create Log Backup).",
+    "В каждой группе сохраняется самое полное QSO (локатор, рапорты, комментарий). Остальные выделяются в логе, и вы подтверждаете удаление. Сначала сделайте резервную копию (Menu > Create Log Backup).",
+    "每组保留最完整的 QSO（网格、报告、备注）。其余的在日志中被选中，删除前需要您确认。请先备份日志（Menu > Create Log Backup）。",
+    "每組保留最完整的 QSO（網格、報告、備註）。其餘的在日誌中被選取，刪除前需要您確認。請先備份日誌（Menu > Create Log Backup）。",
+    "En cada grupo se conserva el QSO más completo (locator, reportes, comentario). Los demás se seleccionan en el log y usted confirma antes de borrarlos. Haga antes una copia del log (Menu > Create Log Backup).",
+    "En cada grup es conserva el QSO més complet (locator, reports, comentari). Els altres se seleccionen al log i confirmeu abans d'esborrar-los. Feu abans una còpia del log (Menu > Create Log Backup).",
+    "Em cada grupo mantém-se o QSO mais completo (locator, relatórios, comentário). Os outros são selecionados no log e confirma antes de serem apagados. Faça antes uma cópia do log (Menu > Create Log Backup).",
+    "În fiecare grup se păstrează QSO-ul cel mai complet (locator, rapoarte, comentariu). Celelalte sunt selectate în log și confirmați înainte de ștergere. Faceți întâi o copie a logului (Menu > Create Log Backup).",
+    "I hver gruppe beholdes den mest komplette QSO (lokator, rapporter, kommentar). De andre markeres i loggen, og du bekræfter før de slettes. Lav først en backup af loggen (Menu > Create Log Backup).",
+    "W każdej grupie zachowywane jest najpełniejsze QSO (lokator, raporty, komentarz). Pozostałe są zaznaczane w logu i potwierdzasz przed usunięciem. Najpierw zrób kopię logu (Menu > Create Log Backup).",
+    "Dans chaque groupe le QSO le plus complet est conservé (locator, reports, commentaire). Les autres sont sélectionnés dans le log et vous confirmez avant leur suppression. Faites d'abord une sauvegarde du log (Menu > Create Log Backup).",
+    "Em cada grupo é mantido o QSO mais completo (locator, reportagens, comentário). Os outros são selecionados no log e você confirma antes de excluí-los. Faça antes um backup do log (Menu > Create Log Backup).",
+    "I hver gruppe beholdes den mest komplette QSO-en (lokator, rapporter, kommentar). De andre merkes i loggen, og du bekrefter før de slettes. Ta først en sikkerhetskopi av loggen (Menu > Create Log Backup).",
+    "In ogni gruppo viene tenuto il QSO più completo (locatore, rapporti, commento). Gli altri vengono selezionati nel log e confermi prima della cancellazione. Fai prima un backup del log (Menu > Create Log Backup).",
+    "V každé skupině se ponechá nejúplnější QSO (lokátor, reporty, komentář). Ostatní se označí v logu a před smazáním potvrdíte. Nejprve si udělejte zálohu logu (Menu > Create Log Backup).")),
+(G, "No duplicate QSOs found.", T("Няма дублирани QSO.", "Повторных QSO не найдено.", "未找到重复 QSO。", "未找到重複 QSO。",
+    "No se encontraron QSO duplicados.", "No s'han trobat QSO duplicats.", "Não foram encontrados QSO duplicados.", "Nu s-au găsit QSO duplicate.",
+    "Ingen dublerede QSO'er fundet.", "Nie znaleziono zduplikowanych QSO.", "Aucun QSO en double trouvé.", "Nenhum QSO duplicado encontrado.",
+    "Ingen dupliserte QSO-er funnet.", "Nessun QSO doppio trovato.", "Nebyla nalezena žádná duplicitní QSO.")),
 ]

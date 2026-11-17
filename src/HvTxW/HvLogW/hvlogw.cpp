@@ -349,15 +349,16 @@ void HvLogList::DeleteSel()
         //q_Sort(rows);
         std::sort(rows.begin(),rows.end());
 
-        int prev = -1;
-        for ( int i = rows.count() - 1; i >= 0; i -= 1 )
+        rows.erase(std::unique(rows.begin(),rows.end()),rows.end());
+        //IC8TEM: remove consecutive rows in one call (fast with big logs and many rows)
+        int i = rows.count() - 1;
+        while (i >= 0)
         {
-            int current = rows[i];
-            if ( current != prev )
-            {
-                model.removeRows( current, 1 );
-                prev = current;
-            }
+            int last = rows[i];
+            int first = last;
+            while (i > 0 && rows[i-1] == first - 1) { --i; first = rows[i]; }
+            model.removeRows( first, last - first + 1 );
+            --i;
         }
         setAutoScroll(true);  //2.21 bez towa bavi za da ne skrolira pri iztrivane kam poslednia markiran
     }
@@ -1775,6 +1776,9 @@ HvLogW::HvLogW(QString inst,QString app_path, bool indsty,int x,int y,QWidget *w
     UploadSelToClubLog_m = new QAction(QPixmap(":pic/uploadsel.png"),tr("Upload Selected To")+" Club Log",this);
     connect(UploadSelToClubLog_m, SIGNAL(triggered()), this, SLOT(UploadSelToClubLog()));
 
+    QAction *FindDupes_m = new QAction(tr("Find And Delete Duplicate QSOs"),this);//IC8TEM
+    connect(FindDupes_m, SIGNAL(triggered()), this, SLOT(FindDuplicates()));
+
     ac_use_adif_save = new QAction(tr("Use Save QSOs In ADIF Log"),this);//2.66
     ac_use_adif_save->setCheckable(true);
     ac_use_adif_save->setChecked(true);
@@ -1791,6 +1795,9 @@ HvLogW::HvLogW(QString inst,QString app_path, bool indsty,int x,int y,QWidget *w
     Menu_m->addAction(ExportAllToAdif_m);
     Menu_m->addAction(ExportToCabr_m);
     Menu_m->addAction(UploadSelToClubLog_m);
+    Menu_m->addSeparator();
+    Menu_m->addAction(FindDupes_m);//IC8TEM
+    Menu_m->addSeparator();
     Menu_m->addAction(ac_use_adif_save);
     //Menu_m->addAction(Statistic_m);
     Min_Menu->addMenu(Menu_m);
@@ -2952,6 +2959,152 @@ void HvLogW::SetEditText()
     THvEditW->SetEdit(list,index_n);
     THvLogList->SetEditRow(index_n);
     //THvLogList->scrollToBottom(); no no move
+}
+//IC8TEM: duplicate QSOs. Same callsign + band + mode, and the same start time, or within N minutes,
+//or the same UTC day. In every group the most complete QSO is kept (locator, reports, comment...),
+//the others are selected and deleted with the normal "Delete Selected" confirmation.
+#include <QDialog>
+#include <QLabel>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QDialogButtonBox>
+#include <QDateTime>
+#include <algorithm>
+namespace
+{
+struct DupRow
+{
+    int row;
+    QString key;
+    qint64 tmin;   // minutes since epoch (UTC start)
+    int tday;      // UTC day number
+    int score;    // filled fields
+};
+qint64 DupMinutes(const QString &date,const QString &start,int &day)
+{
+    QString d = date; d.remove(QRegExp("[^0-9]"));
+    QString t = start; t.remove(QRegExp("[^0-9]"));
+    QDate qd = QDate::fromString(d.left(8),"yyyyMMdd");
+    if (!qd.isValid()) { day = 0; return 0; }
+    day = (int)qd.toJulianDay();
+    int hh = t.mid(0,2).toInt(), mm = t.mid(2,2).toInt();
+    return (qint64)day*1440 + hh*60 + mm;
+}
+}
+void HvLogW::FindDuplicates()
+{
+    int rows = THvLogList->model.rowCount();
+    if (rows < 2) return;
+
+    QDialog d(this);
+    d.setWindowTitle("MSHV "+tr("Duplicate QSOs"));
+    QVBoxLayout *v = new QVBoxLayout(&d);
+    QLabel *l = new QLabel(tr("Duplicates are QSOs with the same callsign, band and mode, and:"));
+    l->setWordWrap(true);
+    QRadioButton *rb_same = new QRadioButton(tr("the same start time (identical QSOs)"));
+    QHBoxLayout *h = new QHBoxLayout();
+    QRadioButton *rb_win = new QRadioButton(tr("start within"));
+    QSpinBox *sb = new QSpinBox();
+    sb->setRange(1,1440);
+    sb->setValue(10);
+    sb->setSuffix(" min");
+    h->addWidget(rb_win);
+    h->addWidget(sb);
+    h->addStretch();
+    QRadioButton *rb_day = new QRadioButton(tr("the same UTC day"));
+    QLabel *l2 = new QLabel(tr("In every group the most complete QSO is kept (locator, reports, comment). "
+                               "The others are selected in the log and you confirm before they are deleted. "
+                               "Make a log backup first (Menu > Create Log Backup)."));
+    l2->setWordWrap(true);
+    QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(bb, SIGNAL(accepted()), &d, SLOT(accept()));
+    connect(bb, SIGNAL(rejected()), &d, SLOT(reject()));
+    rb_win->setChecked(true);
+    v->addWidget(l);
+    v->addWidget(rb_same);
+    v->addLayout(h);
+    v->addWidget(rb_day);
+    v->addSpacing(6);
+    v->addWidget(l2);
+    v->addWidget(bb);
+    d.setMinimumWidth(420);
+    if (d.exec() != QDialog::Accepted) return;
+    int mode = rb_same->isChecked() ? 0 : (rb_win->isChecked() ? 1 : 2);
+    int win = sb->value();
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QVector<DupRow> v_r;
+    v_r.reserve(rows);
+    int cols = THvLogList->model.columnCount();
+    for (int i = 0; i < rows; ++i)
+    {
+        DupRow r;
+        r.row = i;
+        QString call = THvLogList->model.item(i,4)->text().trimmed().toUpper();
+        if (call.isEmpty()) continue;
+        r.key = call+"|"+THvLogList->model.item(i,9)->text().trimmed().toUpper()+"|"+
+                THvLogList->model.item(i,8)->text().trimmed().toUpper();
+        r.tmin = DupMinutes(THvLogList->model.item(i,0)->text(),THvLogList->model.item(i,1)->text(),r.tday);
+        r.score = 0;
+        for (int c = 5; c < cols; ++c)
+        {
+            if (c==8 || c==9 || c==13) continue;
+            if (!THvLogList->model.item(i,c)->text().trimmed().isEmpty()) r.score++;
+        }
+        v_r.append(r);
+    }
+    std::sort(v_r.begin(),v_r.end(),[](const DupRow &a,const DupRow &b)
+    {
+        if (a.key != b.key) return a.key < b.key;
+        if (a.tmin != b.tmin) return a.tmin < b.tmin;
+        return a.row < b.row;
+    });
+
+    QList<int> dup;
+    int i = 0;
+    while (i < v_r.count())
+    {
+        // one group: consecutive QSOs of the same key that match the chosen rule (chained)
+        int j = i + 1;
+        while (j < v_r.count() && v_r.at(j).key == v_r.at(i).key)
+        {
+            const DupRow &p = v_r.at(j-1), &c = v_r.at(j);
+            bool same = false;
+            if (mode == 0) same = (c.tmin == p.tmin);
+            else if (mode == 1) same = (c.tmin - p.tmin <= win);
+            else same = (c.tday == v_r.at(i).tday);
+            if (!same) break;
+            ++j;
+        }
+        if (j - i > 1)
+        {
+            int keep = i;
+            for (int k = i + 1; k < j; ++k)
+                if (v_r.at(k).score > v_r.at(keep).score) keep = k;
+            for (int k = i; k < j; ++k)
+                if (k != keep) dup.append(v_r.at(k).row);
+        }
+        i = j;
+    }
+    QApplication::restoreOverrideCursor();
+
+    if (dup.isEmpty())
+    {
+        QMessageBox::information(this,"MSHV",tr("No duplicate QSOs found."));
+        return;
+    }
+    std::sort(dup.begin(),dup.end());
+    QItemSelection sel;
+    int a = dup.at(0), b = dup.at(0);
+    for (int k = 1; k <= dup.count(); ++k)
+    {
+        if (k < dup.count() && dup.at(k) == b + 1) { b = dup.at(k); continue; }
+        sel.select(THvLogList->model.index(a,0),THvLogList->model.index(b,cols-1));
+        if (k < dup.count()) a = b = dup.at(k);
+    }
+    THvLogList->selectionModel()->select(sel,QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    THvLogList->scrollTo(THvLogList->model.index(dup.at(0),0));
+    DeleteSelected();
 }
 void HvLogW::DeleteSelected()
 {

@@ -286,4 +286,39 @@
         <translation>请在设置中设定</translation>
     </message>
 </context>
+<context>
+    <name>HvLogW</name>
+    <message>
+        <source>Find And Delete Duplicate QSOs</source>
+        <translation>查找并删除重复 QSO</translation>
+    </message>
+    <message>
+        <source>Duplicate QSOs</source>
+        <translation>重复 QSO</translation>
+    </message>
+    <message>
+        <source>Duplicates are QSOs with the same callsign, band and mode, and:</source>
+        <translation>重复是指呼号、波段和模式相同，并且：</translation>
+    </message>
+    <message>
+        <source>the same start time (identical QSOs)</source>
+        <translation>相同的开始时间（完全相同的 QSO）</translation>
+    </message>
+    <message>
+        <source>start within</source>
+        <translation>开始时间相差不超过</translation>
+    </message>
+    <message>
+        <source>the same UTC day</source>
+        <translation>同一 UTC 日</translation>
+    </message>
+    <message>
+        <source>In every group the most complete QSO is kept (locator, reports, comment). The others are selected in the log and you confirm before they are deleted. Make a log backup first (Menu &gt; Create Log Backup).</source>
+        <translation>每组保留最完整的 QSO（网格、报告、备注）。其余的在日志中被选中，删除前需要您确认。请先备份日志（Menu &gt; Create Log Backup）。</translation>
+    </message>
+    <message>
+        <source>No duplicate QSOs found.</source>
+        <translation>未找到重复 QSO。</translation>
+    </message>
+</context>
 </TS>

@@ -286,4 +286,39 @@
         <translation>configúrela en Ajustes</translation>
     </message>
 </context>
+<context>
+    <name>HvLogW</name>
+    <message>
+        <source>Find And Delete Duplicate QSOs</source>
+        <translation>Buscar y borrar QSO duplicados</translation>
+    </message>
+    <message>
+        <source>Duplicate QSOs</source>
+        <translation>QSO duplicados</translation>
+    </message>
+    <message>
+        <source>Duplicates are QSOs with the same callsign, band and mode, and:</source>
+        <translation>Son duplicados los QSO con el mismo indicativo, banda y modo, y:</translation>
+    </message>
+    <message>
+        <source>the same start time (identical QSOs)</source>
+        <translation>la misma hora de inicio (QSO idénticos)</translation>
+    </message>
+    <message>
+        <source>start within</source>
+        <translation>inicio dentro de</translation>
+    </message>
+    <message>
+        <source>the same UTC day</source>
+        <translation>el mismo día UTC</translation>
+    </message>
+    <message>
+        <source>In every group the most complete QSO is kept (locator, reports, comment). The others are selected in the log and you confirm before they are deleted. Make a log backup first (Menu &gt; Create Log Backup).</source>
+        <translation>En cada grupo se conserva el QSO más completo (locator, reportes, comentario). Los demás se seleccionan en el log y usted confirma antes de borrarlos. Haga antes una copia del log (Menu &gt; Create Log Backup).</translation>
+    </message>
+    <message>
+        <source>No duplicate QSOs found.</source>
+        <translation>No se encontraron QSO duplicados.</translation>
+    </message>
+</context>
 </TS>

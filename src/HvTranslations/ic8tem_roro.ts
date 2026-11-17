@@ -286,4 +286,39 @@
         <translation>setați-o în Setări</translation>
     </message>
 </context>
+<context>
+    <name>HvLogW</name>
+    <message>
+        <source>Find And Delete Duplicate QSOs</source>
+        <translation>Găsește și șterge QSO duplicate</translation>
+    </message>
+    <message>
+        <source>Duplicate QSOs</source>
+        <translation>QSO duplicate</translation>
+    </message>
+    <message>
+        <source>Duplicates are QSOs with the same callsign, band and mode, and:</source>
+        <translation>Sunt duplicate QSO-urile cu același indicativ, bandă și mod, și:</translation>
+    </message>
+    <message>
+        <source>the same start time (identical QSOs)</source>
+        <translation>aceeași oră de început (QSO identice)</translation>
+    </message>
+    <message>
+        <source>start within</source>
+        <translation>început în interval de</translation>
+    </message>
+    <message>
+        <source>the same UTC day</source>
+        <translation>aceeași zi UTC</translation>
+    </message>
+    <message>
+        <source>In every group the most complete QSO is kept (locator, reports, comment). The others are selected in the log and you confirm before they are deleted. Make a log backup first (Menu &gt; Create Log Backup).</source>
+        <translation>În fiecare grup se păstrează QSO-ul cel mai complet (locator, rapoarte, comentariu). Celelalte sunt selectate în log și confirmați înainte de ștergere. Faceți întâi o copie a logului (Menu &gt; Create Log Backup).</translation>
+    </message>
+    <message>
+        <source>No duplicate QSOs found.</source>
+        <translation>Nu s-au găsit QSO duplicate.</translation>
+    </message>
+</context>
 </TS>

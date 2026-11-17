@@ -286,4 +286,39 @@
         <translation>задайте го в Настройки</translation>
     </message>
 </context>
+<context>
+    <name>HvLogW</name>
+    <message>
+        <source>Find And Delete Duplicate QSOs</source>
+        <translation>Намери и изтрий дублираните QSO</translation>
+    </message>
+    <message>
+        <source>Duplicate QSOs</source>
+        <translation>Дублирани QSO</translation>
+    </message>
+    <message>
+        <source>Duplicates are QSOs with the same callsign, band and mode, and:</source>
+        <translation>Дублирани са QSO със същия позивен, лента и вид, и:</translation>
+    </message>
+    <message>
+        <source>the same start time (identical QSOs)</source>
+        <translation>същото начално време (еднакви QSO)</translation>
+    </message>
+    <message>
+        <source>start within</source>
+        <translation>начало в рамките на</translation>
+    </message>
+    <message>
+        <source>the same UTC day</source>
+        <translation>същия ден UTC</translation>
+    </message>
+    <message>
+        <source>In every group the most complete QSO is kept (locator, reports, comment). The others are selected in the log and you confirm before they are deleted. Make a log backup first (Menu &gt; Create Log Backup).</source>
+        <translation>Във всяка група се запазва най-пълното QSO (локатор, рапорти, коментар). Останалите се маркират в лога и потвърждавате преди изтриването. Първо направете резервно копие (Menu &gt; Create Log Backup).</translation>
+    </message>
+    <message>
+        <source>No duplicate QSOs found.</source>
+        <translation>Няма дублирани QSO.</translation>
+    </message>
+</context>
 </TS>

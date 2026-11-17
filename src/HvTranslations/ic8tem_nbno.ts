@@ -286,4 +286,39 @@
         <translation>angi den i Innstillinger</translation>
     </message>
 </context>
+<context>
+    <name>HvLogW</name>
+    <message>
+        <source>Find And Delete Duplicate QSOs</source>
+        <translation>Finn og slett dupliserte QSO-er</translation>
+    </message>
+    <message>
+        <source>Duplicate QSOs</source>
+        <translation>Dupliserte QSO-er</translation>
+    </message>
+    <message>
+        <source>Duplicates are QSOs with the same callsign, band and mode, and:</source>
+        <translation>Duplikater er QSO-er med samme kallesignal, bånd og mode, og:</translation>
+    </message>
+    <message>
+        <source>the same start time (identical QSOs)</source>
+        <translation>samme starttid (identiske QSO-er)</translation>
+    </message>
+    <message>
+        <source>start within</source>
+        <translation>start innen</translation>
+    </message>
+    <message>
+        <source>the same UTC day</source>
+        <translation>samme UTC-dag</translation>
+    </message>
+    <message>
+        <source>In every group the most complete QSO is kept (locator, reports, comment). The others are selected in the log and you confirm before they are deleted. Make a log backup first (Menu &gt; Create Log Backup).</source>
+        <translation>I hver gruppe beholdes den mest komplette QSO-en (lokator, rapporter, kommentar). De andre merkes i loggen, og du bekrefter før de slettes. Ta først en sikkerhetskopi av loggen (Menu &gt; Create Log Backup).</translation>
+    </message>
+    <message>
+        <source>No duplicate QSOs found.</source>
+        <translation>Ingen dupliserte QSO-er funnet.</translation>
+    </message>
+</context>
 </TS>

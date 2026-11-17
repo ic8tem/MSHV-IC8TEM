@@ -1,5 +1,9 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.21
+* **Log › Menu › Find And Delete Duplicate QSOs**: trova i QSO doppi (stesso nominativo, banda e modo; stessa ora, entro N minuti o stesso giorno UTC), tiene il più completo e cancella gli altri dopo la conferma. Vedi [[QSO doppi|QSO-doppi]].
+* La cancellazione di molti QSO dal log è molto più veloce.
+
 ## 2.76.7-ic8tem.20
 * **Windows**: l'installatore mette MSHV in **C:\MSHV-IC8TEM-NEW**. Impostazioni e log della cartella precedente vengono copiati una volta nella nuova; la vecchia cartella resta e si può cancellare.
 * **Potenza e ROS** anche con il CAT di MSHV per **Yaesu** (FT-991/991A, FT-DX10, FT-710, FT-DX101, FT-891, FT-DX1200, FT-DX3000, FT-DX5000, FT-950, FT-2000, FTX-1), **Kenwood** (TS-2000, TS-590S, TS-590SG, TS-480) ed **Elecraft K3/K3S/KX3/KX2** (radio "K3/KX3"). Vedi [[Potenza e ROS|Potenza-e-ROS]].
