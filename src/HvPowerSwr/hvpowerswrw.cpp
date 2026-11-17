@@ -878,6 +878,12 @@ void HvPowerSwrW::SetRigInfo(int id,QString s)
         return;
     }
     if (cb_conn->currentIndex() != 0) return;   // own connection in use
+    if (s.startsWith("w:") && id == READ_PO)   // watts (TCI, FlexRadio, K4)
+    {
+        double maxw = sb_maxw->value() > 0 ? sb_maxw->value() : 100;
+        OnPo(s.mid(2).toDouble() / maxw);
+        return;
+    }
     if (s.startsWith("f:"))   // Hamlib values: fractions 0..1, SWR as a number
     {
         double v = s.mid(2).toDouble();

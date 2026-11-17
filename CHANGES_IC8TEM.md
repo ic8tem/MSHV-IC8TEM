@@ -130,3 +130,5 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 ## 2026-11-17 — ic8tem.20
 * `hvrigcatw.*` — Power & SWR for text CAT radios: Yaesu NEWCAT (PC, RM4/5/6), Kenwood TS-2000/TS-590/TS-480 (PC, RM, SM0), Elecraft K3 family (PC, TM, BG, SW); meter scales from Hamlib. Answers parsed in HvRigCat (the drivers ignore them).
 * `yaesu.cpp`, `kenwood.cpp`, `elecraft.cpp` — a short answer no longer drops the following answers of the same chunk.
+* `elecraft_def.h` — new radio K4 (K3 command set, 4800-115200 baud); `hvrigcatw.cpp` — K4 `TM;` (ALC, CMP, FWD, SWR in one answer), `PCnnnH;`.
+* `network.*` — Power & SWR for TCI (drive, tx_power/tx_swr notifications) and FlexRadio 6xxx (rfpower, FWDPWR/SWR meters).

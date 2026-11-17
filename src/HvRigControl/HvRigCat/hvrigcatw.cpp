@@ -925,7 +925,8 @@ bool HvRigCat::PwrCapable()//IC8TEM Power & SWR: Icom CI-V (USB) or Icom LAN, CA
 {
     if (!s_port_poen || !f_rig_activ) return false;
     return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && (IS_ICOMLAN(s_active_model_id) || s_active_model_id==HAMLIB_IC7300))
-            || PwrTextFamily() > 0);
+            || PwrTextFamily() > 0
+            || (s_active_fact_id==NETWORK_ID && (s_active_model_id==3 || s_active_model_id==4 || s_active_model_id==6)));//TCI, FlexRadio 6xxx
 }
 QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
 {
@@ -938,7 +939,9 @@ QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
     else if (s_active_fact_id==NETWORK_ID && s_active_model_id==HAMLIB_IC7300) kind = "Hamlib";
     else if (PwrTextFamily()==1) kind = "Yaesu CAT";
     else if (PwrTextFamily()==2 || PwrTextFamily()==3) kind = "Kenwood CAT";
-    else if (PwrTextFamily()==4) kind = "Elecraft CAT";
+    else if (PwrTextFamily()==4 || PwrTextFamily()==5) kind = "Elecraft CAT";
+    else if (s_active_fact_id==NETWORK_ID && (s_active_model_id==3 || s_active_model_id==4)) kind = "TCI";
+    else if (s_active_fact_id==NETWORK_ID && s_active_model_id==6) kind = "FlexRadio";
     else if (s_active_fact_id==11) kind = "OmniRig";//OMNIRIGHV_ID (Windows only header)
     else if (s_active_fact_id==NETWORK_ID) kind = "Network (TCI/Flex/Hamlib...)";
     else kind = "CAT";
@@ -977,6 +980,7 @@ int HvRigCat::PwrTextFamily()
         return 0;
     }
     if (s_active_fact_id==ELECRAFT_ID && n=="K3/KX3") return 4;
+    if (s_active_fact_id==ELECRAFT_ID && n=="K4") return 5;
     return 0;
 }
 void HvRigCat::PwrTextCmd(int id,const QString &str)
@@ -986,9 +990,11 @@ void HvRigCat::PwrTextCmd(int id,const QString &str)
     if (id==SET_RFPOWER)
     {
         int pct = (int)(str.toInt()*100.0/255.0+0.5);
-        if (fam!=4 && pct < 5) pct = 5;//Yaesu and Kenwood: 5..100 W
+        if (fam!=4 && fam!=5 && pct < 5) pct = 5;//Yaesu and Kenwood: 5..100 W
+        if (fam==5 && pct < 1) pct = 1;
         if (pct > 100) pct = 100;
-        c = QString("PC%1;").arg(pct,3,10,QChar('0'));
+        if (fam==5) c = QString("PC%1H;").arg(pct,3,10,QChar('0'));//K4: H = 1 W units
+        else c = QString("PC%1;").arg(pct,3,10,QChar('0'));
     }
     else if (id==GET_RFPOWER) c = "PC;";
     else if (id==GET_METERS)
@@ -996,6 +1002,7 @@ void HvRigCat::PwrTextCmd(int id,const QString &str)
         if (fam==1) c = "RM5;RM6;RM4;";
         else if (fam==2 || fam==3) c = s_f_ptt ? "RM;SM0;" : "RM;";
         else if (fam==4) c = "TM;BG;SW;";
+        else if (fam==5) c = "TM;";//K4: ALC, CMP, forward power, SWR in one answer
     }
     if (c.isEmpty()) return;
     emit EmitPwrInfo((int)LOG_TX,c);
@@ -1014,13 +1021,14 @@ void HvRigCat::PwrTextParse(const QByteArray &tok)
     int fam = PwrTextFamily();
     QString t = QString::fromLatin1(tok);
     bool mine = t.startsWith("PC") || t.startsWith("RM") || (t.startsWith("SM0") && fam!=1 && fam!=4) ||
-                (fam==4 && (t.startsWith("BG") || t.startsWith("SW") || t.startsWith("TM")));
+                (fam==4 && (t.startsWith("BG") || t.startsWith("SW") || t.startsWith("TM"))) ||
+                (fam==5 && t.startsWith("TM"));
     if (!mine) return;
     emit EmitPwrInfo((int)LOG_RX,t+";");
     if (t.startsWith("PC") && t.length() >= 5)
     {
         double w = t.mid(2,3).toInt();
-        if (fam==4 && t.length() >= 6 && t.at(5)=='0') w /= 10.0;//K3 PCnnnx, x=0: tenths of watt
+        if ((fam==4 || fam==5) && t.length() >= 6 && (t.at(5)=='0' || t.at(5)=='L')) w /= 10.0;//K3 PCnnnx x=0 / K4 PCnnnL: tenths of watt
         emit EmitPwrInfo((int)READ_RFPOWER,"f:"+QString::number(w/100.0,'f',4));
         return;
     }
@@ -1075,6 +1083,14 @@ void HvRigCat::PwrTextParse(const QByteArray &tok)
         }
         else frac = raw/30.0;
         emit EmitPwrInfo((int)READ_PO,"f:"+QString::number(qMin(frac,1.0),'f',4));
+        return;
+    }
+    if (fam==5 && t.startsWith("TM") && t.length() >= 14)//K4 TMaaabbbcccddd: ALC, CMP, FWD W, SWR x10
+    {
+        double alc = t.mid(2,3).toInt(), fwd = t.mid(8,3).toInt(), swr = t.mid(11,3).toInt()/10.0;
+        emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(alc/10.0,'f',4));
+        emit EmitPwrInfo((int)READ_PO,"w:"+QString::number(fwd,'f',1));
+        emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(swr < 1.0 ? 1.0 : swr,'f',3));
         return;
     }
     if (fam==4)

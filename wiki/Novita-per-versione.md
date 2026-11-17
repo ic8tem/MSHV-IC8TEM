@@ -2,6 +2,8 @@
 
 ## 2.76.7-ic8tem.20
 * **Potenza e ROS** anche con il CAT di MSHV per **Yaesu** (FT-991/991A, FT-DX10, FT-710, FT-DX101, FT-891, FT-DX1200, FT-DX3000, FT-DX5000, FT-950, FT-2000, FTX-1), **Kenwood** (TS-2000, TS-590S, TS-590SG, TS-480) ed **Elecraft K3/K3S/KX3/KX2** (radio "K3/KX3"). Vedi [[Potenza e ROS|Potenza-e-ROS]].
+* Nuova radio **Elecraft K4** (K4, K4D, K4HD): con un solo comando (`TM;`) si leggono Po, ROS e ALC.
+* **Potenza e ROS** anche con **TCI** (potenza = drive; Po e ROS mandati dalla radio durante la trasmissione) e **FlexRadio 6xxx** (rfpower, strumenti FWDPWR e SWR).
 
 ## 2.76.7-ic8tem.19
 * **Icom IC-7300 (Hamlib)** usa i normali campi **Port** e **Baud Rate** di Rig Control: MSHV avvia Hamlib sulla porta COM scelta e si ricollega quando la cambiate. MSHV non si blocca più mentre Hamlib aspetta la radio; i messaggi lunghi di Hamlib vanno nel CAT Log.

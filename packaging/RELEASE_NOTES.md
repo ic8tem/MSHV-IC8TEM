@@ -1,7 +1,7 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
-**ic8tem.20:** Power & SWR also with the MSHV CAT of **Yaesu** (FT-991/991A, FT-DX10, FT-710, FT-DX101, FT-891, FT-DX1200, FT-DX3000, FT-DX5000, FT-950, FT-2000, FTX-1), **Kenwood** (TS-2000, TS-590S, TS-590SG, TS-480) and **Elecraft K3/K3S/KX3/KX2** (rig "K3/KX3"): RF power and Po/SWR/ALC; commands and meter scales as in Hamlib.
+**ic8tem.20:** Power & SWR also with the MSHV CAT of **Yaesu** (FT-991/991A, FT-DX10, FT-710, FT-DX101, FT-891, FT-DX1200, FT-DX3000, FT-DX5000, FT-950, FT-2000, FTX-1), **Kenwood** (TS-2000, TS-590S, TS-590SG, TS-480) and **Elecraft K3/K3S/KX3/KX2** (rig "K3/KX3"): RF power and Po/SWR/ALC; commands and meter scales as in Hamlib · new radio **Elecraft K4** (K4/K4D/K4HD): Po, SWR and ALC in one reading (`TM;`) · **TCI** (drive; tx_power and tx_swr sent by the radio) and **FlexRadio 6xxx** (rfpower, FWDPWR/SWR meters) in the Power & SWR window.
 
 **ic8tem.19:** Icom IC-7300 (Hamlib): uses the normal **Port** and **Baud Rate** of Rig Control (Hamlib opens the COM port itself and reconnects when they change); MSHV no longer freezes while Hamlib waits for the radio; long Hamlib errors go to the CAT Log.
 

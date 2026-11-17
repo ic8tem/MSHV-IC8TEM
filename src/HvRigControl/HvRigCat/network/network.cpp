@@ -2542,11 +2542,11 @@ QString Network::GetModeStr(QString mod)
 }
 bool Network::isMyTCICommand(QString sc0)//2.64 tci
 {
-    const int cs = 12;//+3;
+    const int cs = 14;//+3; //IC8TEM +tx_power +tx_swr (Power & SWR window)
     const QString sc[cs] =
         {
             "vfo","modulation","trx","tx_enable","rx_enable","rx_mute","protocol","device",
-            "start","stop","split_enable","drive"//,"audio_stream_sample_type","audio_stream_channels","audio_stream_samples"
+            "start","stop","split_enable","drive","tx_power","tx_swr"//,"audio_stream_sample_type","audio_stream_channels","audio_stream_samples"
         };
     bool res = false;
     for (int i = 0; i < cs; ++i)
@@ -2743,6 +2743,13 @@ void Network::wTextMessageReceived(const QString &s0)//tci
         {
             if (ls2.at(1)=="true") tci_split_enable = true;
             else tci_split_enable = false;
+        }
+        else if (ls1.at(0)=="tx_power" || ls1.at(0)=="tx_swr")//IC8TEM Power & SWR: pushed by the TCI server while transmitting
+        {
+            QStringList lv = ls1.at(1).split(",");
+            double v = lv.last().toDouble();
+            if (ls1.at(0)=="tx_power") emit EmitReadedInfo(READ_PO,"w:"+QString::number(v,'f',1));
+            else emit EmitReadedInfo(READ_SWR,"f:"+QString::number(v < 1.0 ? 1.0 : v,'f',2));
         }
         else if (ls1.at(0)=="drive")//2.76.6
         {
@@ -3283,6 +3290,51 @@ void Network::SetCmd(CmdID i,ptt_t ptt,QString str)
         s_CmdID = GET_MODE;
         get_mode();
         break;
+    case SET_RFPOWER://IC8TEM Power & SWR: TCI drive, FlexRadio rfpower (str = 0..255)
+    case GET_RFPOWER:
+    case GET_METERS:
+        PwrCmd(i,str);
+        break;
+    default:
+        break;
+    }
+}
+void Network::PwrCmd(CmdID i,QString str)//IC8TEM
+{
+    bool tci = (s_ModelID==3 || s_ModelID==4);
+    bool flex = (s_ModelID==6);
+    if (!tci && !flex) return;
+    if (i==SET_RFPOWER)
+    {
+        int pct = (int)(str.toInt()*100.0/255.0+0.5);
+        if (pct > 100) pct = 100;
+        if (tci)
+        {
+            QString c = "drive:"+tci_trx+","+QString::number(pct)+";";
+            writeData(c,false,NULL);
+            tci_drive = pct;
+            emit EmitReadedInfo(LOG_TX,"TCI "+c);
+        }
+        else
+        {
+            VitaSetTransmit("rfpower",pct);
+            emit EmitReadedInfo(LOG_TX,"Flex transmit set rfpower="+QString::number(pct));
+        }
+    }
+    else if (i==GET_RFPOWER)
+    {
+        int v = tci ? tci_drive : _FlexVitaRfPower_();
+        if (v >= 0) emit EmitReadedInfo(READ_RFPOWER,"f:"+QString::number(v/100.0,'f',3));
+    }
+    else if (i==GET_METERS && flex)//TCI pushes tx_power and tx_swr by itself
+    {
+        double fwd = 0.0, ref = 0.0, swr = 1.0;
+        if (_FlexVitaMeters_(&fwd,&ref,&swr))
+        {
+            emit EmitReadedInfo(READ_PO,"w:"+QString::number(fwd,'f',1));
+            emit EmitReadedInfo(READ_SWR,"f:"+QString::number(swr < 1.0 ? 1.0 : swr,'f',2));
+            emit EmitReadedInfo(LOG_RX,QString("Flex FWDPWR %1 W  SWR %2").arg(fwd,0,'f',1).arg(swr,0,'f',2));
+        }
     }
 }
 void Network::SetTciTxOnRX2()

@@ -258,6 +258,7 @@ private:
 	void MacConnectCancel();
 #endif
 	bool writeData(QString str,bool id,char*);
+    void PwrCmd(CmdID i,QString str);//IC8TEM Power & SWR
 	
 	bool tci_start_stop_state;//tci
 	bool is_tci_trx; //tci
