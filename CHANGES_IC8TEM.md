@@ -132,3 +132,4 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `yaesu.cpp`, `kenwood.cpp`, `elecraft.cpp` — a short answer no longer drops the following answers of the same chunk.
 * `elecraft_def.h` — new radio K4 (K3 command set, 4800-115200 baud); `hvrigcatw.cpp` — K4 `TM;` (ALC, CMP, FWD, SWR in one answer), `PCnnnH;`.
 * `network.*` — Power & SWR for TCI (drive, tx_power/tx_swr notifications) and FlexRadio 6xxx (rfpower, FWDPWR/SWR meters).
+* `packaging/windows/mshv-ic8tem.iss` — install folder C:\MSHV-IC8TEM-NEW (UsePreviousAppDir=no); settings/log/RxWavs/ExportLog/AllTxtMonthly/Screenshots copied once from the previous folder.

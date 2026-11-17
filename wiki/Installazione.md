@@ -24,7 +24,7 @@ Il file `SHA256SUMS.txt` contiene le impronte di controllo.
 
 ## Dove finiscono impostazioni e log
 
-* **Windows (installatore)**: programma in `%LOCALAPPDATA%\Programs\MSHV-IC8TEM`, senza diritti di amministratore. Impostazioni e log restano dopo aggiornamenti e disinstallazione.
+* **Windows (installatore)**: programma in `C:\MSHV-IC8TEM-NEW` (dalla 2.76.7-ic8tem.20; prima era `%LOCALAPPDATA%\Programs\MSHV-IC8TEM`), senza diritti di amministratore. Al primo aggiornamento impostazioni, log, RxWavs, ExportLog, AllTxtMonthly e Screenshots della cartella vecchia vengono copiati nella nuova; la cartella vecchia resta com'era e si può cancellare a mano. Impostazioni e log restano dopo aggiornamenti e disinstallazione.
 * **Cartella del programma scrivibile** (zip portatile): tutto accanto all'eseguibile, come l'MSHV originale.
 * **Cartella non scrivibile**: `%APPDATA%\MSHV-IC8TEM` (Windows) o `~/.local/share/MSHV-IC8TEM` (Linux/BSD).
 * **macOS**: `~/Library/Application Support/MSHV-IC8TEM`.
