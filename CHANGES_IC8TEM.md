@@ -136,3 +136,8 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 
 ## 2026-11-17 — ic8tem.21
 * `src/HvTxW/HvLogW/hvlogw.*` — Menu "Find And Delete Duplicate QSOs": same call + band + mode and same start / within N minutes / same UTC day; keeps the most complete QSO of each group, selects the others and uses the Delete Selected confirmation. `HvLogList::DeleteSel` removes consecutive rows in one call.
+
+## 2026-11-17 — ic8tem.22
+* `src/HvTextColor/hvtxtcolor.*` — "Worked in the log on other bands or modes" (pink, color 7) and "New grids only"; saved after the calls text in `default_txt_mark` (#30, #31).
+* `src/HvDecodeList/hvworked.h` (new), `decodelist.*` — pink calls and new grids painted in the message column.
+* `src/HvTxW/HvLogW/hvlogw.*` — QSO B4 lists built with sets (fast with very big logs); every log call kept for the pink highlight.

@@ -1,5 +1,10 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.22
+* **Text Highlight**: nuovo colore **rosa** per i nominativi già nel log ma collegati su altre bande o modi.
+* **Locatori**: nuova opzione **New grids only** (attiva): l'azzurro segna solo i locatori non ancora collegati, invece di quelli già collegati. Vedi [[Colori: già collegati e locatori nuovi|Colori-gia-collegati]].
+* Il calcolo dei già collegati con log molto grandi è più veloce.
+
 ## 2.76.7-ic8tem.21
 * **Log › Menu › Find And Delete Duplicate QSOs**: trova i QSO doppi (stesso nominativo, banda e modo; stessa ora, entro N minuti o stesso giorno UTC), tiene il più completo e cancella gli altri dopo la conferma. Vedi [[QSO doppi|QSO-doppi]].
 * La cancellazione di molti QSO dal log è molto più veloce.

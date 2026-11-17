@@ -321,4 +321,27 @@
         <translation>Няма дублирани QSO.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Работени в лога на други ленти или видове</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Позивни, които вече са в лога, но не са QSO B4 за тази лента и вид</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Само нови локатори</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>Цветът на локатора маркира само локаторите, които още ги няма в лога (нужно е B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Изберете цвят за работени на други ленти</translation>
+    </message>
+</context>
 </TS>

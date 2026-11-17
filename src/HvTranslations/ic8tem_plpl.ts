@@ -321,4 +321,27 @@
         <translation>Nie znaleziono zduplikowanych QSO.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Zrobione w logu na innych pasmach lub emisjach</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Znaki już w logu, ale nieoznaczone jako QSO B4 dla tego pasma i emisji</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Tylko nowe lokatory</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>Kolor lokatora oznacza tylko lokatory, których jeszcze nie ma w logu (wymaga B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Wybierz kolor dla zrobionych na innych pasmach</translation>
+    </message>
+</context>
 </TS>

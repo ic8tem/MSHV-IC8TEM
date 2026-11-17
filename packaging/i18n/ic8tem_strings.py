@@ -13,6 +13,7 @@ P = "HvPowerSwrW"
 M = "Main_Ms"
 L = "HvPwrLink"
 G = "HvLogW"
+C = "HvTxtColor"
 
 def T(bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz):
     return dict(zip(LANGS, [bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz]))
@@ -442,4 +443,41 @@ MESSAGES = [
     "No se encontraron QSO duplicados.", "No s'han trobat QSO duplicats.", "Não foram encontrados QSO duplicados.", "Nu s-au găsit QSO duplicate.",
     "Ingen dublerede QSO'er fundet.", "Nie znaleziono zduplikowanych QSO.", "Aucun QSO en double trouvé.", "Nenhum QSO duplicado encontrado.",
     "Ingen dupliserte QSO-er funnet.", "Nessun QSO doppio trovato.", "Nebyla nalezena žádná duplicitní QSO.")),
+(C, "Worked in the log on other bands or modes", T("Работени в лога на други ленти или видове", "Работали в логе на других диапазонах или видах",
+    "日志中在其他波段或模式已通联", "日誌中在其他波段或模式已通聯", "Trabajados en el log en otras bandas o modos", "Treballats al log en altres bandes o modes",
+    "Trabalhados no log noutras bandas ou modos", "Lucrați în log pe alte benzi sau moduri", "Kørt i loggen på andre bånd eller modes",
+    "Zrobione w logu na innych pasmach lub emisjach", "Contactés dans le log sur d'autres bandes ou modes", "Trabalhados no log em outras bandas ou modos",
+    "Kjørt i loggen på andre bånd eller moduser", "Collegati nel log su altre bande o modi", "Spojení v logu na jiných pásmech nebo druzích provozu")),
+(C, "Calls already in the log, but not marked as QSO B4 for this band and mode", T(
+    "Позивни, които вече са в лога, но не са QSO B4 за тази лента и вид", "Позывные уже в логе, но не QSO B4 для этого диапазона и вида",
+    "已在日志中、但在此波段和模式下未标记为 QSO B4 的呼号", "已在日誌中、但在此波段和模式下未標記為 QSO B4 的呼號",
+    "Indicativos ya en el log, pero no marcados como QSO B4 para esta banda y modo", "Indicatius ja al log, però no marcats com a QSO B4 per a aquesta banda i mode",
+    "Indicativos já no log, mas não marcados como QSO B4 para esta banda e modo", "Indicative deja în log, dar nemarcate QSO B4 pentru această bandă și mod",
+    "Kaldesignaler i loggen, men ikke markeret som QSO B4 for dette bånd og mode", "Znaki już w logu, ale nieoznaczone jako QSO B4 dla tego pasma i emisji",
+    "Indicatifs déjà dans le log, mais pas marqués QSO B4 pour cette bande et ce mode", "Indicativos já no log, mas não marcados como QSO B4 para esta banda e modo",
+    "Kallesignaler i loggen, men ikke merket som QSO B4 for dette båndet og modusen", "Nominativi già nel log, ma non segnati come QSO B4 per questa banda e modo",
+    "Značky už v logu, ale neoznačené jako QSO B4 pro toto pásmo a druh provozu")),
+(C, "New grids only", T("Само нови локатори", "Только новые локаторы", "仅新网格", "僅新網格", "Solo locators nuevos", "Només locators nous",
+    "Só locators novos", "Doar locatoare noi", "Kun nye lokatorer", "Tylko nowe lokatory", "Nouveaux locators seulement", "Só locators novos",
+    "Bare nye lokatorer", "Solo locatori nuovi", "Jen nové lokátory")),
+(C, "The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)", T(
+    "Цветът на локатора маркира само локаторите, които още ги няма в лога (нужно е B4 Grid in MSG)",
+    "Цвет локатора отмечает только локаторы, которых ещё нет в логе (нужно B4 Grid in MSG)",
+    "网格颜色只标记日志中尚未有的网格（需要 B4 Grid in MSG）", "網格顏色只標記日誌中尚未有的網格（需要 B4 Grid in MSG）",
+    "El color del locator marca solo los locators que aún no están en el log (requiere B4 Grid in MSG)",
+    "El color del locator marca només els locators que encara no són al log (cal B4 Grid in MSG)",
+    "A cor do locator marca só os locators que ainda não estão no log (requer B4 Grid in MSG)",
+    "Culoarea locatorului marchează doar locatoarele care nu sunt încă în log (necesită B4 Grid in MSG)",
+    "Lokatorfarven markerer kun lokatorer, der endnu ikke er i loggen (kræver B4 Grid in MSG)",
+    "Kolor lokatora oznacza tylko lokatory, których jeszcze nie ma w logu (wymaga B4 Grid in MSG)",
+    "La couleur du locator ne marque que les locators pas encore dans le log (nécessite B4 Grid in MSG)",
+    "A cor do locator marca só os locators que ainda não estão no log (requer B4 Grid in MSG)",
+    "Lokatorfargen markerer bare lokatorer som ennå ikke er i loggen (krever B4 Grid in MSG)",
+    "Il colore del locatore segna solo i locatori non ancora presenti nel log (serve B4 Grid in MSG)",
+    "Barva lokátoru označí jen lokátory, které ještě nejsou v logu (vyžaduje B4 Grid in MSG)")),
+(C, "Choose Worked on other bands Color", T("Изберете цвят за работени на други ленти", "Выберите цвет для работавших на других диапазонах",
+    "选择其他波段已通联的颜色", "選擇其他波段已通聯的顏色", "Elija el color de trabajados en otras bandas", "Trieu el color de treballats en altres bandes",
+    "Escolha a cor de trabalhados noutras bandas", "Alegeți culoarea pentru lucrați pe alte benzi", "Vælg farve for kørt på andre bånd",
+    "Wybierz kolor dla zrobionych na innych pasmach", "Choisir la couleur des contactés sur d'autres bandes", "Escolha a cor de trabalhados em outras bandas",
+    "Velg farge for kjørt på andre bånd", "Scegli il colore dei collegati su altre bande", "Vyberte barvu pro spojení na jiných pásmech")),
 ]

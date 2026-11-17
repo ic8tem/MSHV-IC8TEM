@@ -851,6 +851,8 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvTxtColor, SIGNAL(EmitTextMarkColors(QColor*,int,bool,bool)), TDecodeList1, SLOT(SetTextMarkColors(QColor*,int,bool,bool)));
     connect(THvTxtColor, SIGNAL(EmitTextMarkColors(QColor*,int,bool,bool)), TDecodeList2, SLOT(SetTextMarkColors(QColor*,int,bool,bool)));
     connect(THvTxtColor, SIGNAL(EmitTextMark(bool*,QString)),FilterDialog,SLOT(SetTextMark(bool*,QString)));//2.69
+    connect(THvTxtColor, SIGNAL(EmitWorkedOpts(bool,bool)), TDecodeList1, SLOT(SetWorkedOpts(bool,bool)));//IC8TEM
+    connect(THvTxtColor, SIGNAL(EmitWorkedOpts(bool,bool)), TDecodeList2, SLOT(SetWorkedOpts(bool,bool)));//IC8TEM
 
     connect(THvTxW, SIGNAL(EmitDListMarkText(QStringList,int,int,int,int,int)), TDecodeList1, SLOT(SetDListMarkText(QStringList,int,int,int,int,int)));
     connect(THvTxW, SIGNAL(EmitDListMarkText(QStringList,int,int,int,int,int)), TDecodeList2, SLOT(SetDListMarkText(QStringList,int,int,int,int,int)));

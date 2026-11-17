@@ -321,4 +321,27 @@
         <translation>未找到重复 QSO。</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>日志中在其他波段或模式已通联</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>已在日志中、但在此波段和模式下未标记为 QSO B4 的呼号</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>仅新网格</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>网格颜色只标记日志中尚未有的网格（需要 B4 Grid in MSG）</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>选择其他波段已通联的颜色</translation>
+    </message>
+</context>
 </TS>

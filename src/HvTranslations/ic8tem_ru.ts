@@ -321,4 +321,27 @@
         <translation>Повторных QSO не найдено.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Работали в логе на других диапазонах или видах</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Позывные уже в логе, но не QSO B4 для этого диапазона и вида</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Только новые локаторы</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>Цвет локатора отмечает только локаторы, которых ещё нет в логе (нужно B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Выберите цвет для работавших на других диапазонах</translation>
+    </message>
+</context>
 </TS>

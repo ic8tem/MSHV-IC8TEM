@@ -411,7 +411,7 @@ private:
     QLineEdit *le_cabrillo_addr_cntr;       
     QPushButton *b_cabrillo_ok;
     QPushButton *b_cabrillo_cacel;
-    bool f_isCheck[7];
+    bool f_isCheck[8];//IC8TEM [7] worked on other bands (pink)
     bool s_allowed_modes;
     QString s_mode;
     QString s_band;	

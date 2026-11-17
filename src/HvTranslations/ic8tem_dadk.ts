@@ -321,4 +321,27 @@
         <translation>Ingen dublerede QSO'er fundet.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Kørt i loggen på andre bånd eller modes</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Kaldesignaler i loggen, men ikke markeret som QSO B4 for dette bånd og mode</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Kun nye lokatorer</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>Lokatorfarven markerer kun lokatorer, der endnu ikke er i loggen (kræver B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Vælg farve for kørt på andre bånd</translation>
+    </message>
+</context>
 </TS>

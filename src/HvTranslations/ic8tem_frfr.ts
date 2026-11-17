@@ -321,4 +321,27 @@
         <translation>Aucun QSO en double trouvé.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Contactés dans le log sur d'autres bandes ou modes</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Indicatifs déjà dans le log, mais pas marqués QSO B4 pour cette bande et ce mode</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Nouveaux locators seulement</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>La couleur du locator ne marque que les locators pas encore dans le log (nécessite B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Choisir la couleur des contactés sur d'autres bandes</translation>
+    </message>
+</context>
 </TS>

@@ -3,6 +3,7 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "decodelist.h"
+#include "hvworked.h"//IC8TEM
 #include "../mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
 #include "../HvTxW/HvRadioNetW/hvlotwusers.h"//IC8TEM mod LoTW
 #include "../config.h"
@@ -191,6 +192,8 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     s_mark_hisc_pos = 8;
     s_mark_b4q_pos = 10;
     s_mark_loc_pos = 20;
+    f_mark_pink = false;//IC8TEM
+    f_mark_newgrid = false;//IC8TEM
     s_mark_myc_pos = 30;//2.65
 
     setMinimumSize(100, 127);//127 be6e 530 na 1 display
@@ -1844,6 +1847,14 @@ void DecodeList::SetDListMarkText(QStringList l,int r12,int ih,int j,int k,int i
         int end = k;
         if (end > im) end = im;
         for (int i = j; i < end; ++i) list_b4qso.append(l.at(i));
+        set_grid_full.clear();//IC8TEM
+        set_grid_pfx4.clear();
+        for (int i = k; i < im && i < l.count(); ++i)
+        {
+            QString g = l.at(i).toUpper();
+            set_grid_full.insert(g);
+            set_grid_pfx4.insert(g.left(4));
+        }
 
         viewport()->update();
         //qDebug()<<l;
@@ -1947,6 +1958,7 @@ void DecodeList::drawRow(QPainter *painter, const QStyleOptionViewItem & option,
             else if (i>=s_mark_hisc_pos) i_mark_ = 2;
             else if (i>=s_mark_r12_pos)	 i_mark_ = 1;
 
+            if (i_mark_ == 4 && f_mark_newgrid) continue;//IC8TEM: new grids are marked in PaintIc8temMarks
             //if(str_find.isEmpty()) continue;//1.60= no need for the moment
             int start = 0;
             int end = 0;
@@ -2020,6 +2032,75 @@ try_again:
             }
         }
     }
+    PaintIc8temMarks(painter,opt,index);//IC8TEM
+}
+//IC8TEM: pink = call already in the log but not QSO B4 for this band/mode;
+//new grids only = the grid color goes to the grids that are not in the worked list
+void DecodeList::SetWorkedOpts(bool pink,bool newgrid)
+{
+    f_mark_pink = pink;
+    f_mark_newgrid = newgrid;
+    viewport()->update();
+}
+bool DecodeList::GridWorked(const QString &g) const
+{
+    if (g.count()==4) return set_grid_pfx4.contains(g);
+    return set_grid_full.contains(g) || set_grid_full.contains(g.left(4));
+}
+void DecodeList::PaintIc8temMarks(QPainter *painter,const QStyleOptionViewItem &opt,const QModelIndex &index) const
+{
+    bool pink = f_mark_pink && !HvWorked::Calls().isEmpty();
+    bool ngrid = f_mark_newgrid && HvWorked::GridsReady();
+    if (!pink && !ngrid) return;
+    if (msg_column >= model.columnCount() || !model.item(index.row(),msg_column)) return;
+    QString str_row = model.item(index.row(),msg_column)->text();
+    if (str_row.isEmpty()) return;
+    painter->save();
+    painter->setFont(opt.font);
+    QFontMetrics fm(opt.font);
+    QRegExp rxw("[^\\s]+");
+    QRegExp rxg("^[A-R]{2}[0-9]{2}([A-X]{2})?$");
+    int pos = 0;
+    while ((pos = rxw.indexIn(str_row,pos)) != -1)
+    {
+        QString w = rxw.cap(0);
+        int len = w.length();
+        QString t = w.toUpper();
+        if (t.endsWith(";")) t.chop(1);
+        t.remove('<');
+        t.remove('>');
+        int ci = -1;
+        if (!t.isEmpty() && !s_mark_txt.contains(t) && !s_mark_txt.contains(w))
+        {
+            if (ngrid && t!="RR73" && rxg.exactMatch(t))
+            {
+                if (!GridWorked(t)) ci = 2;
+            }
+            else if (pink && t.count()>2 && HvWorked::Calls().contains(t) && !list_b4qso.contains(t)) ci = 7;
+        }
+        if (ci >= 0)
+        {
+            int ls = str_row.lastIndexOf('\n',pos-1) + 1;
+            int line = str_row.left(pos).count('\n');
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+            int sta_1 = fm.horizontalAdvance(str_row.mid(ls,pos-ls));
+            int end_1 = fm.horizontalAdvance(w)+1;
+#else
+            int sta_1 = fm.width(str_row.mid(ls,pos-ls));
+            int end_1 = fm.width(w)+1;
+#endif
+            if (header()->sectionSize(msg_column) > sta_1+end_1+opt.rect.x()+5)
+            {
+                QRect r1(sta_1,line*fm.height(),end_1,fm.height()-2);
+                r1.translate(header()->sectionPosition(msg_column)+opt.rect.x()+5,opt.rect.y()+1);
+                painter->fillRect(r1,c_mark_txt[ci]);
+                r1.translate(0,-1);
+                painter->drawText(r1,w);
+            }
+        }
+        pos += len;
+    }
+    painter->restore();
 }
 void DecodeList::paintEvent(QPaintEvent *event)
 {

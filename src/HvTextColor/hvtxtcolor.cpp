@@ -76,6 +76,12 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     cb[27]->setChecked(true);
     cb[28] = new QCheckBox(tr("Calls"));
     cb[28]->setChecked(true);
+    cb_pink = new QCheckBox(tr("Worked in the log on other bands or modes"));//IC8TEM
+    cb_pink->setChecked(true);
+    cb_pink->setToolTip(tr("Calls already in the log, but not marked as QSO B4 for this band and mode"));
+    cb_newgrid = new QCheckBox(tr("New grids only"));//IC8TEM
+    cb_newgrid->setChecked(true);
+    cb_newgrid->setToolTip(tr("The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)"));
     le_cals_msg = new HvLeWithSpace();
     le_cals_msg->setMaxLength(150);
     le_cals_msg->setToolTip("LZ2HV,K1ABC  "+tr("(Call: Minimum 3 Characters)"));//Maximum 150 Characters
@@ -85,6 +91,8 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
 	connect(cb[26], SIGNAL(toggled(bool)), this, SLOT(TxTextMarkChanged(bool)));
 	connect(cb[27], SIGNAL(toggled(bool)), this, SLOT(TxTextMarkChanged(bool)));
 	connect(cb[28], SIGNAL(toggled(bool)), this, SLOT(TextMarkChanged(bool)));
+	connect(cb_pink, SIGNAL(toggled(bool)), this, SLOT(TextMarkChanged(bool)));//IC8TEM
+	connect(cb_newgrid, SIGNAL(toggled(bool)), this, SLOT(TextMarkChanged(bool)));//IC8TEM
 
     QVBoxLayout *V_l0m = new QVBoxLayout();
     V_l0m->setContentsMargins (0, 0, 0, 0);
@@ -138,6 +146,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     b_[4] = new QPushButton(tr("COLOR"));
     b_[5] = new QPushButton(tr("COLOR"));
     b_[6] = new QPushButton(tr("COLOR"));
+    b_[7] = new QPushButton(tr("COLOR"));//IC8TEM
 
     QPushButton *b_set_default = new QPushButton(tr("SET DEFAULT COLORS"));
     
@@ -182,6 +191,16 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     H_h3->addWidget(cb[25]);
     H_h3->addWidget(b_[2]);
 
+    QHBoxLayout *H_hpk = new QHBoxLayout();//IC8TEM
+    H_hpk->setContentsMargins (0, 0, 0, 0);
+    H_hpk->setSpacing(4);
+    H_hpk->addWidget(cb_pink);
+    H_hpk->addWidget(b_[7]);
+    QHBoxLayout *H_hng = new QHBoxLayout();//IC8TEM
+    H_hng->setContentsMargins (0, 0, 0, 0);
+    H_hng->addWidget(cb_newgrid);
+    H_hng->addStretch();
+
     QHBoxLayout *H_ht = new QHBoxLayout();
     H_ht->setContentsMargins (0, 0, 0, 0);
     H_ht->setSpacing(4);
@@ -198,7 +217,9 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     V_l2->setContentsMargins (1, 1, 1, 1);
     V_l2->setSpacing(3);
     V_l2->addLayout(H_h2);
+    V_l2->addLayout(H_hpk);//IC8TEM
     V_l2->addLayout(H_h3);
+    V_l2->addLayout(H_hng);//IC8TEM
     V_l2->addLayout(H_ht);
     V_l2->addLayout(H_hq);
     //QGroupBox *GB_C2 = new QGroupBox("COLOR SECTION 2: QSO B4, Band Mode, will change filtering for Warn Me If QSO B4");//MSK,FT8,JT65
@@ -212,6 +233,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     connect(b_[4], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxQ()));
     connect(b_[5], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxMC()));
     connect(b_[6], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxHC()));
+    connect(b_[7], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxPK()));//IC8TEM
     connect(b_set_default, SIGNAL(clicked(bool)), this, SLOT(setDefColors()));
 
     CD_box = new QColorDialog(this);
@@ -244,6 +266,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     collors[0][4] = collors0[0][4] = QColor(255,255,150);//qsy in list2
     collors[0][5] = collors0[0][5] = QColor(255,180,100);//2.56 mycall
     collors[0][6] = collors0[0][6] = QColor(100,210,255);//2.63 hiscall
+    collors[0][7] = collors0[0][7] = QColor(255,170,225);//IC8TEM worked on other bands (pink)
 	//default dark sheme
     collors[1][0] = collors0[1][0] = QColor(0,125,0);//CQ RRR 73
     collors[1][1] = collors0[1][1] = QColor(130,0,0);//QSO B4
@@ -252,6 +275,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     collors[1][4] = collors0[1][4] = QColor(100,100,59);//qsy in list2
     collors[1][5] = collors0[1][5] = QColor(100,70,40);//2.56 mycall
     collors[1][6] = collors0[1][6] = QColor(50,100,140);//2.63 hiscall
+    collors[1][7] = collors0[1][7] = QColor(130,50,100);//IC8TEM worked on other bands (pink)
 
     RefreshAll();
 }
@@ -316,6 +340,13 @@ void HvTxtColor::OpenCDBoxHC()
     CD_box->open();
     CD_box->setCurrentColor(collors[dsty][6].rgb());
 }
+void HvTxtColor::OpenCDBoxPK()//IC8TEM
+{
+    b_ident = 7;
+    CD_box->setWindowTitle(tr("Choose Worked on other bands Color"));
+    CD_box->open();
+    CD_box->setCurrentColor(collors[dsty][7].rgb());
+}
 void HvTxtColor::SetFont(QFont f)
 {
     for (int i =0; i<C_BT; ++i) b_[i]->setFont(f);
@@ -345,6 +376,7 @@ void HvTxtColor::setDefColors()
     collors[dsty][4] = collors0[dsty][4];
     collors[dsty][5] = collors0[dsty][5];
     collors[dsty][6] = collors0[dsty][6];
+    collors[dsty][7] = collors0[dsty][7];//IC8TEM
     RefreshAll();
 }
 void HvTxtColor::SetTextColor(QString s)
@@ -382,7 +414,9 @@ QString HvTxtColor::GetTextMark()
 		if (cb[i]->isChecked()) res.append("1#");
     	else res.append("0#");
 	}     
-    res.append(le_cals_msg->text());//29      
+    res.append(le_cals_msg->text());//29
+    res.append(cb_pink->isChecked() ? "#1" : "#0");//30 IC8TEM
+    res.append(cb_newgrid->isChecked() ? "#1" : "#0");//31 IC8TEM
     return res;
 }
 QString HvTxtColor::CorrectSyntax(QString txt ,bool cordot)
@@ -430,6 +464,8 @@ void HvTxtColor::SetTextMark(QString s)
     {
     	if (ls.at(29)!="1") le_cals_msg->setText(ls.at(29));//le_cals_msg->setText(CorrectSyntax(ls.at(29),true));    	
    	}
+    cb_pink->setChecked(ls.at(30)!="0");//IC8TEM (older settings: ON)
+    cb_newgrid->setChecked(ls.at(31)!="0");//IC8TEM
   	TextMarkChanged(true);//refresh
 }
 void HvTxtColor::TxTextMarkChanged(bool)
@@ -454,6 +490,10 @@ void HvTxtColor::TextMarkChanged(bool)
 		}
 		else if (cb[i]->isChecked()) f[i]=true;
 	}
+    f[29] = cb_pink->isChecked();//IC8TEM
+    f[30] = cb_newgrid->isChecked() && cb[22]->isChecked();//IC8TEM
+    cb_newgrid->setEnabled(cb[22]->isChecked());
     le_cals_msg->setText(CorrectSyntax(le_cals_msg->text(),true));      
-    emit EmitTextMark(f,le_cals_msg->text()); //qDebug()<<f[0]<<f[1]<<f[28]<<le_cals_msg->text();
+    emit EmitTextMark(f,le_cals_msg->text());
+    emit EmitWorkedOpts(f[29],f[30]);//IC8TEM //qDebug()<<f[0]<<f[1]<<f[28]<<le_cals_msg->text();
 }

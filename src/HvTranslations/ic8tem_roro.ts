@@ -321,4 +321,27 @@
         <translation>Nu s-au găsit QSO duplicate.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Lucrați în log pe alte benzi sau moduri</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Indicative deja în log, dar nemarcate QSO B4 pentru această bandă și mod</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Doar locatoare noi</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>Culoarea locatorului marchează doar locatoarele care nu sunt încă în log (necesită B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Alegeți culoarea pentru lucrați pe alte benzi</translation>
+    </message>
+</context>
 </TS>

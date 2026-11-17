@@ -321,4 +321,27 @@
         <translation>Nebyla nalezena žádná duplicitní QSO.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Spojení v logu na jiných pásmech nebo druzích provozu</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Značky už v logu, ale neoznačené jako QSO B4 pro toto pásmo a druh provozu</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Jen nové lokátory</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>Barva lokátoru označí jen lokátory, které ještě nejsou v logu (vyžaduje B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Vyberte barvu pro spojení na jiných pásmech</translation>
+    </message>
+</context>
 </TS>

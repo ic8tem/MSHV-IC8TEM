@@ -3,6 +3,8 @@
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "hvlogw.h"
+#include "../../HvDecodeList/hvworked.h"//IC8TEM
+#include <QSet>
 #if defined _MACOS_
 #include <QToolButton>//macOS port (VU2CPL)
 #endif
@@ -1094,6 +1096,7 @@ HvLogW::HvLogW(QString inst,QString app_path, bool indsty,int x,int y,QWidget *w
     f_isCheck[4] = true;
     f_isCheck[5] = true;
     f_isCheck[6] = true;
+    f_isCheck[7] = true;//IC8TEM
     s_allowed_modes = false;
     s_mode = "";
     s_band = "";
@@ -2588,7 +2591,7 @@ void HvLogW::AddExtrnalAdif()
                              tr("Non-supported modes of QSOs")+" "+QString("%1").arg(err_mod_qso), QMessageBox::Ok);
     //qDebug()<<"All Lines Count="<<allc<<"Exported QSOs="<<THvLogList->model.rowCount()<<"Error no supported modes="<<ccc<<"Eror is: "<<err;
 
-    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
 
     CheckLogCount();
 }
@@ -2647,6 +2650,7 @@ void HvLogW::SetMarkTextAllRuleChanged(bool *f,int mode,QString band)
     f_isCheck[4] = f[23];//loc 46
     f_isCheck[5] = f[24];//loc b
     f_isCheck[6] = f[25];//loc m
+    f_isCheck[7] = f[29];//IC8TEM worked on other bands (pink)
     s_mode = ModeStr(mode);
     s_band = band;
     if (mode==0 || mode==7 || mode==8 || mode==9 || mode==11 || mode==12 || mode==13 || mode==18 ||
@@ -2656,11 +2660,13 @@ void HvLogW::SetMarkTextAllRuleChanged(bool *f,int mode,QString band)
         s_allowed_modes = false;
 
 
-    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
     else
     {
         QStringList l;
         l.clear();
+        HvWorked::Calls().clear();//IC8TEM
+        HvWorked::GridsReady() = false;
         emit EmitMarkTextLogAll(l,0);//emit empty list
     }
 }
@@ -2679,15 +2685,25 @@ bool HvLogW::isDuplicate(QStringList l,QString s,int b)//2.63
 }
 void HvLogW::GetMarkTextAllFromLog_p(QString band,QString mode)
 {
+    //IC8TEM: same lists as before, duplicates checked with sets (fast with very big logs),
+    //plus every call of the log for the "worked on other bands" highlight
     QStringList l;
+    QSet<QString> seen;
     int p1 = 0;
     int l_count = THvLogList->GetListCount();
     l.clear();
+    QSet<QString> &all = HvWorked::Calls();
+    all.clear();
 
-    if (f_isCheck[0]) //qso b4 calls
+    if (f_isCheck[0] || f_isCheck[7]) //qso b4 calls
     {
         for (int i = 0; i<l_count; ++i)
         {
+            if (isBeforeFictReset(i)) continue;//IC8TEM mod
+            QString s = THvLogList->model.item(i,4)->text();
+            if (s.isEmpty()) continue;
+            if (f_isCheck[7]) all.insert(s);
+            if (!f_isCheck[0]) continue;
             if (f_isCheck[2])
             {
                 if (THvLogList->model.item(i,8)->text()!=mode) continue;
@@ -2696,14 +2712,13 @@ void HvLogW::GetMarkTextAllFromLog_p(QString band,QString mode)
             {
                 if (THvLogList->model.item(i,9)->text()!=band) continue;
             }
-            if (isBeforeFictReset(i)) continue;//IC8TEM mod
-            QString s = THvLogList->model.item(i,4)->text();
-            if (s.isEmpty()) continue;
-            if (isDuplicate(l,s,0)) continue;
+            if (seen.contains(s)) continue;
+            seen.insert(s);
             l.append(s);
         }
-    } //l.removeDuplicates();
+    }
     p1 = l.count();
+    seen.clear();
     if (f_isCheck[3]) //qso b4 loc
     {
         for (int i = 0; i<l_count; ++i)
@@ -2724,24 +2739,30 @@ void HvLogW::GetMarkTextAllFromLog_p(QString band,QString mode)
             {
                 if (s.count()>5)//2.63  ==6
                 {
-                    if (isDuplicate(l,s.mid(0,6),p1)) continue;
-                    l.append(s.mid(0,6));
-                } //else continue;
+                    QString g = s.mid(0,6);
+                    if (seen.contains(g)) continue;
+                    seen.insert(g);
+                    l.append(g);
+                }
             }
             else //loc 4 and 6
             {
                 if (s.count()>3)
                 {
-                    if (!isDuplicate(l,s.mid(0,4),p1)) l.append(s.mid(0,4));
+                    QString g4 = s.mid(0,4);
+                    if (!seen.contains(g4)) { seen.insert(g4); l.append(g4); }
                     if (s.count()>5)
                     {
-                        if (isDuplicate(l,s.mid(0,6),p1)) continue;
-                        l.append(s.mid(0,6));
+                        QString g = s.mid(0,6);
+                        if (seen.contains(g)) continue;
+                        seen.insert(g);
+                        l.append(g);
                     }
-                } //else continue;
+                }
             }
         }
-    } //l.removeDuplicates();
+    }
+    HvWorked::GridsReady() = f_isCheck[3];//IC8TEM
     emit EmitMarkTextLogAll(l,p1); //qDebug()<<l<<l.count();
 }
 void HvLogW::IsCallDupeInLog(QString call,QString mod,QString band,int maxqso,bool &is_exist)
@@ -3183,7 +3204,7 @@ void HvLogW::DeleteSelected()
         End_Edit();
         End_Add_Man_Qso();
 
-        if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+        if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
 
         CheckLogCount();
     }
@@ -3319,7 +3340,7 @@ void HvLogW::ReadEDI(QString path,bool pbarr,bool check_format)
     if (pbarr) THvProgrD->Finish(added_qso);
     file.close();
     if (pbarr) THvProgrD->close();
-    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
     if (pbarr) CheckLogCount();//only from add external
 }
 void HvLogW::SetLogAutoComm(bool f)//2.76.3
@@ -3939,7 +3960,7 @@ void HvLogW::AddManQsoToList(QStringList list,int)
     if (s_udp_broad_logged_qso) emit EmitLoggedQSO(MakeLoggedQSO(rowt));
     if (s_udportcp_broad_logged_adif) emit EmitAdifRecord(MakeAdifString(rowt));
 
-    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
 
     CheckLogCount();
 }
@@ -3953,7 +3974,7 @@ void HvLogW::SetCorrContact(QStringList list,int index_edit)
     //all_exp=0 sel_exp=1  save_all_for_ext_log_prog=2 append_all_for_ext_log_prog=3
     //ExportToAdif("",2);//save_all_for_ext_log_prog=2
 
-    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
 }
 void HvLogW::SaveAllExternal(bool f)//  f true=append false=save all
 {
@@ -4022,7 +4043,7 @@ void HvLogW::CreateNBLog(bool f)
 
     if (f) l_qsos_in_log->setText(QString("%1").arg(THvLogList->model.rowCount()));
 
-    if (f && s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+    if (f && s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
 
     THvProgrD->close();
 
@@ -4436,7 +4457,7 @@ void HvLogW::FictResetChanged()
     if (nf == f_fict_reset && ns == s_fict_reset) return;
     f_fict_reset = nf;
     s_fict_reset = ns;
-    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3])) GetMarkTextAllFromLog_p(s_band,s_mode);
+    if (s_allowed_modes && (f_isCheck[0] || f_isCheck[3] || f_isCheck[7])) GetMarkTextAllFromLog_p(s_band,s_mode);
 }
 QString HvLogW::GetFictResetSettings()
 {

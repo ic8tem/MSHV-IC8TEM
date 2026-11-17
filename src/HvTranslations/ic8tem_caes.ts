@@ -321,4 +321,27 @@
         <translation>No s'han trobat QSO duplicats.</translation>
     </message>
 </context>
+<context>
+    <name>HvTxtColor</name>
+    <message>
+        <source>Worked in the log on other bands or modes</source>
+        <translation>Treballats al log en altres bandes o modes</translation>
+    </message>
+    <message>
+        <source>Calls already in the log, but not marked as QSO B4 for this band and mode</source>
+        <translation>Indicatius ja al log, però no marcats com a QSO B4 per a aquesta banda i mode</translation>
+    </message>
+    <message>
+        <source>New grids only</source>
+        <translation>Només locators nous</translation>
+    </message>
+    <message>
+        <source>The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)</source>
+        <translation>El color del locator marca només els locators que encara no són al log (cal B4 Grid in MSG)</translation>
+    </message>
+    <message>
+        <source>Choose Worked on other bands Color</source>
+        <translation>Trieu el color de treballats en altres bandes</translation>
+    </message>
+</context>
 </TS>

@@ -12,10 +12,10 @@
 #include <QColor>
 #include <QColorDialog>
 #include <QGroupBox>
-#define C_COLORS 7
+#define C_COLORS 8 //IC8TEM: +7 worked on other bands (pink)
 #define C_SHEM 2
 #define C_CB 29
-#define C_BT 7
+#define C_BT 8
 
 #include "../HvTxW/hvinle.h"
 //#include "../config.h"
@@ -55,6 +55,7 @@ public:
 signals:
     void EmitTextMark(bool *f,QString);
     void EmitTextMarkColors(QColor*,int,bool,bool);
+    void EmitWorkedOpts(bool,bool);//IC8TEM pink calls, new grids only
 
 private slots:
     void TextMarkChanged(bool);
@@ -66,6 +67,7 @@ private slots:
     void OpenCDBoxQ();
     void OpenCDBoxMC();
     void OpenCDBoxHC();
+    void OpenCDBoxPK();//IC8TEM
     void setDefColors();
     void ColorChanged(QColor);
     //void LeTextChanged(QString);
@@ -73,6 +75,8 @@ private slots:
 private:
     int dsty;
     QCheckBox *cb[C_CB];
+    QCheckBox *cb_pink;//IC8TEM
+    QCheckBox *cb_newgrid;//IC8TEM
     HvLeWithSpace *le_cals_msg;    
     QColor collors[C_SHEM][C_COLORS];
     QColor collors0[C_SHEM][C_COLORS];
