@@ -871,7 +871,7 @@ void Yaesu::SetReadyRead(QByteArray ar,int size0)
                 if (size < 4)//to get mde ansver->MD02;  ansver->FA014250000;
                 {
                     s_read_array.clear();//qDebug()<<"NO INAF SIZE";
-                    return;
+                    continue;//IC8TEM was return: keep the next answers of the same chunk
                 }//F=0x46 A=0x41
                 if (s_CmdID==GET_FREQ && s_read_array[0]==(char)0x46 && s_read_array[1]==(char)0x41)//my qestion for freq and freq filter vfoA
                 {

@@ -126,3 +126,7 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 ## 2026-11-17 — ic8tem.19
 * `hvrigcontrol.*` — Icom IC-7300 (Hamlib) takes Port and Baud Rate from the serial combos (MSHV does not open the port, Hamlib reconnects on change).
 * `hamlibrig.*` — no blocking in the GUI thread when the rig is replaced (worker closes and quits by itself), one Hamlib open/close at a time, long messages shortened (full text in the CAT Log).
+
+## 2026-11-17 — ic8tem.20
+* `hvrigcatw.*` — Power & SWR for text CAT radios: Yaesu NEWCAT (PC, RM4/5/6), Kenwood TS-2000/TS-590/TS-480 (PC, RM, SM0), Elecraft K3 family (PC, TM, BG, SW); meter scales from Hamlib. Answers parsed in HvRigCat (the drivers ignore them).
+* `yaesu.cpp`, `kenwood.cpp`, `elecraft.cpp` — a short answer no longer drops the following answers of the same chunk.

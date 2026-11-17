@@ -163,7 +163,7 @@ void Kenwood::SetReadyRead(QByteArray ar,int size0)
             {
                 //qDebug()<<"NO INAF SIZE";
                 s_read_array.clear();
-                return;
+                continue;//IC8TEM was return: keep the next answers of the same chunk
             }
             //I=49 F=46
             if ((s_CmdID==GET_FREQ || s_CmdID==GET_MODE) && s_read_array[0]==(char)0x49 && s_read_array[1]==(char)0x46)//my qestion for freq and freq filter vfoA

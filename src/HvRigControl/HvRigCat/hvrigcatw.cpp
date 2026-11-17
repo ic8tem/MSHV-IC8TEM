@@ -78,6 +78,7 @@ HvRigCat::HvRigCat( QWidget *parent )
     c_poll_comm = -1;
     s_port_type = RIG_PORT_NONE;
     s_port_poen = false;
+    pwr_k3_tm = 0;//IC8TEM
     vita_rx = 0;
     vita_tx = false;
 
@@ -895,6 +896,18 @@ void HvRigCat::set_freq(QString sfreq)
 void HvRigCat::SetReadyRead(QByteArray a,int i)
 {
     emit EmitReadyRead(a,i);
+    if (PwrTextFamily() > 0)//IC8TEM: answers to the Power & SWR commands (the driver ignores them)
+    {
+        pwr_rx_buf.append(a.left(i));
+        int p;
+        while ((p = pwr_rx_buf.indexOf(';')) >= 0)
+        {
+            QByteArray tok = pwr_rx_buf.left(p).trimmed();
+            pwr_rx_buf.remove(0,p+1);
+            if (!tok.isEmpty()) PwrTextParse(tok);
+        }
+        if (pwr_rx_buf.size() > 512) pwr_rx_buf.clear();
+    }
 }
 void HvRigCat::SetReadedInfo(CmdID i,QString str)
 {
@@ -911,7 +924,8 @@ void HvRigCat::SetReadedInfo(CmdID i,QString str)
 bool HvRigCat::PwrCapable()//IC8TEM Power & SWR: Icom CI-V (USB) or Icom LAN, CAT running
 {
     if (!s_port_poen || !f_rig_activ) return false;
-    return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && (IS_ICOMLAN(s_active_model_id) || s_active_model_id==HAMLIB_IC7300)));
+    return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && (IS_ICOMLAN(s_active_model_id) || s_active_model_id==HAMLIB_IC7300))
+            || PwrTextFamily() > 0);
 }
 QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
 {
@@ -922,6 +936,9 @@ QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
     if (s_active_fact_id==ICOM_ID) kind = "Icom CI-V";
     else if (s_active_fact_id==NETWORK_ID && IS_ICOMLAN(s_active_model_id)) kind = "Icom LAN";
     else if (s_active_fact_id==NETWORK_ID && s_active_model_id==HAMLIB_IC7300) kind = "Hamlib";
+    else if (PwrTextFamily()==1) kind = "Yaesu CAT";
+    else if (PwrTextFamily()==2 || PwrTextFamily()==3) kind = "Kenwood CAT";
+    else if (PwrTextFamily()==4) kind = "Elecraft CAT";
     else if (s_active_fact_id==11) kind = "OmniRig";//OMNIRIGHV_ID (Windows only header)
     else if (s_active_fact_id==NETWORK_ID) kind = "Network (TCI/Flex/Hamlib...)";
     else kind = "CAT";
@@ -931,7 +948,151 @@ void HvRigCat::SendPwrCmd(int id,QString str)//IC8TEM
 {
     if (!PwrCapable()) return;
     if (id!=SET_RFPOWER && id!=GET_RFPOWER && id!=GET_METERS) return;
+    if (PwrTextFamily() > 0)
+    {
+        PwrTextCmd(id,str);
+        return;
+    }
     emit SetCmd((CmdID)id,RIG_PTT_OFF,str);
+}
+//IC8TEM ---------------------------------------------------------------- text CAT radios
+// Commands and meter scales as in Hamlib (newcat.c, ts590.c, ts2000.c, k3.c):
+//  Yaesu NEWCAT  PCnnn (W) / RM5 Po / RM6 SWR / RM4 ALC   (0-255)
+//  Kenwood       PCnnn (W) / RM; -> RM1 SWR, RM2 COMP, RM3 ALC (0-30) / SM0 = Po while transmitting
+//  Elecraft K3   PCnnn (W) / TM; BG; -> BGnnT (TM0 power 0-10+, TM1 ALC 0-7) / SWnnn = SWR x10
+int HvRigCat::PwrTextFamily()
+{
+    if (!f_rig_activ) return 0;
+    QString n = get_rig_name();
+    if (s_active_fact_id==YAESU_ID)
+    {
+        if (n=="FT-991" || n=="FT-710" || n=="FT-DX10" || n=="FT-DX101" || n=="FT-891" || n=="FT-DX1200" ||
+                n=="FT-DX3000" || n=="FT-DX5000" || n=="FT-950" || n=="FTX-1" || n=="FT-2000") return 1;
+        return 0;
+    }
+    if (s_active_fact_id==KENWOOD_ID)
+    {
+        if (n=="TS-590S" || n=="TS-590SG" || n=="TS-480") return 2;
+        if (n=="TS-2000") return 3;
+        return 0;
+    }
+    if (s_active_fact_id==ELECRAFT_ID && n=="K3/KX3") return 4;
+    return 0;
+}
+void HvRigCat::PwrTextCmd(int id,const QString &str)
+{
+    int fam = PwrTextFamily();
+    QString c;
+    if (id==SET_RFPOWER)
+    {
+        int pct = (int)(str.toInt()*100.0/255.0+0.5);
+        if (fam!=4 && pct < 5) pct = 5;//Yaesu and Kenwood: 5..100 W
+        if (pct > 100) pct = 100;
+        c = QString("PC%1;").arg(pct,3,10,QChar('0'));
+    }
+    else if (id==GET_RFPOWER) c = "PC;";
+    else if (id==GET_METERS)
+    {
+        if (fam==1) c = "RM5;RM6;RM4;";
+        else if (fam==2 || fam==3) c = s_f_ptt ? "RM;SM0;" : "RM;";
+        else if (fam==4) c = "TM;BG;SW;";
+    }
+    if (c.isEmpty()) return;
+    emit EmitPwrInfo((int)LOG_TX,c);
+    pwr_tx_buf = c.toLatin1();
+    SetWriteCmd(pwr_tx_buf.data(),pwr_tx_buf.size());
+}
+static double PwrCal(double raw,const double (*t)[2],int n)//IC8TEM linear interpolation
+{
+    if (raw <= t[0][0]) return t[0][1];
+    for (int i = 1; i < n; ++i)
+        if (raw <= t[i][0]) return t[i-1][1] + (t[i][1]-t[i-1][1])*(raw-t[i-1][0])/(t[i][0]-t[i-1][0]);
+    return t[n-1][1];
+}
+void HvRigCat::PwrTextParse(const QByteArray &tok)
+{
+    int fam = PwrTextFamily();
+    QString t = QString::fromLatin1(tok);
+    bool mine = t.startsWith("PC") || t.startsWith("RM") || (t.startsWith("SM0") && fam!=1 && fam!=4) ||
+                (fam==4 && (t.startsWith("BG") || t.startsWith("SW") || t.startsWith("TM")));
+    if (!mine) return;
+    emit EmitPwrInfo((int)LOG_RX,t+";");
+    if (t.startsWith("PC") && t.length() >= 5)
+    {
+        double w = t.mid(2,3).toInt();
+        if (fam==4 && t.length() >= 6 && t.at(5)=='0') w /= 10.0;//K3 PCnnnx, x=0: tenths of watt
+        emit EmitPwrInfo((int)READ_RFPOWER,"f:"+QString::number(w/100.0,'f',4));
+        return;
+    }
+    if (fam==1 && t.startsWith("RM") && t.length() >= 6)
+    {
+        QChar m = t.at(2);
+        double raw = t.mid(3,3).toInt();
+        QString n = get_rig_name();
+        if (m=='5')//Po, watts
+        {
+            static const double c991[][2] = {{0,0},{10,0.8},{50,8},{100,26},{150,54},{200,92},{250,140}};
+            static const double c10[][2]  = {{0,0},{27,5},{94,25},{147,50},{176,75},{205,100}};
+            static const double cdef[][2] = {{0,0},{148,50},{255,100}};
+            double w;
+            if (n=="FT-991") w = PwrCal(raw,c991,7);
+            else if (n=="FT-DX10" || n=="FT-710" || n=="FT-DX101") w = PwrCal(raw,c10,6);
+            else w = PwrCal(raw,cdef,3);
+            emit EmitPwrInfo((int)READ_PO,"f:"+QString::number(qMin(w/100.0,1.0),'f',4));
+        }
+        else if (m=='6')//SWR
+        {
+            static const double s10[][2]  = {{0,1.0},{26,1.2},{52,1.5},{89,2.0},{126,3.0},{173,4.0},{236,5.0},{255,25.0}};
+            static const double sdef[][2] = {{0,1.0},{12,1.0},{39,1.35},{65,1.5},{89,2.0},{242,5.0}};
+            double swr = (n=="FT-DX10" || n=="FT-710" || n=="FT-DX101") ? PwrCal(raw,s10,8) : PwrCal(raw,sdef,6);
+            emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(swr,'f',3));
+        }
+        else if (m=='4')//ALC: 1.0 = half scale
+            emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(raw/128.0,'f',4));
+        return;
+    }
+    if ((fam==2 || fam==3) && t.startsWith("RM") && t.length() >= 4)
+    {
+        QChar m = t.at(2);
+        double raw = t.mid(3).toInt();
+        if (m=='1')
+        {
+            static const double s590[][2] = {{0,1.0},{6,1.5},{12,2.0},{18,3.0},{30,10.0}};
+            emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(PwrCal(raw,s590,5),'f',3));
+        }
+        else if (m=='3') emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(raw/(fam==3 ? 20.0 : 30.0),'f',4));
+        return;
+    }
+    if ((fam==2 || fam==3) && t.startsWith("SM0") && t.length() >= 4)
+    {
+        if (!s_f_ptt) return;//S-meter while receiving
+        double raw = t.mid(3).toInt();
+        double frac;
+        if (fam==2)
+        {
+            static const double p590[][2] = {{0,0},{3,5},{6,10},{8,15},{12,25},{17,50},{30,100}};
+            frac = PwrCal(raw,p590,7)/100.0;
+        }
+        else frac = raw/30.0;
+        emit EmitPwrInfo((int)READ_PO,"f:"+QString::number(qMin(frac,1.0),'f',4));
+        return;
+    }
+    if (fam==4)
+    {
+        if (t.startsWith("TM") && t.length() >= 3) pwr_k3_tm = (t.at(2)=='1') ? 1 : 0;
+        else if (t.startsWith("BG") && t.length() >= 5 && t.at(4)=='T')
+        {
+            double nn = t.mid(2,2).toInt();
+            if (pwr_k3_tm==1) emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(nn/7.0,'f',4));
+            else emit EmitPwrInfo((int)READ_PO,"f:"+QString::number(qMin(nn/10.0,1.0),'f',4));
+        }
+        else if (t.startsWith("SW") && t.length() >= 3)
+        {
+            double swr = t.mid(2).toInt()/10.0;
+            if (swr < 1.0) swr = 1.0;
+            emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(swr,'f',3));
+        }
+    }
 }
 void HvRigCat::StartStopPollingTimer(bool popen)/*, bool read_data_rts_on*/
 {

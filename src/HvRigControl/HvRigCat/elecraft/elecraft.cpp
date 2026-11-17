@@ -203,7 +203,7 @@ void Elecraft::SetReadyRead(QByteArray ar,int size0)
             if (size < 3)//MD2 bez ;
             {                
                 s_read_array.clear();//qDebug()<<"NO INAF SIZE";
-                return;
+                continue;//IC8TEM was return: keep the next answers of the same chunk
             }
             //F=0x46 A=0x41  ,=0x2c
             char id =(char)0x41;
