@@ -11,6 +11,7 @@
 #include <QObject>
 #include <QThread>
 #include <QAtomicInt>
+#include <QMutex>
 #include "../rigdef.h"
 
 class HamlibWorker : public QObject
@@ -25,6 +26,7 @@ signals:
 public slots:
     void Open(QString port,int baud);
     void CloseRig();
+    void CloseAndQuit();
     void Do(int cmd,int ptt,QString arg);
 private:
     int s_model;
@@ -63,7 +65,7 @@ private slots:
 private:
     int s_ModelID;
     bool running;
-    QThread thr;
+    QThread *thr;
     HamlibWorker *w;
 };
 #endif

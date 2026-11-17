@@ -122,3 +122,7 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 ## 2026-11-17 — ic8tem.18
 * CI: HAMLIB_DIR passed to qmake before the project file (with -after the Windows builds had no HAVE_HAMLIB); the build fails if Hamlib was downloaded but not enabled.
 * `src/main_ms.*` — "Txing" bar shows the progress of the T/R period (green RX, red TX), updated every 100 ms.
+
+## 2026-11-17 — ic8tem.19
+* `hvrigcontrol.*` — Icom IC-7300 (Hamlib) takes Port and Baud Rate from the serial combos (MSHV does not open the port, Hamlib reconnects on change).
+* `hamlibrig.*` — no blocking in the GUI thread when the rig is replaced (worker closes and quits by itself), one Hamlib open/close at a time, long messages shortened (full text in the CAT Log).

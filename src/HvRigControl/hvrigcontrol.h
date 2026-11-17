@@ -245,6 +245,9 @@ private:
     QComboBox *cb_baud2;
     bool block_save_net;
 	bool net_active;
+    bool hamlib_active;//IC8TEM Icom IC-7300 (Hamlib): MSHV Port and Baud Rate, no MSHV serial port
+    bool hamlib_block;
+    void HamlibApply();
     QLineEdit *TCPServer;
     QLineEdit *TCPPort;
     QLabel *l_lanuser;//IC8TEM Icom LAN

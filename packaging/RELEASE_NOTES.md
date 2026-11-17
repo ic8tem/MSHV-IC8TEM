@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.19:** Icom IC-7300 (Hamlib): uses the normal **Port** and **Baud Rate** of Rig Control (Hamlib opens the COM port itself and reconnects when they change); MSHV no longer freezes while Hamlib waits for the radio; long Hamlib errors go to the CAT Log.
+
 **ic8tem.18:** fix: the radio **Icom IC-7300 (Hamlib)** was missing from the Rig Control list in the Windows packages of ic8tem.17 · the "Txing" bar fills from left to right as the T/R period goes by (green receiving, red transmitting).
 
 **ic8tem.17:** new radio **Icom IC-7300 (Hamlib)** (Windows): the IC-7300 driven by the Hamlib library — frequency, mode, PTT, RF power and Po/SWR/ALC in the Power & SWR window. Rig Control › Network: Server = COM port, Port = baud rate. · JT65 Deep Search: the calls heard in the last 24 hours (any mode) come first in the list of 15000 calls taken from the database (CALL3.TXT).

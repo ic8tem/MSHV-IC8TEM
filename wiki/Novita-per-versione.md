@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.19
+* **Icom IC-7300 (Hamlib)** usa i normali campi **Port** e **Baud Rate** di Rig Control: MSHV avvia Hamlib sulla porta COM scelta e si ricollega quando la cambiate. MSHV non si blocca più mentre Hamlib aspetta la radio; i messaggi lunghi di Hamlib vanno nel CAT Log.
+
 ## 2.76.7-ic8tem.18
 * Corretto: nella .17 la radio **Icom IC-7300 (Hamlib)** non compariva nell'elenco di Rig Control (Windows).
 * La barra **Txing** si riempie da sinistra a destra con lo scorrere del periodo: verde in ricezione, rossa in trasmissione.

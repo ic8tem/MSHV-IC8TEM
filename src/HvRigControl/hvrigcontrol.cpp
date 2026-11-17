@@ -252,6 +252,8 @@ HvRigControl::HvRigControl( QWidget *parent )
     s_rig_full_name = "None";//2.76.1
     block_save_net = false;
     net_active = false;
+    hamlib_active = false;//IC8TEM
+    hamlib_block = false;
     netServPort[0].serv="127.0.0.1";
     netServPort[0].port="7809";			//HRD
     netServPort[1].serv="127.0.0.1";
@@ -1506,8 +1508,22 @@ void HvRigControl::Set_Dtr(bool flag)
         else port->setDtr(flag);
     }
 }
+void HvRigControl::HamlibApply()//IC8TEM: Hamlib opens the COM port chosen in Port with the Baud Rate
+{
+    if (!hamlib_active || hamlib_block) return;
+    TCPServer->setText(cb_port->currentText());
+    TCPPort->setText(cb_baud->currentText());
+    QString s = TCPServer->text()+"#"+TCPPort->text()+"#########reopen";
+    emit EmitNetSP(s);
+}
 void HvRigControl::PortNameChanged(QString str)
 {
+    if (hamlib_active)//IC8TEM: the port is opened by Hamlib, not by MSHV
+    {
+        if (port->isOpen()) port->close();
+        HamlibApply();
+        return;
+    }
     //qDebug()<<"str"<<port->isOpen();
 
     if (port->isOpen())
@@ -1549,6 +1565,11 @@ void HvRigControl::PortNameChanged(QString str)
 }
 void HvRigControl::BaudRateChanged(QString str)
 {
+    if (hamlib_active)//IC8TEM
+    {
+        HamlibApply();
+        return;
+    }
     //QString s_port_name = port->portName();
     if (port->isOpen())// important
     {
@@ -1615,7 +1636,7 @@ void HvRigControl::SetEnabledAll(bool f)
     //else rb_dtr->setEnabled(f);
 
     ////// omnirig /////////////
-    if (omnirig_active || net_active)////// net //////////
+    if (omnirig_active || (net_active && !hamlib_active))////// net ////////// //IC8TEM Hamlib uses Port and Baud Rate
     {
         cb_baud->setEnabled(false);
         cb_port->setEnabled(false);
@@ -1771,11 +1792,38 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
         }
         net_active = true;
         gb_net->setEnabled(true);
+        hamlib_active = false;//IC8TEM
         cb_port->setCurrentIndex(0);
+        if (s_net_model_id==HAMLIB_IC7300)//IC8TEM Icom IC-7300 (Hamlib): Port and Baud Rate of MSHV
+        {
+            hamlib_block = true;
+            hamlib_active = true;
+            int ip = cb_port->findText(netServPort[s_net_model_id].serv,Qt::MatchCaseSensitive);
+            if (ip < 0 && !netServPort[s_net_model_id].serv.isEmpty() && netServPort[s_net_model_id].serv!="None")
+            {
+                cb_port->addItem(netServPort[s_net_model_id].serv);
+                ip = cb_port->count()-1;
+            }
+            if (ip >= 0) cb_port->setCurrentIndex(ip);
+            int ib = cb_baud->findText(netServPort[s_net_model_id].port,Qt::MatchCaseSensitive);
+            if (ib < 0) ib = cb_baud->findText("115200",Qt::MatchCaseSensitive);
+            if (ib >= 0) cb_baud->setCurrentIndex(ib);
+            TCPServer->setEnabled(false);
+            TCPPort->setEnabled(false);
+            hamlib_block = false;
+        }
+        else
+        {
+            TCPServer->setEnabled(true);
+            TCPPort->setEnabled(true);
+        }
     }
     else
     {
         net_active = false;
+        hamlib_active = false;//IC8TEM
+        TCPServer->setEnabled(true);
+        TCPPort->setEnabled(true);
         gb_net->setEnabled(false);
     }
     block_save_net = false;
@@ -1864,7 +1912,7 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
         else rb_rts->setChecked(true);
     }
 
-    if (only_one)
+    if (only_one && !hamlib_active)//IC8TEM Hamlib keeps the saved Baud Rate
     {
         int index = cb_baud->findText(QString("%1").arg(sett.serial_rate_max), Qt::MatchCaseSensitive);
         if (index >= 0) cb_baud->setCurrentIndex(index);

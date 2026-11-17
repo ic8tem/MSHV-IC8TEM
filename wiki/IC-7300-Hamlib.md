@@ -1,16 +1,16 @@
 # IC-7300 con Hamlib
 
-Dalla versione **2.76.7-ic8tem.18**, solo **Windows** (64 e 32 bit): in *Options › Rig Control* c'è la radio **Icom IC-7300 (Hamlib)**. MSHV comanda l'IC-7300 con la libreria **Hamlib**, la stessa usata da WSJT-X e da IP-TRX-CTRL, al posto dei comandi Icom scritti da LZ2HV.
+Dalla versione **2.76.7-ic8tem.19**, solo **Windows** (64 e 32 bit): in *Options › Rig Control* c'è la radio **Icom IC-7300 (Hamlib)**. MSHV comanda l'IC-7300 con la libreria **Hamlib**, la stessa usata da WSJT-X e da IP-TRX-CTRL, al posto dei comandi Icom scritti da LZ2HV.
 
 ## Impostazione
 
-1. *Options › Rig Control*: scegliete **Icom IC-7300 (Hamlib)** (è nell'elenco delle radio di rete).
-2. Nel riquadro **Network**:
-   * **Server** = porta seriale della radio, per esempio `COM5` (la stessa che vedete in Gestione dispositivi, "Silicon Labs CP210x").
-   * **Port** = velocità, per esempio `115200` (deve essere uguale a *CI-V USB Baud Rate* della radio).
-3. Premete **Connect**: la riga diventa verde con la versione di Hamlib.
+1. *Options › Rig Control*: scegliete **Icom IC-7300 (Hamlib)** nell'elenco RIG.
+2. **Port**: la porta COM della radio, cioè quella che in Gestione dispositivi compare come "Silicon Labs CP210x USB to UART Bridge". Se la radio ne mostra due, provate prima quella con il numero più basso.
+3. **Baud Rate**: la stessa velocità di *MENU › SET › Connectors › CI-V › CI-V USB Baud Rate* della radio (consigliato `115200`; con *Auto* va bene `115200`).
+4. **PTT Method**: **PTT Via CAT COMMAND**.
+5. MSHV avvia Hamlib da solo: nel riquadro Network la riga diventa verde con la versione di Hamlib. Se scegliete un'altra porta o velocità, Hamlib si ricollega subito.
 
-La porta COM può essere aperta da un solo programma: chiudete prima gli altri programmi che usano la stessa porta (IP-TRX-CTRL, rigctld, un altro CAT).
+La radio deve avere l'indirizzo CI-V predefinito `94h`. La porta COM può essere aperta da un solo programma: chiudete prima gli altri programmi che usano la stessa porta (IP-TRX-CTRL, rigctld, un altro CAT).
 
 ## Cosa fa
 

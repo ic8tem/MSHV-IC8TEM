@@ -7,6 +7,7 @@
 #include "../network/network_def.h"
 
 #define HL_MODEL_IC7300 3073   // RIG_MODEL_IC7300
+static QMutex g_hl_port;          // one Hamlib open/close at a time (a closing rig frees the COM port first)
 
 // ---------------------------------------------------------------- worker (own thread)
 HamlibWorker::HamlibWorker(int model)
@@ -28,6 +29,12 @@ void HamlibWorker::Err(const QString &what,int e)
 void HamlibWorker::Open(QString port,int baud)
 {
     CloseRig();
+    if (port.isEmpty() || port=="None")
+    {
+        emit Status(tr("Choose the COM port of the radio in Port and the speed in Baud Rate"),0);
+        return;
+    }
+    QMutexLocker lk(&g_hl_port);
     QString err;
     rig = HlWrap::Open(s_model,port,baud,err);
     if (!rig)
@@ -41,10 +48,16 @@ void HamlibWorker::Open(QString port,int baud)
 void HamlibWorker::CloseRig()
 {
     if (!rig) return;
+    QMutexLocker lk(&g_hl_port);
     HlWrap::SetPtt(rig,false);
     HlWrap::Close(rig);
     rig = 0;
     emit Status(tr("Disconnected"),0);
+}
+void HamlibWorker::CloseAndQuit()
+{
+    CloseRig();
+    thread()->quit();
 }
 void HamlibWorker::Do(int cmd,int ptt,QString arg)
 {
@@ -133,33 +146,41 @@ HamlibRig::HamlibRig(int ModelID,QObject *parent)
     s_ModelID = ModelID;
     running = false;
     w = new HamlibWorker(HL_MODEL_IC7300);
-    w->moveToThread(&thr);
+    thr = new QThread();
+    w->moveToThread(thr);
     connect(this, SIGNAL(WOpen(QString,int)), w, SLOT(Open(QString,int)));
     connect(this, SIGNAL(WClose()), w, SLOT(CloseRig()));
     connect(this, SIGNAL(WDo(int,int,QString)), w, SLOT(Do(int,int,QString)));
     connect(w, SIGNAL(Status(QString,int)), this, SLOT(WStatus(QString,int)));
     connect(w, SIGNAL(Readed(int,QString)), this, SLOT(WReaded(int,QString)));
-    thr.start();
+    thr->start();
 }
 HamlibRig::~HamlibRig()
 {
-    if (thr.isRunning())
-    {
-        QMetaObject::invokeMethod(w, "CloseRig", Qt::BlockingQueuedConnection);
-        thr.quit();
-        thr.wait(3000);
-    }
-    delete w;
+    // never wait here (GUI thread): the worker may be inside a slow rig_open.
+    // It closes the radio and deletes itself and its thread when it is free.
+    disconnect(w, 0, this, 0);
+    connect(thr, SIGNAL(finished()), w, SLOT(deleteLater()));
+    connect(thr, SIGNAL(finished()), thr, SLOT(deleteLater()));
+    QMetaObject::invokeMethod(w, "CloseAndQuit", Qt::QueuedConnection);
 }
 void HamlibRig::ConnectNet(QString all)
 {
     QStringList l = all.split("#");
     QString port = l.value(0).trimmed();
     int baud = l.value(1).trimmed().toInt();
-    if (running)
+    bool reopen = (l.value(11)=="reopen");//IC8TEM: Port or Baud Rate changed in Rig Control
+    if (running && !reopen)
     {
         running = false;
         emit WClose();
+        return;
+    }
+    if (port.isEmpty() || port=="None")
+    {
+        running = false;
+        emit WClose();
+        emit EmitNetConnInfo("<font color='red'>"+tr("Choose the COM port of the radio in Port and the speed in Baud Rate")+"</font>",false,false);
         return;
     }
     running = true;
@@ -188,6 +209,11 @@ void HamlibRig::SetCmd(CmdID i,ptt_t ptt,QString str)
 }
 void HamlibRig::WStatus(QString s,int state)
 {
+    if (s.length() > 160)//long Hamlib messages: the whole text goes to the CAT Log
+    {
+        emit EmitReadedInfo(LOG_RX,s);
+        s = s.left(157)+"...";
+    }
     if (state==0)
     {
         running = false;
