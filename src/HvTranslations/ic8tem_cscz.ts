@@ -274,6 +274,14 @@
         <source>MSK144 Carrier Notch (ZAP)</source>
         <translation>MSK144 Notch nosných (ZAP)</translation>
     </message>
+    <message>
+        <source>Dashed Line For Periods With No Decodes</source>
+        <translation>Přerušovaná čára pro periody bez dekódování</translation>
+    </message>
+    <message>
+        <source>Default Column Widths (drag the column borders to change them)</source>
+        <translation>Výchozí šířka sloupců (pro změnu přetáhněte okraje sloupců)</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>

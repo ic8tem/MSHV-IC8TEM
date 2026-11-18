@@ -8,6 +8,8 @@
 #include <QHeaderView>
 #include <QTreeView>
 #include <QSet>
+#include <QMap>
+#include <QVector>
 #include <QCoreApplication>
 #include <QStandardItemModel>
 #include <QMouseEvent>
@@ -75,6 +77,10 @@ public:
     void HideShowWfTxRefreshList();//2.46
     void SetActivityId(QString);
     //void SetSHAllColl(bool,bool,bool);
+    // IC8TEM v27: columns the user can make narrower or wider (saved in percent of the automatic width)
+    QString GetUserColWidths() const;
+    void SetUserColWidths(QString);
+    void ResetUserColWidths();
 
 signals:
     //void SendRightClick();
@@ -88,6 +94,7 @@ signals:
     void EmitUdpDecClr();
     void EmitDetectTextInMsg(QString,QString &);
     void EmitHeaderDoubleClicked();//2.44
+    void EmitUserColWidth(int,int,int);//IC8TEM v27 column layout, column, percent: same width in the other list
 
 public slots:
     void InsertItem_hv(QStringList,bool,bool);
@@ -108,8 +115,13 @@ public slots:
     void SetHisCalls(QStringList);
     void SetOtpVerif(QString,uint8_t);//2.76sf
     void SetShowOtpRxMsg(bool f);//2.76sf
-    
+    void SetShowNoDecLines(bool);//IC8TEM v27 dashed line for the periods decoded with no decodes
+    void SetUserColWidth(int,int,int);//IC8TEM v27 from the other list
+    void SetDecodeRequest(int*,int,QString,int,int,bool,bool,bool);//IC8TEM v27 no-decode lines
+    void SetDecoderState(bool,int);//IC8TEM v27 no-decode lines
+
 private slots:
+    void SectionResized(int,int,int);//IC8TEM v27
     void RefreshListTimer();
     void ItemSelectedText(QString,int,int);
     void ac_spot();
@@ -196,6 +208,20 @@ private:
     void PaintIc8temMarks(QPainter *painter,const QStyleOptionViewItem &opt,const QModelIndex &index) const;
     int def_section_sizes[22];
     void SaveAndCorrSectionSize();//2.10 max 20 int def_section_sizes[20]; from model.columnCount()
+    // IC8TEM v27 user column widths: key = group of modes with the same columns, value = percent per column (0 = automatic)
+    QMap<int, QVector<int> > user_colw;
+    bool f_block_colw;
+    int ColLayoutKey(int mode) const;
+    int AutoSectionSize(int i) const;
+    // IC8TEM v27 no-decode lines
+    bool f_nodec_lines;
+    QString nd_time;
+    int nd_count;
+    bool nd_final;
+    bool nd_shown;
+    void AddNoDecRow(const QString &t);
+    void RemoveNoDecRows();
+    bool IsNoDecRow(int row) const;
     int count_dec;
 	void CountMsgInPeriod(bool);
 	bool s_show_timec;

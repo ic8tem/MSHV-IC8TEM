@@ -274,6 +274,14 @@
         <source>MSK144 Carrier Notch (ZAP)</source>
         <translation>MSK144 Режекция несущих (ZAP)</translation>
     </message>
+    <message>
+        <source>Dashed Line For Periods With No Decodes</source>
+        <translation>Пунктирная линия для периодов без декодирования</translation>
+    </message>
+    <message>
+        <source>Default Column Widths (drag the column borders to change them)</source>
+        <translation>Ширина столбцов по умолчанию (чтобы изменить, перетащите границы столбцов)</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>

@@ -274,6 +274,14 @@
         <source>MSK144 Carrier Notch (ZAP)</source>
         <translation>MSK144 载波陷波 (ZAP)</translation>
     </message>
+    <message>
+        <source>Dashed Line For Periods With No Decodes</source>
+        <translation>无解码周期显示虚线</translation>
+    </message>
+    <message>
+        <source>Default Column Widths (drag the column borders to change them)</source>
+        <translation>默认列宽（拖动列边界可更改）</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>

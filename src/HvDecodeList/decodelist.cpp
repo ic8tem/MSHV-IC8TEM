@@ -194,6 +194,12 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     s_mark_loc_pos = 20;
     f_mark_pink = false;//IC8TEM
     f_mark_newgrid = false;//IC8TEM
+    f_block_colw = true;//IC8TEM v27 until the constructor has set the columns
+    f_nodec_lines = true;//IC8TEM v27
+    nd_time = "";
+    nd_count = 0;
+    nd_final = false;
+    nd_shown = false;
     s_mark_myc_pos = 30;//2.65
 
     setMinimumSize(100, 127);//127 be6e 530 na 1 display
@@ -270,6 +276,8 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     for (int i = 0; i < model.columnCount(); ++i) def_section_sizes[i]=THvHeader->sectionSize(i);
 
     connect(THvHeader, SIGNAL(sectionDoubleClicked(int)), this, SLOT(SetHeaderDoubleClicked()));
+    connect(THvHeader, SIGNAL(sectionResized(int,int,int)), this, SLOT(SectionResized(int,int,int)));//IC8TEM v27
+    THvHeader->setMinimumSectionSize(16);//IC8TEM v27 the user can make the columns narrow (big fonts)
     //connect(THvHeader, SIGNAL(sectionClicked(int)), this, SLOT(SetHeaderSingleClicked()));
     //THvHeader->setSectionsClickable(true);
 
@@ -304,7 +312,7 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     //qlsi_st_c = 0;
     list_rfresh_timer = new QTimer();
     connect(list_rfresh_timer, SIGNAL(timeout()), this, SLOT(RefreshListTimer()));
-
+    f_block_colw = false;//IC8TEM v27 from now on a resized column is the user's choice
 }
 DecodeList::~DecodeList()
 {
@@ -334,12 +342,108 @@ void DecodeList::SaveAndCorrSectionSize()
     int fcor = (fm.width("8")+2)-10;//2pix<-Bearing 8 K W
 #endif
     int fps = font().pointSize()+fcor;
+    bool blk = f_block_colw;
+    f_block_colw = true;//IC8TEM v27 resized here, not by the user
+    QVector<int> uw = user_colw.value(ColLayoutKey(s_mode));
     for (int i = 0; i < model.columnCount(); ++i)
     {
         int inc_sz = (def_section_sizes[i]*fps)/10;// in %
+        if (i != msg_column && i < uw.count() && uw.at(i) > 0) inc_sz = qMax(12,(inc_sz*uw.at(i))/100);//IC8TEM v27 width chosen by the user
         THvHeader->resizeSection(i,inc_sz);
     }
+    f_block_colw = blk;
     //qDebug()<<"2 IncSize="<<fps<<fcor; //<<fm.leftBearing('8')<<fm.rightBearing('8');
+}
+// IC8TEM v27: the columns can be made narrower or wider by dragging their border in the header
+// (a double click on the border fits the column to its text). The width is kept in percent of the
+// automatic width, so it follows the font size; one setting for the modes with the same columns.
+int DecodeList::AutoSectionSize(int i) const
+{
+    if (i < 0 || i >= 22) return 0;
+    QFont fnn = font();
+    fnn.setPointSize(10);
+    QFontMetrics fm(fnn);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    int fcor = (fm.horizontalAdvance("8")+2)-10;
+#else
+    int fcor = (fm.width("8")+2)-10;
+#endif
+    int fps = font().pointSize()+fcor;
+    return (def_section_sizes[i]*fps)/10;
+}
+int DecodeList::ColLayoutKey(int mode) const
+{
+    if (mode==11 || mode==13 || mode==18 || (mode>=14 && mode<=17)) return 11;//FT8 FT4 FT2 Q65
+    if (mode==0 || mode==12) return 0;//MSK144 MSK144ms
+    if (mode>=7 && mode<=9) return 7;//JT65
+    if (mode>=1 && mode<=3) return 1;//JTMS FSK441 FSK315
+    if (mode==4 || mode==5) return 4;//ISCAT
+    return mode;
+}
+void DecodeList::SectionResized(int i,int oldSize,int newSize)
+{
+    if (f_block_colw || oldSize <= 0 || newSize <= 0) return;//resized by MSHV, or a column hidden/shown
+    if (i < 0 || i >= 22 || i == msg_column) return;//the message column takes the rest of the width
+    if (THvHeader->sectionResizeMode(i) != QHeaderView::Interactive) return;
+    int a = AutoSectionSize(i);
+    if (a <= 0) return;
+    int key = ColLayoutKey(s_mode);
+    QVector<int> &v = user_colw[key];
+    if (v.count() < 22) v.resize(22);
+    v[i] = qBound(10,(newSize*100+a/2)/a,400);
+    emit EmitUserColWidth(key,i,v[i]);//the other list (Band Activity / RX Frequency) gets the same width
+}
+void DecodeList::SetUserColWidth(int key,int i,int pct)
+{
+    if (i < 0 || i >= 22) return;
+    QVector<int> &v = user_colw[key];
+    if (v.count() < 22) v.resize(22);
+    if (v[i] == pct) return;
+    v[i] = pct;
+    if (key == ColLayoutKey(s_mode)) SaveAndCorrSectionSize();
+}
+QString DecodeList::GetUserColWidths() const
+{
+    QStringList out;
+    for (QMap<int, QVector<int> >::const_iterator it = user_colw.constBegin(); it != user_colw.constEnd(); ++it)
+    {
+        QStringList p;
+        bool any = false;
+        for (int i = 0; i < it.value().count(); ++i)
+        {
+            p << QString::number(it.value().at(i));
+            if (it.value().at(i) > 0) any = true;
+        }
+        if (any) out << QString::number(it.key())+":"+p.join(",");
+    }
+    return out.join(";");
+}
+void DecodeList::SetUserColWidths(QString s)
+{
+    user_colw.clear();
+    QStringList l = s.split(";");
+    for (int k = 0; k < l.count(); ++k)
+    {
+        QStringList kv = l.at(k).split(":");
+        if (kv.count() != 2) continue;
+        bool ok = false;
+        int key = kv.at(0).toInt(&ok);
+        if (!ok) continue;
+        QStringList p = kv.at(1).split(",");
+        QVector<int> v(22,0);
+        for (int i = 0; i < p.count() && i < 22; ++i)
+        {
+            int x = p.at(i).toInt();
+            if (x >= 10 && x <= 400) v[i] = x;
+        }
+        user_colw.insert(key,v);
+    }
+    SaveAndCorrSectionSize();
+}
+void DecodeList::ResetUserColWidths()
+{
+    user_colw.remove(ColLayoutKey(s_mode));
+    SaveAndCorrSectionSize();
 }
 void DecodeList::SetFontList(QFont f)
 {
@@ -622,6 +726,76 @@ void DecodeList::SetTimeElapsed(float ts)
     else
         model.setHeaderData(msg_column,Qt::Horizontal,tr("Message")+" "+QString("%1").arg(count_dec)+" / "+QString("%1").arg(ts,0,'f',1)+"s");
 }
+// IC8TEM v27: a dashed line (with the UTC time) for each period decoded with no decodes.
+// Decode request of a period (time) -> decodes counted -> decoder idle after the last decode
+// of the period: no decodes = dashed line. A decode that arrives later for the same period
+// removes the line (e.g. FT8 three-stage decoding).
+void DecodeList::SetShowNoDecLines(bool f)
+{
+    f_nodec_lines = f;
+    if (!f) RemoveNoDecRows();
+}
+void DecodeList::SetDecodeRequest(int*,int,QString time,int,int mousebutton,bool f_rtd,bool end_rtd,bool ffopen)
+{
+    if (s_list_ident != 1) return;
+    //mousebutton Left=1 Right=3 (part of the period) full=0 rtd=2 ft8 three-stage=4,5,6
+    if (ffopen || mousebutton==1 || mousebutton==3) return;
+    if (time != nd_time)
+    {
+        nd_time = time;
+        nd_count = 0;
+        nd_shown = false;
+    }
+    nd_final = (mousebutton==0 || mousebutton==6 || (mousebutton==2 && f_rtd && end_rtd));
+}
+void DecodeList::SetDecoderState(bool busy,int dec_state)
+{
+    if (s_list_ident != 1 || busy || dec_state != 0 || !nd_final) return;//dec_state 0 = end of the decoding of a period
+    nd_final = false;
+    if (!f_nodec_lines || nd_count > 0 || nd_shown) return;
+    if (nd_time.isEmpty() || nd_time == "NONETM") return;
+    AddNoDecRow(nd_time);
+    nd_shown = true;
+    if (s_mode==11 || s_mode==13 || s_mode==18 || s_mode==0 || s_mode==12 || s_mode==7 || s_mode==8 || s_mode==9 || allq65)
+    {
+        count_dec = 0;//the header shows the count of the last period: 0
+        s_ts_ = -1.0;
+        model.setHeaderData(msg_column,Qt::Horizontal,tr("Message")+" 0");
+    }
+}
+#define NODEC_ROLE (Qt::UserRole+77)
+bool DecodeList::IsNoDecRow(int row) const
+{
+    QStandardItem *it = model.item(row,0);
+    return (it && it->data(NODEC_ROLE).toInt() == 1);
+}
+void DecodeList::AddNoDecRow(const QString &t)
+{
+    if (g_block_list_exp) return;
+    QColor bg = dsty ? QColor(25,25,25) : QColor(255,255,255);
+    QColor fg = dsty ? QColor(140,140,140) : QColor(130,130,130);
+    QList<QStandardItem *> row;
+    for (int i = 0; i < model.columnCount(); ++i)
+    {
+        QStandardItem *item = new QStandardItem(i==0 ? t : QString(""));
+        item->setEditable(false);
+        item->setTextAlignment(Qt::AlignCenter);
+        item->setBackground(bg);
+        item->setForeground(fg);
+        if (i==0) item->setData(1,NODEC_ROLE);
+        row.append(item);
+    }
+    model.appendRow(row);
+    if (model.rowCount() > 250) model.removeRow(0);
+    if (!list_rfresh_timer->isActive()) list_rfresh_timer->start(80);
+}
+void DecodeList::RemoveNoDecRows()
+{
+    for (int i = model.rowCount()-1; i >= 0; --i)
+    {
+        if (IsNoDecRow(i) && (!f_nodec_lines || model.item(i,0)->text() == nd_time)) model.removeRow(i);
+    }
+}
 //#include <QToolTip>
 void DecodeList::RefreshFiltHeadColor(bool f1,bool f2,bool f3,bool f4,bool f5,bool f6,bool f7,bool f8,bool f9)
 {
@@ -680,8 +854,11 @@ void DecodeList::SetShowMskWidth(bool f)//IC8TEM MSK144 ping duration (Width) co
 {
     s_show_mskw = f;
     if (s_mode!=0) return;
+    bool blk = f_block_colw;
+    f_block_colw = true;//IC8TEM v27
     if (f) THvHeader->showSection(2);
     else THvHeader->hideSection(2);
+    f_block_colw = blk;
 }
 void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3) //,bool ftc,bool fdc,bool ffc,bool fcc
 {
@@ -693,6 +870,15 @@ void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3)
     if (s_mode==mode && s_flag_two==flag_two && s_show_timec==f0 && s_show_distc==f1 && s_show_freqc==f2 && s_show_counc==f3) return;
     bool rfr_cmsginp = true;
     if (s_mode == mode) rfr_cmsginp = false;
+    else//IC8TEM v27 new mode: new periods
+    {
+        nd_time = "";
+        nd_count = 0;
+        nd_final = false;
+        nd_shown = false;
+    }
+    bool blk_colw = f_block_colw;
+    f_block_colw = true;//IC8TEM v27 columns shown/hidden/resized here, not by the user
 
     if (mode==14 || mode==15 || mode==16 || mode==17) allq65 = true;
     else allq65 = false;
@@ -709,7 +895,7 @@ void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3)
     s_show_freqc = f2;
     s_show_counc = f3;
 
-    THvHeader->setSectionResizeMode(QHeaderView::Fixed);//qt5
+    THvHeader->setSectionResizeMode(QHeaderView::Interactive);//IC8TEM v27 the user can resize the columns (was Fixed)
 
     QStringList list_A;
 
@@ -998,6 +1184,7 @@ void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3)
     if (flag_two) CorrListSize();
     else setMinimumWidth(100);//setMinimumSize(100,127);
     SaveAndCorrSectionSize(); //qDebug()<<"uniformRowHeights="<<uniformRowHeights();
+    f_block_colw = blk_colw;//IC8TEM v27
 
     if (s_list_ident==1)
     {
@@ -1156,7 +1343,7 @@ void DecodeList::RefreshListTimer()
     /*for (int i = 0; i<qlsi_st_c; ++i)
         model.appendRow(qlsi_st[i]);
     qlsi_st_c = 0;*/
-    setCurrentIndex(model.index(model.rowCount()-1,6));
+    if (!IsNoDecRow(model.rowCount()-1)) setCurrentIndex(model.index(model.rowCount()-1,6));//IC8TEM v27 the dashed line is not selected
     scrollToBottom();
 }
 void DecodeList::HideShowWfTxRefreshList()//2.64
@@ -1526,6 +1713,15 @@ void DecodeList::SetShowOtpRxMsg(bool f)
 }*/
 void DecodeList::InsertItem_hv(QStringList list,bool ffopen,bool forme)
 {
+    if (s_list_ident == 1 && !ffopen && !list.isEmpty())//IC8TEM v27 decodes of the period: no dashed line
+    {
+        nd_count++;
+        if (nd_shown)
+        {
+            RemoveNoDecRows();//the line came too early (a later decoding stage found something)
+            nd_shown = false;
+        }
+    }
     if (g_block_list_exp) return;
     if (!list.isEmpty())
     {
@@ -1904,6 +2100,24 @@ void DecodeList::drawRow(QPainter *painter, const QStyleOptionViewItem & option,
     ///painter->setOpacity(0.5);
     QTreeView::drawRow(painter, opt, index);
 
+    if (IsNoDecRow(index.row()))//IC8TEM v27 period with no decodes: dashed line after the time
+    {
+        int x0 = opt.rect.x() + 6;
+        if (!header()->isSectionHidden(0)) x0 = opt.rect.x() + header()->sectionPosition(0) + header()->sectionSize(0) + 4;
+        int x1 = opt.rect.x() + header()->length() - 6;
+        if (x1 > opt.rect.right() - 4) x1 = opt.rect.right() - 4;
+        int y = opt.rect.y() + opt.rect.height()/2;
+        QPen pen(dsty ? QColor(150,150,150) : QColor(120,120,120));
+        pen.setWidth(1);
+        pen.setStyle(Qt::CustomDashLine);
+        pen.setDashPattern(QVector<qreal>() << 6 << 4);
+        painter->save();
+        painter->setPen(pen);
+        if (x1 > x0) painter->drawLine(x0,y,x1,y);
+        painter->restore();
+        return;
+    }
+
     //IC8TEM mod: black dot at the right of the decoded line if the sender is a LoTW user
     if (HvLotwUsersW::IsShowActive() && msg_column < model.columnCount() && model.item(index.row(),msg_column))
     {
@@ -2197,6 +2411,7 @@ void DecodeList::mousePressEvent(QMouseEvent * event)
 {
     QTreeView::mousePressEvent(event);
     QModelIndex index = indexAt(event->pos());
+    if (index.row() != -1 && IsNoDecRow(index.row())) return;//IC8TEM v27 dashed line: nothing to spot or show
     if (event->button() == Qt::RightButton && !(index.row() == -1)) m_spot->exec(QCursor::pos());
 
     if (f_click_on_call_show_cty && (s_mode==0 || s_mode==12 || s_mode==11 || s_mode==13 || s_mode==18 || allq65) &&

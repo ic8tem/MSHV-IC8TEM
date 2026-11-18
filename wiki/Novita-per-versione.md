@@ -1,5 +1,9 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.27
+* **Lista decodifiche**: le colonne si possono stringere o allargare trascinando il loro bordo nell'intestazione (doppio clic sul bordo: larghezza adatta al testo). Utile con i caratteri grandi. Le larghezze restano salvate, seguono la grandezza dei caratteri e sono le stesse nelle due liste; *Default Column Widths* nel menu della lista le riporta a quelle automatiche.
+* **Riga tratteggiata** con l'ora UTC per ogni periodo decodificato senza nessuna decodifica (tutti i modi, anche MSK144 in tempo reale); si spegne con *Dashed Line For Periods With No Decodes*. Vedi [[Lista decodifiche: colonne e periodi vuoti|Lista-decodifiche]].
+
 ## 2.76.7-ic8tem.26
 * **Icom IC-7300 (Hamlib)**: corretto. Dopo il primo comando alla radio (tasto banda, **F**, cambio di modo o trasmissione) MSHV smetteva di leggere la frequenza: la radio cambiava banda, ma MSHV restava fermo sulla frequenza letta alla connessione. Ora frequenza e modo vengono letti di continuo, come con le altre radio, e MSHV segue anche i cambi fatti dalla radio.
 * **Icom LAN**: stessa correzione (dopo la prima trasmissione o il primo cambio di banda la frequenza non veniva più letta).

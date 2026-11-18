@@ -70,6 +70,7 @@ private slots:
     void SetBandFromRigFreq(int i);
     void SetSHAllColl(bool);
     void SetShowMskWidthColl(bool);//IC8TEM
+    void ResetDecListColWidths();//IC8TEM v27
     void SetTwoDecList(bool f);
     void ShowCloseAstroW(bool);
     void ShowClosePwrSwrW(bool);//IC8TEM
@@ -358,6 +359,8 @@ private:
     QAction *ac_show_distc;
     QAction *ac_show_freqc;
     QAction *ac_show_mskwidthc;//IC8TEM
+    QAction *ac_nodec_lines;//IC8TEM v27 dashed line for periods with no decodes
+    QAction *ac_colw_reset;//IC8TEM v27
     bool s_show_lc[COUNT_MODE][4];
     QAction *ac_filter_list;
       

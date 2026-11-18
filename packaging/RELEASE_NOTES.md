@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.27:** **Decode list**: the columns can be made narrower or wider by dragging their border in the header (double click on the border: fit to the text) — useful with big fonts; the widths are saved, follow the font size and are the same in both lists; *Default Column Widths* in the decode list menu restores the automatic ones · a **dashed line** with the UTC time for each period decoded with no decodes (all modes, also MSK144 real-time decoding); *Dashed Line For Periods With No Decodes* turns it off.
+
 **ic8tem.26:** fix: **Icom IC-7300 (Hamlib)** and **Icom LAN** — after the first command to the radio (band button, **F**, mode change or TX) MSHV stopped reading the frequency and the mode, so it kept showing the frequency read at connection while the radio was elsewhere. Now they are read all the time, as with the other radios, and MSHV follows the changes made on the radio.
 
 **ic8tem.25:** **Power & SWR** window much smaller: it takes the size of the open tab — the Power and SWR tab is only as big as its content (before, it was as big as the Settings tab); Settings and CAT Log enlarge it when opened, and back on the first tab it shrinks again · shorter protection text (*Stop TX if SWR > 2.5 for 1.0 s*) · the red SWR block message spans the full width under the two boxes.

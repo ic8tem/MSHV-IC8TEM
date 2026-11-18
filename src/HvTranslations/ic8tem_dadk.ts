@@ -274,6 +274,14 @@
         <source>MSK144 Carrier Notch (ZAP)</source>
         <translation>MSK144 Bærebølge-notch (ZAP)</translation>
     </message>
+    <message>
+        <source>Dashed Line For Periods With No Decodes</source>
+        <translation>Stiplet linje for perioder uden dekodninger</translation>
+    </message>
+    <message>
+        <source>Default Column Widths (drag the column borders to change them)</source>
+        <translation>Standard kolonnebredder (træk i kolonnekanterne for at ændre dem)</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>

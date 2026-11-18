@@ -400,6 +400,10 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(TDecoderMs, SIGNAL(EmitDecodetText(QStringList,bool,bool)), TDecoderMs, SLOT(AddHeardCalls(QStringList,bool,bool)));//IC8TEM deep search JT65: recently heard calls first
     connect(TDecodeList1, SIGNAL(EmitLstNexColor(bool)), TDecoderMs, SLOT(SetNexColor(bool)));
     connect(TDecoderMs, SIGNAL(EmitTimeElapsed(float)), TDecodeList1, SLOT(SetTimeElapsed(float)));//2.33
+    //IC8TEM v27 dashed line for the periods with no decodes: decode requests and end of decoding
+    connect(MainDisplay, SIGNAL(EmitDataToDecode(int*,int,QString,int,int,bool,bool,bool)), TDecodeList1, SLOT(SetDecodeRequest(int*,int,QString,int,int,bool,bool,bool)));
+    connect(SecondDisplay, SIGNAL(EmitDataToDecode(int*,int,QString,int,int,bool,bool,bool)), TDecodeList1, SLOT(SetDecodeRequest(int*,int,QString,int,int,bool,bool,bool)));
+    connect(TDecoderMs, SIGNAL(EmitDecode(bool,int)), TDecodeList1, SLOT(SetDecoderState(bool,int)));
 
     connect(TDecoderMs, SIGNAL(EmitDecodetTextRxFreq(QStringList,bool,bool)), TDecodeList2, SLOT(InsertItem_hv(QStringList,bool,bool)));
     TDecodeList2->SetBackColor(true);
@@ -580,6 +584,16 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(ac_show_distc,SIGNAL(toggled(bool)),this,SLOT(SetSHAllColl(bool)));//2.72
     connect(ac_show_freqc,SIGNAL(toggled(bool)),this,SLOT(SetSHAllColl(bool)));//2.72
     connect(ac_show_mskwidthc,SIGNAL(toggled(bool)),this,SLOT(SetShowMskWidthColl(bool)));//IC8TEM
+    ac_nodec_lines = new QAction(tr("Dashed Line For Periods With No Decodes"),this);//IC8TEM v27
+    ac_nodec_lines->setCheckable(true);
+    ac_nodec_lines->setChecked(true);
+    Dlf_m->addAction(ac_nodec_lines);
+    connect(ac_nodec_lines,SIGNAL(toggled(bool)),TDecodeList1,SLOT(SetShowNoDecLines(bool)));
+    ac_colw_reset = new QAction(tr("Default Column Widths (drag the column borders to change them)"),this);//IC8TEM v27
+    Dlf_m->addAction(ac_colw_reset);
+    connect(ac_colw_reset,SIGNAL(triggered()),this,SLOT(ResetDecListColWidths()));
+    connect(TDecodeList1,SIGNAL(EmitUserColWidth(int,int,int)),TDecodeList2,SLOT(SetUserColWidth(int,int,int)));//IC8TEM v27
+    connect(TDecodeList2,SIGNAL(EmitUserColWidth(int,int,int)),TDecodeList1,SLOT(SetUserColWidth(int,int,int)));
 
     ac_filter_list = new QAction(QPixmap(":pic/filters.png"),tr("Decode List Filters")+" FT",this);
     Dlf_m->addAction(ac_filter_list);
@@ -3699,6 +3713,11 @@ void Main_Ms::SetSHAllColl(bool)
     s_show_lc[s_mode][3] = ac_show_counc->isChecked();
     SetModeDecodeListS(two_dec_list_all[s_mode],s_show_lc[s_mode][0],s_show_lc[s_mode][1],s_show_lc[s_mode][2],s_show_lc[s_mode][3]);
 }
+void Main_Ms::ResetDecListColWidths()//IC8TEM v27 columns of the current mode back to the automatic widths
+{
+    TDecodeList1->ResetUserColWidths();
+    TDecodeList2->ResetUserColWidths();
+}
 void Main_Ms::SetShowMskWidthColl(bool f)//IC8TEM MSK144 ping duration column
 {
     TDecodeList1->SetShowMskWidth(f);
@@ -4338,7 +4357,7 @@ void Main_Ms::SetQActionCb(QString s, bool idp, QAction *ac)//idp priority of pr
 }
 void Main_Ms::Read_Settings(QString path)
 {
-    const int c_st_id = 112;//dopalva se tuk v kraia  IC8TEM 111=def_msk_nb_zap
+    const int c_st_id = 114;//dopalva se tuk v kraia  IC8TEM 111=def_msk_nb_zap 112=def_dl_colw 113=def_nodec_lines
     const QString st_id[c_st_id]=
         {
             "default_w","default_h","default_device_alsa","default_bitpersample","default_card_latency",
@@ -4364,7 +4383,7 @@ void Main_Ms::Read_Settings(QString path)
             "def_filter_list4","def_filter_list5","def_adle_vdsp","def_areset_qso","def_1_dec_sig_q65",
             "def_auto_clr_avg_afdec","def_dec_aft_eme_delay","def_max_drift","def_use_queue_cont","def_filter_list6",
             "use_aseq_max_dist","def_mod_bt_sw","def_show_lcols","vd_bw_lines_draw","def_band_bt_sw",
-            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col","def_msk_nb_zap"
+            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col","def_msk_nb_zap","def_dl_colw","def_nodec_lines"
         };
 
     QString st_res[c_st_id];
@@ -4831,6 +4850,14 @@ void Main_Ms::Read_Settings(QString path)
         ac_msk_zap->setChecked(l.value(1)=="1");
     }
     SetShowMskWidthColl(ac_show_mskwidthc->isChecked());
+    if (!st_res[112].isEmpty())//IC8TEM v27 def_dl_colw=list1|list2
+    {
+        QStringList l = st_res[112].split("|");
+        TDecodeList1->SetUserColWidths(l.value(0));
+        TDecodeList2->SetUserColWidths(l.value(1));
+    }
+    SetQActionCb(st_res[113], false, ac_nodec_lines);//IC8TEM v27 def true
+    TDecodeList1->SetShowNoDecLines(ac_nodec_lines->isChecked());
 
     THvTxW->SetBlockEmitFreqToRig(false);
 
@@ -5059,6 +5086,8 @@ void Main_Ms::Save_Settings(QString path)
         for (int i = 0; i < 3; ++i) if (ac_msk_nb[i]->isChecked()) nb = i;
         out << "def_msk_nb_zap=" << QString("%1#%2").arg(nb).arg(ac_msk_zap->isChecked() ? 1 : 0) << "\n";//IC8TEM
     }
+    out << "def_dl_colw=" << TDecodeList1->GetUserColWidths() << "|" << TDecodeList2->GetUserColWidths() << "\n";//IC8TEM v27
+    out << "def_nodec_lines=" << QString("%1").arg(ac_nodec_lines->isChecked()) << "\n";//IC8TEM v27
 
     file.close();
 }

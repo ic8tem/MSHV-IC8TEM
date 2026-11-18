@@ -274,6 +274,14 @@
         <source>MSK144 Carrier Notch (ZAP)</source>
         <translation>MSK144 Notch des porteuses (ZAP)</translation>
     </message>
+    <message>
+        <source>Dashed Line For Periods With No Decodes</source>
+        <translation>Ligne pointillée pour les périodes sans décodage</translation>
+    </message>
+    <message>
+        <source>Default Column Widths (drag the column borders to change them)</source>
+        <translation>Largeur des colonnes par défaut (faites glisser les bords des colonnes pour la modifier)</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
