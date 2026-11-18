@@ -146,3 +146,6 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvDecoderMs/hvmsknoise.h` (new) — impulse blanker (approach of WDSP NB2, NR0V, changed so that pings are never blanked), linear prediction blanker (port of `alt_noise_blanking()` by DL2FW, UHSDR, GPLv3) and carrier notch (steady lines in the median-over-time spectrum, not with a continuous MSK signal).
 * `decodermsk144.cpp`, `decoderms.*` — `analytic_msk144_2()` applies them in the full-period and real-time MSK144 decoding; `SetMskNoise()`.
 * `main_ms.*` — Decode menu: MSK144 Noise Blanker Off / NR0V NB2 / LPC DL2FW, MSK144 Carrier Notch (ZAP); setting `def_msk_nb_zap`.
+
+## 2026-11-18 — ic8tem.24
+* `src/HvRigControl/HvRigCat/hamlibrig/hamlibrig.cpp` — fix: reopening the rig emitted "Disconnected" first, so the commands stayed blocked after the following "Connected"; the reopen is now silent and every "Connected" status enables the commands. First frequency reading at once, written in the CAT Log.

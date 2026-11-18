@@ -28,7 +28,13 @@ void HamlibWorker::Err(const QString &what,int e)
 }
 void HamlibWorker::Open(QString port,int baud)
 {
-    CloseRig();
+    if (rig)//IC8TEM v24: reopen (new Port or Baud Rate): close without the "Disconnected" status
+    {
+        QMutexLocker lk(&g_hl_port);
+        HlWrap::SetPtt(rig,false);
+        HlWrap::Close(rig);
+        rig = 0;
+    }
     if (port.isEmpty() || port=="None")
     {
         emit Status(tr("Choose the COM port of the radio in Port and the speed in Baud Rate"),0);
@@ -44,6 +50,15 @@ void HamlibWorker::Open(QString port,int baud)
     }
     errors = 0;
     emit Status(tr("Connected")+" "+port+" "+QString::number(baud)+"  ("+HlWrap::Version()+")",2);
+    // first reading at once, written in the CAT Log
+    double hz = 0.0;
+    int e = HlWrap::GetFreq(rig,&hz);
+    if (e == 0 && hz > 0.0)
+    {
+        emit Readed(LOG_RX,"Hamlib get_freq "+QString::number((qlonglong)(hz+0.5))+" Hz OK");
+        emit Readed(GET_FREQ,QString::number((qlonglong)(hz+0.5)));
+    }
+    else emit Readed(LOG_RX,"Hamlib get_freq: "+HlWrap::Error(e));
 }
 void HamlibWorker::CloseRig()
 {
@@ -221,6 +236,7 @@ void HamlibRig::WStatus(QString s,int state)
     }
     else
     {
+        running = true;//IC8TEM v24: after a reopen the commands were dropped (green "Connected" but no CAT)
         emit EmitNetConnInfo("<font color='#00b300'>"+s+"</font>",true,true);
         emit EmitFullRigInfo("Icom IC-7300 (Hamlib)");
     }

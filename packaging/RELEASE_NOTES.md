@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.24:** Icom IC-7300 (Hamlib) fixed: after the port was reopened (at start, or changing Port or Baud Rate) the status was green but every CAT command was dropped (no frequency reading, band buttons and **F** did not tune the radio, no Power & SWR). The frequency is now read at once on connection and written in the CAT Log.
+
 **ic8tem.23:** MSK144 (Decode menu, off by default): **Noise Blanker** for impulsive noise — NR0V NB2 style (recommended) or DL2FW linear prediction; pings are never blanked — and **Carrier Notch (ZAP)** for steady carriers and birdies (10 Hz notches, never on a continuous MSK signal).
 
 **ic8tem.22:** Text Highlight — new **pink** color for calls already in the log but worked on other bands or modes · **New grids only** (ON): the grid color marks the grids not yet worked instead of the worked ones · faster QSO B4 lists with very big logs.

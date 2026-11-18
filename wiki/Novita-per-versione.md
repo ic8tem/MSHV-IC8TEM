@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.24
+* **Icom IC-7300 (Hamlib)**: corretto. Dopo una riapertura della porta (all'avvio, o cambiando Port o Baud Rate) lo stato era verde "Connected" ma MSHV scartava tutti i comandi: niente lettura della frequenza, i tasti banda e **F** non cambiavano la frequenza, niente Potenza e ROS. Ora alla connessione la frequenza viene letta subito e scritta nel CAT Log.
+
 ## 2.76.7-ic8tem.23
 * **MSK144 Noise Blanker** (menu Decode): toglie i disturbi impulsivi dall'audio della radio senza toccare i ping. Due metodi: NB2 di NR0V (consigliato) e predizione lineare di DL2FW. Spento di serie.
 * **MSK144 Carrier Notch (ZAP)** (menu Decode): toglie le portanti fisse e le spurie con tacche di 10 Hz; non interviene sui segnali MSK continui. Spento di serie. Vedi [[Rumore MSK144|Rumore-MSK144]].
