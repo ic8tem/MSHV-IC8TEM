@@ -196,7 +196,13 @@ jobs:
             mkdir -p bin/platforms && cp "$P" bin/platforms/
             S=$(dirname "$(dirname "$P")")/styles; [ -d "$S" ] && mkdir -p bin/styles && cp "$S"/*.dll bin/styles/
           fi
-          for i in 1 2 3; do for f in bin/*.exe bin/*.dll bin/*/*.dll; do ldd "$f" 2>/dev/null; done | grep -i '/clangarm64/' | awk '{print $3}' | sort -u | xargs -r cp -u -t bin/; done
+          # DLL closure without running the program (ldd starts the exe and sometimes hangs on the ARM runner)
+          OD=$(command -v llvm-objdump || command -v objdump || true)
+          for i in 1 2 3 4; do
+            for f in bin/*.exe bin/*.dll bin/*/*.dll; do [ -f "$f" ] && timeout 60 "$OD" -p "$f" 2>/dev/null | awk '/DLL Name:/{print $3}'; done | sort -u | while read -r d; do
+              [ -f "/clangarm64/bin/$d" ] && [ ! -f "bin/$d" ] && cp "/clangarm64/bin/$d" bin/ || true
+            done
+          done
           set -e
           test -f bin/platforms/qwindows.dll
           find bin -name .gitkeep -delete
