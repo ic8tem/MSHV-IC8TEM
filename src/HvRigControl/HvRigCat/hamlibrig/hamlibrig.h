@@ -32,6 +32,8 @@ private:
     int s_model;
     void *rig;
     int errors;
+    QString cur_port;//IC8TEM v24
+    int cur_baud;
     void Err(const QString &what,int e);
 };
 

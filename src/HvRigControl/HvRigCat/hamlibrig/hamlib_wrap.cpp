@@ -8,6 +8,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
+#include <QStringList>
 #include <hamlib/rig.h>
 
 namespace
@@ -28,6 +29,7 @@ decltype(&rig_set_ptt) p_set_ptt = 0;
 decltype(&rig_get_level) p_get_level = 0;
 decltype(&rig_set_level) p_set_level = 0;
 decltype(&rigerror) p_error = 0;
+const char *(*p_error2)(int) = 0;//IC8TEM v24: single-line message (Hamlib 4.6+)
 decltype(&rig_set_debug) p_debug = 0;
 const char *(*p_version)() = 0;
 }
@@ -71,6 +73,7 @@ bool HlWrap::Load(QString &err)
     HL_RES(p_debug,"rig_set_debug");
 #undef HL_RES
     p_version = (const char *(*)())lib->resolve("rig_version");
+    p_error2 = (const char *(*)(int))lib->resolve("rigerror2");
     p_debug(RIG_DEBUG_NONE);
     loaded = true;
     return true;
@@ -97,7 +100,13 @@ void *HlWrap::Open(int model,const QString &port,int baud,QString &err)
     int e = p_open(r);
     if (e != RIG_OK)
     {
-        err = "Hamlib: "+port+" "+QString::fromLatin1(p_error(e));
+        //IC8TEM v24: the real error, in one line, and what to check
+        int ae = (e < 0) ? -e : e;
+        err = "Hamlib: "+port+" "+QString::number(baud)+": "+Error(e);
+        if (ae == RIG_ETIMEOUT)
+            err += " - "+QCoreApplication::translate("HamlibRig","no answer: Baud Rate must be the same as in the radio (MENU > SET > Connectors > CI-V), check also the COM port");
+        else if (ae == RIG_EIO)
+            err += " - "+QCoreApplication::translate("HamlibRig","the port does not exist or another program is using it");
         p_cleanup(r);
         return 0;
     }
@@ -179,7 +188,24 @@ int HlWrap::SetRfPower(void *rig,float v)
 QString HlWrap::Error(int code)
 {
     if (!loaded) return QString::number(code);
-    return QString::fromLatin1(p_error(code));
+    //IC8TEM v24: rigerror() gives the whole debug history with the error at the end
+    QString s;
+    if (p_error2) s = QString::fromLatin1(p_error2(code));
+    else
+    {
+        QStringList l = QString::fromLatin1(p_error(code)).split('\n');
+        for (int i = l.count()-1; i >= 0; --i)
+        {
+            if (!l.at(i).trimmed().isEmpty())
+            {
+                s = l.at(i);
+                break;
+            }
+        }
+    }
+    s = s.trimmed();
+    if (s.isEmpty()) s = QString::number(code);
+    return s;
 }
 
 #else  // ---------------------------------------------------------------- no Hamlib in this build

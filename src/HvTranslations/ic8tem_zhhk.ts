@@ -360,4 +360,15 @@
         <translation>選擇其他波段已通聯的顏色</translation>
     </message>
 </context>
+<context>
+    <name>HamlibRig</name>
+    <message>
+        <source>no answer: Baud Rate must be the same as in the radio (MENU &gt; SET &gt; Connectors &gt; CI-V), check also the COM port</source>
+        <translation>無應答：Baud Rate 必須與電台相同（MENU &gt; SET &gt; Connectors &gt; CI-V），並檢查 COM 埠</translation>
+    </message>
+    <message>
+        <source>the port does not exist or another program is using it</source>
+        <translation>埠不存在或被其他程式佔用</translation>
+    </message>
+</context>
 </TS>

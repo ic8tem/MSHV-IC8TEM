@@ -360,4 +360,15 @@
         <translation>Scegli il colore dei collegati su altre bande</translation>
     </message>
 </context>
+<context>
+    <name>HamlibRig</name>
+    <message>
+        <source>no answer: Baud Rate must be the same as in the radio (MENU &gt; SET &gt; Connectors &gt; CI-V), check also the COM port</source>
+        <translation>nessuna risposta: Baud Rate deve essere uguale a quella della radio (MENU &gt; SET &gt; Connectors &gt; CI-V), controlla anche la porta COM</translation>
+    </message>
+    <message>
+        <source>the port does not exist or another program is using it</source>
+        <translation>la porta non esiste o la sta usando un altro programma</translation>
+    </message>
+</context>
 </TS>

@@ -2,6 +2,8 @@
 
 ## 2.76.7-ic8tem.24
 * **Icom IC-7300 (Hamlib)**: corretto. Dopo una riapertura della porta (all'avvio, o cambiando Port o Baud Rate) lo stato era verde "Connected" ma MSHV scartava tutti i comandi: niente lettura della frequenza, i tasti banda e **F** non cambiavano la frequenza, niente Potenza e ROS. Ora alla connessione la frequenza viene letta subito e scritta nel CAT Log.
+* **Icom IC-7300 (Hamlib)**: se la porta non si apre, la scritta rossa dice l'errore vero in una riga (prima c'era il registro interno di Hamlib, tagliato) e cosa controllare: Baud Rate uguale a quella della radio, porta COM inesistente o usata da un altro programma. Non riapre più la porta se Port e Baud Rate non sono cambiati, e se l'apertura non riesce riprova una volta.
+* Ricordati: con Hamlib la porta della radio è usata da Hamlib; la trasmissione passa dal comando CAT oppure dalla **Port 2** (per esempio COM2 con PTT Via RTS).
 
 ## 2.76.7-ic8tem.23
 * **MSK144 Noise Blanker** (menu Decode): toglie i disturbi impulsivi dall'audio della radio senza toccare i ping. Due metodi: NB2 di NR0V (consigliato) e predizione lineare di DL2FW. Spento di serie.

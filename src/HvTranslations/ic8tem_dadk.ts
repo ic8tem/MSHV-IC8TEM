@@ -360,4 +360,15 @@
         <translation>Vælg farve for kørt på andre bånd</translation>
     </message>
 </context>
+<context>
+    <name>HamlibRig</name>
+    <message>
+        <source>no answer: Baud Rate must be the same as in the radio (MENU &gt; SET &gt; Connectors &gt; CI-V), check also the COM port</source>
+        <translation>intet svar: Baud Rate skal være den samme som i radioen (MENU &gt; SET &gt; Connectors &gt; CI-V), tjek også COM-porten</translation>
+    </message>
+    <message>
+        <source>the port does not exist or another program is using it</source>
+        <translation>porten findes ikke, eller et andet program bruger den</translation>
+    </message>
+</context>
 </TS>

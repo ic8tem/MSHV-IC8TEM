@@ -149,3 +149,4 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 
 ## 2026-11-18 — ic8tem.24
 * `src/HvRigControl/HvRigCat/hamlibrig/hamlibrig.cpp` — fix: reopening the rig emitted "Disconnected" first, so the commands stayed blocked after the following "Connected"; the reopen is now silent and every "Connected" status enables the commands. First frequency reading at once, written in the CAT Log.
+* `hamlib_wrap.cpp` — error text from `rigerror2()` (one line; with older Hamlib the last line of `rigerror()`), hints for timeout and IO error; `hamlibrig.*` — no reopen with the same port and speed, 0.4 s pause after closing and one retry.

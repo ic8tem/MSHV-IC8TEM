@@ -360,4 +360,15 @@
         <translation>Изберете цвят за работени на други ленти</translation>
     </message>
 </context>
+<context>
+    <name>HamlibRig</name>
+    <message>
+        <source>no answer: Baud Rate must be the same as in the radio (MENU &gt; SET &gt; Connectors &gt; CI-V), check also the COM port</source>
+        <translation>няма отговор: Baud Rate трябва да е същата като в радиото (MENU &gt; SET &gt; Connectors &gt; CI-V), проверете и COM порта</translation>
+    </message>
+    <message>
+        <source>the port does not exist or another program is using it</source>
+        <translation>портът не съществува или се използва от друга програма</translation>
+    </message>
+</context>
 </TS>

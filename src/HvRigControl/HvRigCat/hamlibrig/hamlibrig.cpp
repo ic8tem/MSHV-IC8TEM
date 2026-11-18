@@ -16,6 +16,7 @@ HamlibWorker::HamlibWorker(int model)
     s_model = model;
     rig = 0;
     errors = 0;
+    cur_baud = 0;
 }
 void HamlibWorker::Err(const QString &what,int e)
 {
@@ -28,6 +29,12 @@ void HamlibWorker::Err(const QString &what,int e)
 }
 void HamlibWorker::Open(QString port,int baud)
 {
+    if (rig && port==cur_port && baud==cur_baud)//IC8TEM v24: already open with these settings
+    {
+        emit Status(tr("Connected")+" "+port+" "+QString::number(baud)+"  ("+HlWrap::Version()+")",2);
+        return;
+    }
+    bool was_open = (rig != 0);
     if (rig)//IC8TEM v24: reopen (new Port or Baud Rate): close without the "Disconnected" status
     {
         QMutexLocker lk(&g_hl_port);
@@ -40,14 +47,24 @@ void HamlibWorker::Open(QString port,int baud)
         emit Status(tr("Choose the COM port of the radio in Port and the speed in Baud Rate"),0);
         return;
     }
+    if (was_open) QThread::msleep(400);// Windows needs a moment to free the COM port
     QMutexLocker lk(&g_hl_port);
     QString err;
     rig = HlWrap::Open(s_model,port,baud,err);
     if (!rig)
     {
+        QThread::msleep(700);// one more try (port just freed, radio busy)
+        rig = HlWrap::Open(s_model,port,baud,err);
+    }
+    if (!rig)
+    {
+        cur_port.clear();
+        cur_baud = 0;
         emit Status(err,0);
         return;
     }
+    cur_port = port;
+    cur_baud = baud;
     errors = 0;
     emit Status(tr("Connected")+" "+port+" "+QString::number(baud)+"  ("+HlWrap::Version()+")",2);
     // first reading at once, written in the CAT Log
@@ -67,6 +84,8 @@ void HamlibWorker::CloseRig()
     HlWrap::SetPtt(rig,false);
     HlWrap::Close(rig);
     rig = 0;
+    cur_port.clear();
+    cur_baud = 0;
     emit Status(tr("Disconnected"),0);
 }
 void HamlibWorker::CloseAndQuit()
