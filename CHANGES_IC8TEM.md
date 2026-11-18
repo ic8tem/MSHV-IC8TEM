@@ -141,3 +141,8 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvTextColor/hvtxtcolor.*` — "Worked in the log on other bands or modes" (pink, color 7) and "New grids only"; saved after the calls text in `default_txt_mark` (#30, #31).
 * `src/HvDecodeList/hvworked.h` (new), `decodelist.*` — pink calls and new grids painted in the message column.
 * `src/HvTxW/HvLogW/hvlogw.*` — QSO B4 lists built with sets (fast with very big logs); every log call kept for the pink highlight.
+
+## 2026-11-18 — ic8tem.23
+* `src/HvDecoderMs/hvmsknoise.h` (new) — impulse blanker (approach of WDSP NB2, NR0V, changed so that pings are never blanked), linear prediction blanker (port of `alt_noise_blanking()` by DL2FW, UHSDR, GPLv3) and carrier notch (steady lines in the median-over-time spectrum, not with a continuous MSK signal).
+* `decodermsk144.cpp`, `decoderms.*` — `analytic_msk144_2()` applies them in the full-period and real-time MSK144 decoding; `SetMskNoise()`.
+* `main_ms.*` — Decode menu: MSK144 Noise Blanker Off / NR0V NB2 / LPC DL2FW, MSK144 Carrier Notch (ZAP); setting `def_msk_nb_zap`.

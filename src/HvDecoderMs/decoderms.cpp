@@ -228,6 +228,10 @@ DecoderMs::DecoderMs(QString p)//QObject *parent
     ////// NEW analytic ////////////////////////////////////////////////////////////////
     s_msk144rxequal_s = false;  //1.31 default msk144/msk40
     s_msk144rxequal_d = false;   //1.31 default msk144/msk40
+    s_msk_nb_mode = 0;//IC8TEM MSK144 noise tools
+    s_msk_zap = false;
+    s_msk_zap_reset = false;
+    s_msk_nb_events = 0;
 
     nfft0_msk144_2 = 0;//new analytic_msk144_2
     pomAll.zero_double_beg_end(dpclast_msk144_2,0,3);

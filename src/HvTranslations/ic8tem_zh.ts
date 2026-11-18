@@ -254,6 +254,22 @@
         <source>View Power and SWR</source>
         <translation>查看功率和驻波比</translation>
     </message>
+    <message>
+        <source>MSK144 Noise Blanker Off</source>
+        <translation>MSK144 噪声消隐关闭</translation>
+    </message>
+    <message>
+        <source>MSK144 Noise Blanker (NR0V NB2)</source>
+        <translation>MSK144 噪声消隐 (NR0V NB2)</translation>
+    </message>
+    <message>
+        <source>MSK144 Noise Blanker LPC (DL2FW)</source>
+        <translation>MSK144 噪声消隐 LPC (DL2FW)</translation>
+    </message>
+    <message>
+        <source>MSK144 Carrier Notch (ZAP)</source>
+        <translation>MSK144 载波陷波 (ZAP)</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>

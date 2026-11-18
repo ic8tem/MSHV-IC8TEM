@@ -1172,6 +1172,20 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     for (int i = 0; i < 4; ++i) cb_msk144rxequal_[i]->setEnabled(false);
     QActionGroup *ac_gr_eq = new QActionGroup(this);
     for (int i = 0; i < 4; ++i) ac_gr_eq->addAction(cb_msk144rxequal_[i]);
+    //IC8TEM: MSK144 noise tools
+    ac_msk_nb[0] = new QAction(tr("MSK144 Noise Blanker Off"),this);
+    ac_msk_nb[1] = new QAction(tr("MSK144 Noise Blanker (NR0V NB2)"),this);
+    ac_msk_nb[2] = new QAction(tr("MSK144 Noise Blanker LPC (DL2FW)"),this);
+    QActionGroup *ac_gr_nb = new QActionGroup(this);
+    for (int i = 0; i < 3; ++i)
+    {
+        ac_msk_nb[i]->setCheckable(true);
+        ac_msk_nb[i]->setEnabled(false);
+        ac_gr_nb->addAction(ac_msk_nb[i]);
+    }
+    ac_msk_zap = new QAction(tr("MSK144 Carrier Notch (ZAP)"),this);
+    ac_msk_zap->setCheckable(true);
+    ac_msk_zap->setEnabled(false);
 
     TAggressiveDialog = new AggressiveDialog(dsty,this);
     connect(TAggressiveDialog, SIGNAL(EmitLevelAggres(int)), TDecoderMs, SLOT(SetAggresLevFtd(int)));
@@ -1298,6 +1312,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     Decode_m->addSeparator();
     for (int i = 0; i < 4; ++i) Decode_m->addAction(cb_msk144rxequal_[i]);
     Decode_m->addSeparator();
+    for (int i = 0; i < 3; ++i) Decode_m->addAction(ac_msk_nb[i]);//IC8TEM
+    Decode_m->addAction(ac_msk_zap);//IC8TEM
+    Decode_m->addSeparator();
     Decode_m->addAction(cb_1_dec_sig_q65);
     Decode_m->addAction(cb_max_drift);
     for (int i = 0; i < 5; ++i) Decode_m->addAction(cb_max65_cand[i]);
@@ -1325,6 +1342,9 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
 
     for (int i = 0; i < 4; ++i) connect(cb_msk144rxequal_[i], SIGNAL(toggled(bool)), this, SLOT(Msk144RxEqual(bool)));
     cb_msk144rxequal_[0]->setChecked(true);//default Equalization msk144 and decoderms.cpp
+    for (int i = 0; i < 3; ++i) connect(ac_msk_nb[i], SIGNAL(toggled(bool)), this, SLOT(MskNoiseChanged(bool)));//IC8TEM
+    connect(ac_msk_zap, SIGNAL(toggled(bool)), this, SLOT(MskNoiseChanged(bool)));
+    ac_msk_nb[0]->setChecked(true);
 
     connect(cb_vhf_uhf_decode_fac, SIGNAL(toggled(bool)), this, SLOT(SetVhfUhfFeatures(bool)));//1.60=
 
@@ -2354,6 +2374,15 @@ void Main_Ms::SetAvgPi4CountToButtonTxt(int iu1,int ia1)
 void Main_Ms::SetAvgQ65CountToButtonTxt(int iu1,int ia1)
 {
     pb_clear_avgQ65->setText(tr("CLEAR AVG")+" "+QString("%1").arg(iu1)+" | "+QString("%1").arg(ia1));
+}
+void Main_Ms::MskNoiseChanged(bool)//IC8TEM
+{
+    int nb = 0;
+    for (int i = 0; i < 3; ++i)
+    {
+        if (ac_msk_nb[i]->isChecked()) nb = i;
+    }
+    TDecoderMs->SetMskNoise(nb,ac_msk_zap->isChecked());
 }
 void Main_Ms::Msk144RxEqual(bool)
 {
@@ -3818,6 +3847,8 @@ void Main_Ms::ModeChanged(bool fg)
     cb_UseVarDecFt->setEnabled(false);
     MVDecFtPar->setEnabled(false);
     for (int i = 0; i < 4; ++i) cb_msk144rxequal_[i]->setEnabled(false);
+    for (int i = 0; i < 3; ++i) ac_msk_nb[i]->setEnabled(false);//IC8TEM
+    ac_msk_zap->setEnabled(false);
     cb_rtd_decode->setEnabled(false);
     MainDisplay->SetStartStopRtd(false);
     SecondDisplay->SetStartStopRtd(false);
@@ -3866,6 +3897,8 @@ void Main_Ms::ModeChanged(bool fg)
         for (int i = 0; i < 3; ++i) rb_dec_depth[i]->setEnabled(true);
 
         for (int i = 0; i < 4; ++i) cb_msk144rxequal_[i]->setEnabled(true);
+        for (int i = 0; i < 3; ++i) ac_msk_nb[i]->setEnabled(true);//IC8TEM
+        ac_msk_zap->setEnabled(true);
 
         cb_rtd_decode->setEnabled(true);
         MainDisplay->SetStartStopRtd(cb_rtd_decode->isChecked());
@@ -3890,6 +3923,8 @@ void Main_Ms::ModeChanged(bool fg)
         for (int i = 0; i < 3; ++i) rb_dec_depth[i]->setEnabled(true);
 
         for (int i = 0; i < 4; ++i) cb_msk144rxequal_[i]->setEnabled(true);
+        for (int i = 0; i < 3; ++i) ac_msk_nb[i]->setEnabled(true);//IC8TEM
+        ac_msk_zap->setEnabled(true);
 
         cb_rtd_decode->setEnabled(true);
         MainDisplay->SetStartStopRtd(cb_rtd_decode->isChecked());
@@ -4303,7 +4338,7 @@ void Main_Ms::SetQActionCb(QString s, bool idp, QAction *ac)//idp priority of pr
 }
 void Main_Ms::Read_Settings(QString path)
 {
-    const int c_st_id = 111;//dopalva se tuk v kraia
+    const int c_st_id = 112;//dopalva se tuk v kraia  IC8TEM 111=def_msk_nb_zap
     const QString st_id[c_st_id]=
         {
             "default_w","default_h","default_device_alsa","default_bitpersample","default_card_latency",
@@ -4329,7 +4364,7 @@ void Main_Ms::Read_Settings(QString path)
             "def_filter_list4","def_filter_list5","def_adle_vdsp","def_areset_qso","def_1_dec_sig_q65",
             "def_auto_clr_avg_afdec","def_dec_aft_eme_delay","def_max_drift","def_use_queue_cont","def_filter_list6",
             "use_aseq_max_dist","def_mod_bt_sw","def_show_lcols","vd_bw_lines_draw","def_band_bt_sw",
-            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col"
+            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col","def_msk_nb_zap"
         };
 
     QString st_res[c_st_id];
@@ -4788,6 +4823,13 @@ void Main_Ms::Read_Settings(QString path)
     }
 
     SetQActionCb(st_res[110], true, ac_show_mskwidthc);//IC8TEM def false
+    if (!st_res[111].isEmpty())//IC8TEM def_msk_nb_zap=nb#zap
+    {
+        QStringList l = st_res[111].split("#");
+        int nb = l.value(0).toInt();
+        if (nb >= 0 && nb < 3) ac_msk_nb[nb]->setChecked(true);
+        ac_msk_zap->setChecked(l.value(1)=="1");
+    }
     SetShowMskWidthColl(ac_show_mskwidthc->isChecked());
 
     THvTxW->SetBlockEmitFreqToRig(false);
@@ -5012,6 +5054,11 @@ void Main_Ms::Save_Settings(QString path)
     }
     out << "def_var_dec_parr=" << dd << "\n";
     out << "def_msk_width_col=" << QString("%1").arg(ac_show_mskwidthc->isChecked()) << "\n";//IC8TEM
+    {
+        int nb = 0;
+        for (int i = 0; i < 3; ++i) if (ac_msk_nb[i]->isChecked()) nb = i;
+        out << "def_msk_nb_zap=" << QString("%1#%2").arg(nb).arg(ac_msk_zap->isChecked() ? 1 : 0) << "\n";//IC8TEM
+    }
 
     file.close();
 }

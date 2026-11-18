@@ -129,6 +129,7 @@ private slots:
     void BtSet2D1D();
     void BtSetD1D2();
     void Msk144RxEqual(bool);
+    void MskNoiseChanged(bool);//IC8TEM
     void SetVhfUhfFeatures(bool);
     void DeepSearchChanged(bool);
     void AvgDecodeChanged(bool);
@@ -302,6 +303,8 @@ private:
     QAction *rb_vdec_sens[3];   
        
     QAction *cb_msk144rxequal_[4];
+    QAction *ac_msk_nb[3];//IC8TEM MSK144 noise blanker
+    QAction *ac_msk_zap;//IC8TEM MSK144 carrier notch
     QAction *ac_aggressive;
      
     void SetDecodeAllSettingsB(QString s,int ident);

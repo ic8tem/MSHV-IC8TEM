@@ -1,5 +1,9 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.23
+* **MSK144 Noise Blanker** (menu Decode): toglie i disturbi impulsivi dall'audio della radio senza toccare i ping. Due metodi: NB2 di NR0V (consigliato) e predizione lineare di DL2FW. Spento di serie.
+* **MSK144 Carrier Notch (ZAP)** (menu Decode): toglie le portanti fisse e le spurie con tacche di 10 Hz; non interviene sui segnali MSK continui. Spento di serie. Vedi [[Rumore MSK144|Rumore-MSK144]].
+
 ## 2.76.7-ic8tem.22
 * **Text Highlight**: nuovo colore **rosa** per i nominativi già nel log ma collegati su altre bande o modi.
 * **Locatori**: nuova opzione **New grids only** (attiva): l'azzurro segna solo i locatori non ancora collegati, invece di quelli già collegati. Vedi [[Colori: già collegati e locatori nuovi|Colori-gia-collegati]].

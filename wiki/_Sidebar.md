@@ -8,6 +8,7 @@
 * [[Annullamento fittizio del log|Annullamento-fittizio-del-log]]
 * [[QSO doppi|QSO-doppi]]
 * [[Colori: già collegati e locatori nuovi|Colori-gia-collegati]]
+* [[Rumore MSK144: noise blanker e notch|Rumore-MSK144]]
 * [[Multi Answer TX Slots|Multi-Answer-TX-Slots]]
 * [[Durata del ping MSK144|Durata-ping-MSK144]]
 * [[Icom LAN|Icom-LAN]]

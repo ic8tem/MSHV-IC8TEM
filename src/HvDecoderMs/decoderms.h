@@ -6,6 +6,7 @@
 #define DECODERMS_H
 #include <pthread.h>//IC8TEM: explicit (needed by clang/libc++, e.g. Windows ARM64)
 
+#include "hvmsknoise.h"//IC8TEM: MSK144 noise blanker and carrier notch (before the complex macro)
 #include <complex.h>
 #define complex		_Complex
 #include "../mac_complex_shim.h"//macOS: complex shim (VU2CPL)
@@ -766,6 +767,7 @@ public:
     void SetMultiAnswerMod(bool);//for AP MAM ft8 2.03
     void SetThrLevel(int);
     void SetMsk144RxEqual(int);
+    void SetMskNoise(int nb,bool zap);//IC8TEM
     void SetMsh(uint8_t);
     void SetVarDecodeFtPar(bool,int,int);
 
@@ -1011,7 +1013,14 @@ private:
     //double saclast_msk144_2[5];
     bool any_not_and_save_in_a(double *a,double *b,int c);
     void analytic_msk144_2_init_s_corrs_full();
-    void analytic_msk144_2(double *d,int d_count_begin,int npts,int nfft,double complex *c,double *dpc,bool bseq,bool bdeq);
+    void analytic_msk144_2(double *d,int d_count_begin,int npts,int nfft,double complex *c,double *dpc,bool bseq,bool bdeq,
+                           bool fclean = false,bool frtd = false);//IC8TEM: fclean = noise tools, frtd = real time
+    //IC8TEM: MSK144 noise tools (menu Decode)
+    int s_msk_nb_mode;              // 0 off, 1 impulse blanker (NR0V NB2 style), 2 linear prediction (DL2FW)
+    bool s_msk_zap;                 // carrier notch
+    bool s_msk_zap_reset;
+    HvMskNoise::ZapState s_msk_zap_st;
+    int s_msk_nb_events;
     // end new analytic ////////////////////////////////
     void msk_144_40_decode(double *dat,int npts_in,double s_istart,bool);
     /// MSK144 end///////////////

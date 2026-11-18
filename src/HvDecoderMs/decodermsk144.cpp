@@ -216,7 +216,7 @@ bool DecoderMs::any_not_and_save_in_a(double *a,double *b,int c)
     return res;
 }
 void DecoderMs::analytic_msk144_2(double *d,int d_count_begin,int npts,int nfft,double complex *c,
-                                  double *dpc,bool bseq,bool bdeq)
+                                  double *dpc,bool bseq,bool bdeq,bool fclean,bool frtd)
 {
     //parameter (NFFTMAX=1024*1024)
     double fac=(double)2.0/(double)nfft;
@@ -267,11 +267,35 @@ void DecoderMs::analytic_msk144_2(double *d,int d_count_begin,int npts,int nfft,
     for (int i = 0; i<npts; i++)
         c[i]=fac*d[i+d_count_begin];
 
+    //IC8TEM: MSK144 noise tools (menu Decode): linear prediction blanker on the audio,
+    //steady carriers found on the audio and notched in the spectrum, impulse blanker on the analytic signal
+    int zap_nl = 0;
+    double zap_lines[64];
+    if (fclean && s_msk_zap_reset)
+    {
+        s_msk_zap_st.Reset();
+        s_msk_zap_reset = false;
+    }
+    if (fclean && npts > 0 && (s_msk_nb_mode==2 || s_msk_zap))
+    {
+        std::vector<double> xr(npts);
+        for (int i = 0; i<npts; i++) xr[i]=d[i+d_count_begin];
+        if (s_msk_nb_mode==2)
+        {
+            s_msk_nb_events += HvMskNoise::LpcBlank(&xr[0],npts);
+            for (int i = 0; i<npts; i++) c[i]=fac*xr[i];
+        }
+        if (s_msk_zap)
+            zap_nl = HvMskNoise::ZapFindLines(&xr[0],npts,DEC_SAMPLE_RATE,frtd ? &s_msk_zap_st : 0,zap_lines);
+    }
+
     //for (int j = npts+1; j<nfft; j++)
     for (int j = npts; j<nfft; j++)
         c[j]=0.0+0.0*I;
 
     f2a.four2a_c2c(c,nfft,-1,1);               //!Forward c2c FFT
+
+    if (zap_nl > 0) HvMskNoise::ZapApply((double*)c,nfft,DEC_SAMPLE_RATE,zap_lines,zap_nl);//IC8TEM
 
     //int button = (bdeq<<1 | bseq);
     //qDebug()<<"button"<<button;
@@ -302,6 +326,15 @@ void DecoderMs::analytic_msk144_2(double *d,int d_count_begin,int npts,int nfft,
         c[y]=0.0+0.0*I; //c(nh+2:nfft)=0.
 
     f2a.four2a_c2c(c,nfft,1,1);                //!Inverse c2c FFT
+
+    if (fclean && s_msk_nb_mode==1 && npts > 0)//IC8TEM: impulse blanker
+        s_msk_nb_events += HvMskNoise::BlankImpulses((double*)c,npts,DEC_SAMPLE_RATE);
+}
+void DecoderMs::SetMskNoise(int nb,bool zap)//IC8TEM
+{
+    s_msk_nb_mode = nb;
+    if (zap != s_msk_zap) s_msk_zap_reset = true;// the decoding thread resets the carrier notch
+    s_msk_zap = zap;
 }
 /*
 void DecoderMs::analytic_msk144_2(double *d,int d_count_begin,int npts,int nfft,double complex *c,
@@ -2430,7 +2463,7 @@ void DecoderMs::msk_144_40_rtd(double *dat,int,double s_istart,bool rpt_db_msk)
     //if(!s_msk144rxequal_s && !s_msk144rxequal_d)
     //analytic_msk144(dat,0,NZ,NFFT1,cdat);      //!Convert to analytic signal and filter
     //else
-    analytic_msk144_2(dat,0,NZ,NFFT1,cdat,s_pcoeffs_msk144,s_msk144rxequal_s,s_msk144rxequal_d);      //call analytic(d,NZ,NFFT1,cdat,pcoeffs,.true.) !Convert to analytic signal and filter
+    analytic_msk144_2(dat,0,NZ,NFFT1,cdat,s_pcoeffs_msk144,s_msk144rxequal_s,s_msk144rxequal_d,true,true);//IC8TEM noise tools      //call analytic(d,NZ,NFFT1,cdat,pcoeffs,.true.) !Convert to analytic signal and filter
 
     //qDebug()<<s_pcoeffs_msk144[0]<<s_pcoeffs_msk144[1]<<s_pcoeffs_msk144[2];
 
@@ -2798,7 +2831,7 @@ void DecoderMs::msk_144_40_decode(double *dat,int npts_in,double s_istart,bool r
 
     //bool cb_rxequa = false;
     //s_msk144rxequal
-    analytic_msk144_2(dat,0,npts,nfft,c,s_pcoeffs_msk144,false,false);//s_msk144rxequal ako e true ne decodira
+    analytic_msk144_2(dat,0,npts,nfft,c,s_pcoeffs_msk144,false,false,true,false);//s_msk144rxequal ako e true ne decodira  IC8TEM noise tools
 
     //analytic_jtmsk(dat,0,npts,nfft,c);//!Convert to analytic signal
     //double *s = new double[1024*1024];

@@ -254,6 +254,22 @@
         <source>View Power and SWR</source>
         <translation>Pokaż moc i WFS</translation>
     </message>
+    <message>
+        <source>MSK144 Noise Blanker Off</source>
+        <translation>MSK144 Noise Blanker wyłączony</translation>
+    </message>
+    <message>
+        <source>MSK144 Noise Blanker (NR0V NB2)</source>
+        <translation>MSK144 Noise Blanker (NR0V NB2)</translation>
+    </message>
+    <message>
+        <source>MSK144 Noise Blanker LPC (DL2FW)</source>
+        <translation>MSK144 Noise Blanker LPC (DL2FW)</translation>
+    </message>
+    <message>
+        <source>MSK144 Carrier Notch (ZAP)</source>
+        <translation>MSK144 Notch nośnych (ZAP)</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
