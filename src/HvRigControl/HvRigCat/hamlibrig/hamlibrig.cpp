@@ -240,6 +240,7 @@ void HamlibRig::SetCmd(CmdID i,ptt_t ptt,QString str)
     if (i==GET_METERS && !w->pend_meters.testAndSetOrdered(0,1)) return;
     if (i==GET_RFPOWER && !w->pend_power.testAndSetOrdered(0,1)) return;
     emit WDo((int)i,(int)ptt,str);
+    if (i==SET_FREQ || i==SET_MODE || i==SET_PTT) emit EmitCmdSent();//IC8TEM v26: MSHV stops the frequency polling for these
 }
 void HamlibRig::WStatus(QString s,int state)
 {

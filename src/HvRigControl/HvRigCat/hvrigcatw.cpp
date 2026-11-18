@@ -639,6 +639,7 @@ void HvRigCat::SetRig(int index)
         connect(THamlib, SIGNAL(EmitRigSet(RigSet)), this, SLOT(SetRigSet(RigSet)));
         connect(this, SIGNAL(DesleteRig()), THamlib, SLOT(deleteLater()));
         connect(THamlib, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SLOT(SetReadedInfo(CmdID,QString)));
+        connect(THamlib, SIGNAL(EmitCmdSent()), this, SLOT(RestartPolling()));//IC8TEM v26
         connect(this, SIGNAL(EmitOnOffCatCommand(bool,int,int)), THamlib, SLOT(SetOnOffCatCommand(bool,int,int)));
         have_read_data_rts_on = 3;
         s_active_model_id = rstruc.model;
@@ -657,6 +658,7 @@ void HvRigCat::SetRig(int index)
         connect(TIcomLan, SIGNAL(EmitRigSet(RigSet)), this, SLOT(SetRigSet(RigSet)));
         connect(this, SIGNAL(DesleteRig()), TIcomLan, SLOT(deleteLater()));
         connect(TIcomLan, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SLOT(SetReadedInfo(CmdID,QString)));
+        connect(TIcomLan, SIGNAL(EmitCmdSent()), this, SLOT(RestartPolling()));//IC8TEM v26
         connect(this, SIGNAL(EmitOnOffCatCommand(bool,int,int)), TIcomLan, SLOT(SetOnOffCatCommand(bool,int,int)));
         have_read_data_rts_on = 3;
         s_active_model_id = rstruc.model;
@@ -849,6 +851,14 @@ void HvRigCat::SetWriteCmd(char*data,int size)
     {
         polling_timer->start(sb_pollint->value());
     }
+}
+void HvRigCat::RestartPolling()
+{
+    // IC8TEM: set_freq, set_mode and set_ptt stop the polling; the drivers that write to the
+    // port of MSHV start it again in SetWriteCmd. Hamlib and Icom LAN do not write through MSHV,
+    // so the frequency and the mode were read no more after the first command (band button, F, TX).
+    if ((s_port_type == RIG_PORT_SERIAL || s_port_type == RIG_PORT_NETWORK) && s_port_poen)
+        polling_timer->start(sb_pollint->value());
 }
 void HvRigCat::StartPttTimer()
 {

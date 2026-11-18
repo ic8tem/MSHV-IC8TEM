@@ -1127,9 +1127,11 @@ void IcomLanRig::SetCmd(CmdID i,ptt_t ptt,QString str)
         if (on) emit CoreKey(true);
         emit IcomCmd(i, on ? RIG_PTT_ON : RIG_PTT_OFF, str);
         if (!on) emit CoreKey(false);
+        emit EmitCmdSent();//IC8TEM v26: MSHV stops the frequency polling for these
         return;
     }
     emit IcomCmd(i,ptt,str);
+    if (i==SET_FREQ || i==SET_MODE) emit EmitCmdSent();//IC8TEM v26
 }
 void IcomLanRig::CivFromIcom(char *data,int size)
 {

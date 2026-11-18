@@ -186,6 +186,7 @@ signals:
     void EmitReadedInfo(CmdID,QString);
     void EmitNetConnInfo(QString,bool,bool);
     void EmitFullRigInfo(QString);
+    void EmitCmdSent();          // IC8TEM v26: set_freq/set_mode/set_ptt sent, polling may go on
     // internal
     void IcomCmd(CmdID,ptt_t,QString);
     void IcomRead(QByteArray,int);

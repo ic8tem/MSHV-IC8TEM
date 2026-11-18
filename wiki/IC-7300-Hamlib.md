@@ -14,7 +14,7 @@ La radio deve avere l'indirizzo CI-V predefinito `94h`. La porta COM può essere
 
 ## Cosa fa
 
-* Frequenza e modo letti e impostati (USB-D per i modi digitali), PTT via CAT.
+* Frequenza e modo letti e impostati (USB-D per i modi digitali), PTT via CAT. Frequenza e modo sono letti di continuo (ogni *Polling Interval* di Rig Control): se cambiate banda dalla radio, MSHV la segue (corretto nella versione **2.76.7-ic8tem.26**).
 * Finestra **Potenza e ROS** (*Options › View Power and SWR*), con la connessione *CAT di MSHV*: regolazione della potenza (`RFPOWER`) e lettura di Po (`RFPOWER_METER`), ROS (`SWR`) e ALC (`ALC`).
 * La scheda **CAT Log** della finestra Potenza e ROS mostra ogni comando Hamlib e la risposta (o l'errore di Hamlib).
 

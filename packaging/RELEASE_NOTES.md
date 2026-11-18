@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.26:** fix: **Icom IC-7300 (Hamlib)** and **Icom LAN** — after the first command to the radio (band button, **F**, mode change or TX) MSHV stopped reading the frequency and the mode, so it kept showing the frequency read at connection while the radio was elsewhere. Now they are read all the time, as with the other radios, and MSHV follows the changes made on the radio.
+
 **ic8tem.25:** **Power & SWR** window much smaller: it takes the size of the open tab — the Power and SWR tab is only as big as its content (before, it was as big as the Settings tab); Settings and CAT Log enlarge it when opened, and back on the first tab it shrinks again · shorter protection text (*Stop TX if SWR > 2.5 for 1.0 s*) · the red SWR block message spans the full width under the two boxes.
 
 **ic8tem.24:** Icom IC-7300 (Hamlib) fixed: after the port was reopened (at start, or changing Port or Baud Rate) the status was green but every CAT command was dropped (no frequency reading, band buttons and **F** did not tune the radio, no Power & SWR). The frequency is now read at once on connection and written in the CAT Log. When the port cannot be opened, the red status shows the real Hamlib error in one line (not the truncated debug history) and what to check; no reopen when Port and Baud Rate did not change, one retry.

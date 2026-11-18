@@ -144,6 +144,7 @@ private slots:
     //void SetRig1(int);
     void SetRigSet(RigSet);
     void SetWriteCmd(char*data,int size);
+    void RestartPolling();//IC8TEM: Hamlib and Icom LAN, after set_freq/set_mode/set_ptt
     void PttChanget(bool f);
     ////////////////////////////////////////////////////////new read com
     void SetReadedInfo(CmdID,QString);

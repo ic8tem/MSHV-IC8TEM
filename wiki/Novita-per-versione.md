@@ -1,5 +1,9 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.26
+* **Icom IC-7300 (Hamlib)**: corretto. Dopo il primo comando alla radio (tasto banda, **F**, cambio di modo o trasmissione) MSHV smetteva di leggere la frequenza: la radio cambiava banda, ma MSHV restava fermo sulla frequenza letta alla connessione. Ora frequenza e modo vengono letti di continuo, come con le altre radio, e MSHV segue anche i cambi fatti dalla radio.
+* **Icom LAN**: stessa correzione (dopo la prima trasmissione o il primo cambio di banda la frequenza non veniva più letta).
+
 ## 2.76.7-ic8tem.25
 * **Potenza e ROS**: la finestra è molto più piccola. Prende la misura della scheda aperta: la scheda *Power and SWR* occupa solo lo spazio che le serve (prima era grande quanto la scheda *Settings*), *Settings* e *CAT Log* la ingrandiscono quando le aprite e, tornando alla prima scheda, si rimpicciolisce di nuovo. Vedi [[Potenza e ROS|Potenza-e-ROS]].
 * Scritta della protezione più corta (*Stop TX if SWR > 2.5 for 1.0 s*); il messaggio rosso del blocco per ROS alto va sotto i due riquadri, a tutta larghezza.
