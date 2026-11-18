@@ -17,6 +17,8 @@
 #include <QFontDatabase>
 #include <QApplication>
 #include <QClipboard>
+#include <QScreen>
+#include <QShowEvent>
 #include "../HvRigControl/qexsp_1_2rc/qextserialenumerator.h"
 
 // ---------------------------------------------------------------- meter
@@ -28,7 +30,7 @@ HvPwrMeter::HvPwrMeter(int kind,QWidget *parent)
     s_peak = -1.0;
     s_limit = -1.0;
     setMinimumHeight(18);
-    setMinimumWidth(160);
+    setMinimumWidth(110);
 }
 void HvPwrMeter::SetValue(double v,double peak)
 {
@@ -135,6 +137,8 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     last_alc = 0.0;
     f_was_visible = false;
     f_closing = false;
+    t_fit = 0;
+    f_fit_exact = false;
     clock.start();
     QFont mono = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
@@ -155,18 +159,19 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     QGroupBox *gb_pwr = new QGroupBox(tr("Output Power"));
     l_pct = new QLabel("50 %");
     QFont fb = mono;
-    fb.setPointSize(fb.pointSize()+10);
+    fb.setPointSize(fb.pointSize()+6);
     fb.setBold(true);
     l_pct->setFont(fb);
+    l_pct->setMinimumWidth(QFontMetrics(fb).boundingRect("100 %").width()+6);//no jumps while the slider moves
     l_watt = new QLabel();
     QHBoxLayout *H_val = new QHBoxLayout();
     H_val->addWidget(l_pct);
     H_val->addWidget(l_watt,1);
     pb_minus = new QPushButton("-");
-    pb_minus->setFixedSize(34,30);
+    pb_minus->setFixedSize(30,24);
     pb_minus->setToolTip(tr("Decrease power"));
     pb_plus = new QPushButton("+");
-    pb_plus->setFixedSize(34,30);
+    pb_plus->setFixedSize(30,24);
     pb_plus->setToolTip(tr("Increase power"));
     sl_pwr = new QSlider(Qt::Horizontal);
     sl_pwr->setRange(0,100);
@@ -177,11 +182,16 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     H_sl->addWidget(sl_pwr,1);
     H_sl->addWidget(pb_plus);
     QHBoxLayout *H_pre = new QHBoxLayout();
+    H_pre->setSpacing(3);
     const int presets[] = {10,25,35,50,100};
+    const int pre_w = QFontMetrics(font()).boundingRect("100 %").width()+14;
     for (int i = 0; i < 5; ++i)
     {
         QPushButton *b = new QPushButton(QString("%1 %").arg(presets[i]));
         b->setProperty("pct",presets[i]);
+        //the style gives push buttons at least 75-80 pixels: here they share the width of the row
+        b->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Fixed);
+        b->setMinimumWidth(pre_w);
         connect(b, SIGNAL(clicked()), this, SLOT(Preset()));
         pb_presets << b;
         H_pre->addWidget(b);
@@ -197,6 +207,8 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     H_tb->addWidget(pb_tune);
     H_tb->addWidget(pb_read);
     QVBoxLayout *V_pwr = new QVBoxLayout();
+    V_pwr->setContentsMargins(8,4,8,6);
+    V_pwr->setSpacing(5);
     V_pwr->addLayout(H_val);
     V_pwr->addLayout(H_sl);
     V_pwr->addLayout(H_pre);
@@ -218,8 +230,9 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     l_po->setFont(fm);
     l_swr->setFont(fm);
     l_alc->setFont(fm);
-    l_po->setMinimumWidth(70);
+    l_po->setMinimumWidth(QFontMetrics(fm).boundingRect("2000 W").width()+4);//no jumps when the values change
     QGridLayout *G_met = new QGridLayout();
+    G_met->setVerticalSpacing(4);
     G_met->addWidget(new QLabel("Po"),0,0);
     G_met->addWidget(m_po,0,1);
     G_met->addWidget(l_po,0,2);
@@ -234,6 +247,8 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     l_event = new QLabel();
     l_event->setFont(mono);
     l_event->setWordWrap(true);
+    l_event->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    l_event->setMinimumHeight(2*QFontMetrics(mono).lineSpacing()+2);//2 lines: the window does not jump with long messages
     l_block = new QLabel();
     l_block->setWordWrap(true);
     l_block->setStyleSheet("QLabel{background-color:rgb(153,27,27);color:white;padding:4px;font-weight:bold;}");
@@ -242,24 +257,30 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     H_blk->addWidget(l_block,1);
     H_blk->addWidget(pb_unlock);
     QVBoxLayout *V_met = new QVBoxLayout();
+    V_met->setContentsMargins(8,4,8,6);
+    V_met->setSpacing(5);
     V_met->addLayout(G_met);
     V_met->addStretch(1);
     V_met->addWidget(cb_prot_main);
     V_met->addWidget(l_event);
-    V_met->addLayout(H_blk);
     gb_met->setLayout(V_met);
 
     QHBoxLayout *H_main = new QHBoxLayout();
+    H_main->setSpacing(6);
     H_main->addWidget(gb_pwr,1);
     H_main->addWidget(gb_met,1);
     l_status = new QLabel();
     l_status->setFont(mono);
+    l_status->setWordWrap(true);//long CAT messages wrap instead of widening the window
     l_status->setStyleSheet("QLabel{color:rgb(55,65,81);}");
     QVBoxLayout *V_w1 = new QVBoxLayout(w1);
+    V_w1->setContentsMargins(6,6,6,6);
+    V_w1->setSpacing(5);
     V_w1->addLayout(H_head);
     V_w1->addWidget(l_status);
     V_w1->addWidget(l_notcap);
     V_w1->addLayout(H_main,1);
+    V_w1->addLayout(H_blk);//SWR protection message: full width, under the two boxes
     w1->setLayout(V_w1);
 
     // ---------------- tab 2
@@ -275,15 +296,13 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     sb_interval->setSuffix(" ms");
     cb_only_tx = new QCheckBox(tr("Read only while transmitting"));
     cb_only_tx->setChecked(true);
-    QHBoxLayout *H_s1 = new QHBoxLayout();
-    H_s1->addWidget(new QLabel(tr("Maximum power of the radio")+":"));
-    H_s1->addWidget(sb_maxw);
-    H_s1->addSpacing(12);
-    H_s1->addWidget(new QLabel(tr("Read the meters every")+":"));
-    H_s1->addWidget(sb_interval);
-    H_s1->addSpacing(12);
-    H_s1->addWidget(cb_only_tx);
-    H_s1->addStretch(1);
+    QGridLayout *H_s1 = new QGridLayout();//2 rows: the Settings tab is not too wide
+    H_s1->addWidget(new QLabel(tr("Maximum power of the radio")+":"),0,0);
+    H_s1->addWidget(sb_maxw,0,1);
+    H_s1->addWidget(new QLabel(tr("Read the meters every")+":"),1,0);
+    H_s1->addWidget(sb_interval,1,1);
+    H_s1->addWidget(cb_only_tx,1,2);
+    H_s1->setColumnStretch(3,1);
 
     QGroupBox *gb_bands = new QGroupBox(tr("Power per band"));
     tw_bands = new QTableWidget(PWR_NBANDS,3);
@@ -365,19 +384,24 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     QHBoxLayout *H_c1 = new QHBoxLayout();
     H_c1->addWidget(cb_conn,1);
     H_c1->addWidget(pb_conn);
-    QHBoxLayout *H_c2 = new QHBoxLayout();
-    H_c2->addWidget(new QLabel("rigctld:"));
-    H_c2->addWidget(le_host);
-    H_c2->addWidget(new QLabel(tr("Port")+":"));
-    H_c2->addWidget(sb_port);
-    H_c2->addSpacing(16);
-    H_c2->addWidget(new QLabel("CI-V:"));
-    H_c2->addWidget(cb_com);
-    H_c2->addWidget(pb_rescan);
-    H_c2->addWidget(cb_baud);
-    H_c2->addWidget(new QLabel(tr("Address")+":"));
-    H_c2->addWidget(le_civ);
-    H_c2->addStretch(1);
+    QGridLayout *H_c2 = new QGridLayout();//rigctld and CI-V on 2 rows: the Settings tab is not too wide
+    H_c2->addWidget(new QLabel("rigctld:"),0,0);
+    QHBoxLayout *H_c2a = new QHBoxLayout();
+    H_c2a->addWidget(le_host);
+    H_c2a->addWidget(new QLabel(tr("Port")+":"));
+    H_c2a->addWidget(sb_port);
+    H_c2a->addStretch(1);
+    H_c2->addLayout(H_c2a,0,1);
+    H_c2->addWidget(new QLabel("CI-V:"),1,0);
+    QHBoxLayout *H_c2b = new QHBoxLayout();
+    H_c2b->addWidget(cb_com);
+    H_c2b->addWidget(pb_rescan);
+    H_c2b->addWidget(cb_baud);
+    H_c2b->addWidget(new QLabel(tr("Address")+":"));
+    H_c2b->addWidget(le_civ);
+    H_c2b->addStretch(1);
+    H_c2->addLayout(H_c2b,1,1);
+    H_c2->setColumnStretch(1,1);
     QLabel *l_cinfo = new QLabel(tr("A serial port can be used by one program only: with the own CI-V port the MSHV CAT must use another port or be off. Hamlib rigctld can be shared by several programs (e.g. rigctld -m 3073 -r COM5 -s 115200 for the IC-7300)."));
     l_cinfo->setWordWrap(true);
     QVBoxLayout *V_c = new QVBoxLayout();
@@ -410,9 +434,12 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     V_w2->addWidget(l_xv);
     w2->setLayout(V_w2);
 
+    t_fit = new QTimer(this);
+    t_fit->setSingleShot(true);
+    connect(t_fit, SIGNAL(timeout()), this, SLOT(FitNow()));
     tabs = new QTabWidget();
-    tabs->addTab(w1,tr("Power and SWR"));
-    tabs->addTab(w2,tr("Settings"));
+    tabs->addTab(TabPage(w1),tr("Power and SWR"));
+    tabs->addTab(TabPage(w2),tr("Settings"));
     // ---------------- tab 3: CAT log
     QWidget *w3 = new QWidget();
     QLabel *l_loginfo = new QLabel(tr("CI-V frames of power and meters sent to the radio and its answers. FA = the radio refused the command (NG)."));
@@ -421,6 +448,7 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     te_log->setReadOnly(true);
     te_log->setMaximumBlockCount(1000);
     te_log->setFont(mono);
+    te_log->setMinimumSize(420,200);//the window grows to this when the CAT Log tab is opened
     QPushButton *pb_readnow = new QPushButton(tr("Read now (power and meters)"));
     QPushButton *pb_clear = new QPushButton(tr("Clear"));
     QPushButton *pb_copy = new QPushButton(tr("Copy"));
@@ -436,7 +464,9 @@ HvPowerSwrW::HvPowerSwrW(QString app_path,QWidget *parent)
     V_w3->addWidget(te_log,1);
     V_w3->addLayout(H_log);
     w3->setLayout(V_w3);
-    tabs->addTab(w3,tr("CAT Log"));
+    tabs->addTab(TabPage(w3),tr("CAT Log"));
+    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(TabChanged(int)));
+    TabChanged(tabs->currentIndex());
     connect(pb_readnow, SIGNAL(clicked()), this, SLOT(ReadNow()));
     connect(pb_clear, SIGNAL(clicked()), this, SLOT(LogClear()));
     connect(pb_copy, SIGNAL(clicked()), this, SLOT(LogCopy()));
@@ -501,6 +531,74 @@ void HvPowerSwrW::closeEvent(QCloseEvent *e)
     f_closing = false;
     emit EmitClosed();
     e->accept();
+}
+// Size of the window = size of the open tab. A QTabWidget is as big as its biggest
+// tab (Settings): the content of the tabs not shown is hidden, so it does not count,
+// and the Power and SWR tab gets only the space it needs.
+QWidget *HvPowerSwrW::TabPage(QWidget *content)
+{
+    QWidget *p = new QWidget();
+    QVBoxLayout *v = new QVBoxLayout(p);
+    v->setContentsMargins(0,0,0,0);
+    v->addWidget(content);
+    tab_pages << content;
+    return p;
+}
+void HvPowerSwrW::TabChanged(int idx)
+{
+    for (int i = 0; i < tab_pages.count(); ++i) tab_pages.at(i)->setVisible(i == idx);
+    FitLater(true);
+}
+void HvPowerSwrW::showEvent(QShowEvent *e)
+{
+    QWidget::showEvent(e);
+    if (e->spontaneous()) return;//restored from the taskbar: keep the size
+    Fit(true);//before the window appears
+    FitLater(true);//and again when everything is laid out
+}
+void HvPowerSwrW::FitLater(bool exact)
+{
+    if (exact) f_fit_exact = true;
+    if (t_fit && isVisible()) t_fit->start(0);
+}
+void HvPowerSwrW::FitNow()
+{
+    bool exact = f_fit_exact;
+    f_fit_exact = false;
+    Fit(exact);
+}
+void HvPowerSwrW::Fit(bool exact)
+{
+    // Power and SWR tab: exact = as small as its content, otherwise same width and taller if needed.
+    // Other tabs: big enough for their content (never smaller than now).
+    if (!isVisible() || isMinimized() || isMaximized() || isFullScreen()) return;
+    QCoreApplication::sendPostedEvents(0, QEvent::LayoutRequest);//sizes of the tab just changed
+    tabs->updateGeometry();
+    if (layout()) layout()->activate();
+    const QSize min = minimumSizeHint();
+    const bool main_tab = (tabs->currentIndex() == 0);
+    int w = (main_tab && exact) ? sizeHint().width() : width();
+    if (!main_tab) w = qMax(w, sizeHint().width());
+    w = qMax(w, min.width());
+    int h = hasHeightForWidth() ? heightForWidth(w) : -1;
+    if (h <= 0) h = sizeHint().height();
+    h = qMax(h, min.height());
+    if (!(main_tab && exact)) h = qMax(h, height());
+    QSize s(w,h);
+    QScreen *sc = QGuiApplication::screenAt(frameGeometry().center());
+    if (!sc) sc = QGuiApplication::primaryScreen();
+    if (sc)
+    {
+        QRect av = sc->availableGeometry();
+        QSize fr = frameGeometry().size() - size();//title bar and borders
+        s = s.boundedTo(av.size() - fr).expandedTo(min);
+        QRect g(frameGeometry().topLeft(), s + fr);
+        int x = g.x(), y = g.y();
+        if (g.right() > av.right()) x = qMax(av.left(), av.right() - g.width() + 1);
+        if (g.bottom() > av.bottom()) y = qMax(av.top(), av.bottom() - g.height() + 1);
+        if (x != g.x() || y != g.y()) move(x,y);
+    }
+    if (s != size()) resize(s);
 }
 void HvPowerSwrW::ReadSettings()
 {
@@ -610,8 +708,8 @@ void HvPowerSwrW::SettingsChanged()
 {
     if (f_block) return;
     m_swr->SetLimit(cb_prot->isChecked() ? sb_swr_lim->value() : -1.0);
-    cb_prot_main->setText(tr("Stop TX if SWR is above")+" "+QString::number(sb_swr_lim->value(),'f',1)+" "+
-                          tr("for more than")+" "+QString::number(sb_swr_sec->value(),'f',1)+" s");
+    cb_prot_main->setText(tr("Stop TX if SWR > %1 for %2 s").arg(QString::number(sb_swr_lim->value(),'f',1))
+                          .arg(QString::number(sb_swr_sec->value(),'f',1)));//short: the window stays small
     t_poll->start(sb_interval->value());
     UpdatePowerLabels();
     SaveSettings();
@@ -715,10 +813,15 @@ void HvPowerSwrW::Unlock()
     l_block->setHidden(true);
     pb_unlock->setHidden(true);
     Event(tr("TX unlocked"),false);
+    FitLater(true);
 }
 void HvPowerSwrW::UpdateEnabled()
 {
-    l_notcap->setHidden(f_capable);
+    if (l_notcap->isHidden() != f_capable)
+    {
+        l_notcap->setHidden(f_capable);
+        FitLater(true);
+    }
     QList<QWidget*> l;
     l << sl_pwr << pb_minus << pb_plus << pb_save_band << pb_tune << pb_read;
     for (int i = 0; i < pb_presets.count(); ++i) l << pb_presets.at(i);
@@ -809,7 +912,11 @@ void HvPowerSwrW::PollMeters()
 void HvPowerSwrW::SetStatus(QString s)
 {
     s_cat_status = s;
-    if (cb_conn->currentIndex() == 0) l_status->setText(s);
+    if (cb_conn->currentIndex() == 0 && l_status->text() != s)
+    {
+        l_status->setText(s);
+        FitLater(false);
+    }
 }
 void HvPowerSwrW::ReadNow()
 {
@@ -954,6 +1061,7 @@ void HvPowerSwrW::OnSwr(double swr)
                 Event(tr("SWR")+" "+QString::number(last_swr,'f',1)+" - "+tr("TX STOPPED"),true);
                 show();
                 raise();
+                FitLater(false);
                 emit EmitStopTx();
             }
         }
@@ -1044,7 +1152,11 @@ void HvPowerSwrW::LinkStatus(bool ok,QString s)
     l_conn->setStyleSheet(ok ? "QLabel{color:rgb(22,101,52);}" : "QLabel{color:rgb(153,27,27);}");
     if (cb_conn->currentIndex() != 0)
     {
-        l_status->setText(s);
+        if (l_status->text() != s)
+        {
+            l_status->setText(s);
+            FitLater(false);
+        }
         if (ok && !was) Log(true,s);
         UpdateCapable();
         if (ok && !was) link->ReadFreq();

@@ -114,6 +114,12 @@ MESSAGES = [
 (P, "for more than", T(
     "за повече от", "дольше чем", "持续超过", "持續超過", "durante más de", "durant més de", "durante mais de",
     "mai mult de", "i mere end", "przez ponad", "pendant plus de", "por mais de", "i mer enn", "per più di", "déle než")),
+(P, "Stop TX if SWR > %1 for %2 s", T(
+    "Спри TX, ако КСВ > %1 за %2 s", "Остановить TX, если КСВ > %1 дольше %2 s", "驻波比 > %1 持续 %2 秒时停止发射",
+    "駐波比 > %1 持續 %2 秒時停止發射", "Detener TX si ROE > %1 durante %2 s", "Atura el TX si ROE > %1 durant %2 s",
+    "Parar TX se ROE > %1 durante %2 s", "Oprește TX dacă SWR > %1 timp de %2 s", "Stop TX hvis SWR > %1 i %2 s",
+    "Zatrzymaj TX, gdy WFS > %1 przez %2 s", "Arrêter le TX si ROS > %1 pendant %2 s", "Parar TX se ROE > %1 por %2 s",
+    "Stopp TX hvis SWR > %1 i %2 s", "Ferma il TX se ROS > %1 per %2 s", "Zastavit TX, pokud PSV > %1 po dobu %2 s")),
 (P, "Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.", T(
     "Не е налично: изберете радио Icom (CI-V по USB или Icom LAN) в Rig Control и стартирайте CAT.",
     "Недоступно: выберите трансивер Icom (CI-V по USB или Icom LAN) в Rig Control и запустите CAT.",

@@ -92,6 +92,10 @@
         <translation>przez ponad</translation>
     </message>
     <message>
+        <source>Stop TX if SWR &gt; %1 for %2 s</source>
+        <translation>Zatrzymaj TX, gdy WFS &gt; %1 przez %2 s</translation>
+    </message>
+    <message>
         <source>Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.</source>
         <translation>Niedostępne: wybierz radio Icom (CI-V przez USB lub Icom LAN) w Rig Control i uruchom CAT.</translation>
     </message>

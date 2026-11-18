@@ -1,5 +1,9 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.25
+* **Potenza e ROS**: la finestra è molto più piccola. Prende la misura della scheda aperta: la scheda *Power and SWR* occupa solo lo spazio che le serve (prima era grande quanto la scheda *Settings*), *Settings* e *CAT Log* la ingrandiscono quando le aprite e, tornando alla prima scheda, si rimpicciolisce di nuovo. Vedi [[Potenza e ROS|Potenza-e-ROS]].
+* Scritta della protezione più corta (*Stop TX if SWR > 2.5 for 1.0 s*); il messaggio rosso del blocco per ROS alto va sotto i due riquadri, a tutta larghezza.
+
 ## 2.76.7-ic8tem.24
 * **Icom IC-7300 (Hamlib)**: corretto. Dopo una riapertura della porta (all'avvio, o cambiando Port o Baud Rate) lo stato era verde "Connected" ma MSHV scartava tutti i comandi: niente lettura della frequenza, i tasti banda e **F** non cambiavano la frequenza, niente Potenza e ROS. Ora alla connessione la frequenza viene letta subito e scritta nel CAT Log.
 * **Icom IC-7300 (Hamlib)**: se la porta non si apre, la scritta rossa dice l'errore vero in una riga (prima c'era il registro interno di Hamlib, tagliato) e cosa controllare: Baud Rate uguale a quella della radio, porta COM inesistente o usata da un altro programma. Non riapre più la porta se Port e Baud Rate non sono cambiati, e se l'apertura non riesce riprova una volta.

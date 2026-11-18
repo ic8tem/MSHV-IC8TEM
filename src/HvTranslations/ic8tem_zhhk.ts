@@ -92,6 +92,10 @@
         <translation>持續超過</translation>
     </message>
     <message>
+        <source>Stop TX if SWR &gt; %1 for %2 s</source>
+        <translation>駐波比 &gt; %1 持續 %2 秒時停止發射</translation>
+    </message>
+    <message>
         <source>Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.</source>
         <translation>不可用：請在 Rig Control 中選擇 Icom 電台（USB 上的 CI-V 或 Icom LAN）並啟動 CAT。</translation>
     </message>

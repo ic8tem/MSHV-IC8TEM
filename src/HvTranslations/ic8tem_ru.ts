@@ -92,6 +92,10 @@
         <translation>дольше чем</translation>
     </message>
     <message>
+        <source>Stop TX if SWR &gt; %1 for %2 s</source>
+        <translation>Остановить TX, если КСВ &gt; %1 дольше %2 s</translation>
+    </message>
+    <message>
         <source>Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.</source>
         <translation>Недоступно: выберите трансивер Icom (CI-V по USB или Icom LAN) в Rig Control и запустите CAT.</translation>
     </message>

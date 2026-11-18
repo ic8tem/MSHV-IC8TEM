@@ -92,6 +92,10 @@
         <translation>déle než</translation>
     </message>
     <message>
+        <source>Stop TX if SWR &gt; %1 for %2 s</source>
+        <translation>Zastavit TX, pokud PSV &gt; %1 po dobu %2 s</translation>
+    </message>
+    <message>
         <source>Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.</source>
         <translation>Nedostupné: zvolte rádio Icom (CI-V přes USB nebo Icom LAN) v Rig Control a spusťte CAT.</translation>
     </message>

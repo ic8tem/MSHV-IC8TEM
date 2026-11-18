@@ -92,6 +92,10 @@
         <translation>i mere end</translation>
     </message>
     <message>
+        <source>Stop TX if SWR &gt; %1 for %2 s</source>
+        <translation>Stop TX hvis SWR &gt; %1 i %2 s</translation>
+    </message>
+    <message>
         <source>Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.</source>
         <translation>Ikke tilgængelig: vælg en Icom-radio (CI-V via USB eller Icom LAN) i Rig Control og start CAT.</translation>
     </message>

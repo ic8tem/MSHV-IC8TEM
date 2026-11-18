@@ -70,8 +70,11 @@ public slots:
 
 protected:
     void closeEvent(QCloseEvent *);
+    void showEvent(QShowEvent *);
 
 private slots:
+    void TabChanged(int);
+    void FitNow();
     void SliderChanged(int);
     void SendPower();
     void Minus();
@@ -124,6 +127,13 @@ private:
     bool f_closing;
 
     QTabWidget *tabs;
+    // the window takes the size of the open tab only: the Power and SWR tab stays small
+    QList<QWidget*> tab_pages;
+    QTimer *t_fit;
+    bool f_fit_exact;
+    QWidget *TabPage(QWidget *content);
+    void FitLater(bool exact);
+    void Fit(bool exact);
     QLabel *l_head;
     QLabel *l_tx;
     QLabel *l_pct;

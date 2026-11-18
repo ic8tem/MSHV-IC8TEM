@@ -92,6 +92,10 @@
         <translation>per più di</translation>
     </message>
     <message>
+        <source>Stop TX if SWR &gt; %1 for %2 s</source>
+        <translation>Ferma il TX se ROS &gt; %1 per %2 s</translation>
+    </message>
+    <message>
         <source>Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.</source>
         <translation>Non disponibile: scegli una radio Icom (CI-V su USB o Icom LAN) in Rig Control e avvia il CAT.</translation>
     </message>

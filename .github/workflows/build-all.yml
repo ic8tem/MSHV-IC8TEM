@@ -14,7 +14,7 @@ on:
     types: [published]
 
 env:
-  MSHV_VERSION: 2.76.7-ic8tem.24
+  MSHV_VERSION: 2.76.7-ic8tem.25
 
 permissions:
   contents: write

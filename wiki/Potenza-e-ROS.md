@@ -49,5 +49,6 @@ In alto nella prima scheda si vede lo stato della connessione: con il CAT di MSH
 * **Con il transverter** (es. 144 → 28 MHz) la radio misura la potenza di pilotaggio e il ROS verso il transverter, **non** in antenna. Per il ROS dell'antenna serve un misuratore esterno.
 * Le scale di Po, ROS e ALC sono quelle dei manuali CI-V Icom (IC-7300: ROS 1,5 = 48, 2,0 = 80, 3,0 = 120). Su altri modelli possono differire leggermente.
 * Comandi CI-V usati: `14 0A` potenza, `15 11` Po, `15 12` ROS, `15 13` ALC.
+* La finestra prende la misura della scheda aperta (dalla versione **2.76.7-ic8tem.25**): la scheda *Potenza e ROS* è piccola, *Impostazioni* e *CAT Log* la ingrandiscono quando le aprite e, tornando alla prima scheda, si rimpicciolisce.
 * Impostazioni salvate in `settings/ms_pwrswr`.
 * La finestra è tradotta nelle stesse lingue di MSHV.

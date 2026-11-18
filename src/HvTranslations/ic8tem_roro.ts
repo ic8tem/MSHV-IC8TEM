@@ -92,6 +92,10 @@
         <translation>mai mult de</translation>
     </message>
     <message>
+        <source>Stop TX if SWR &gt; %1 for %2 s</source>
+        <translation>Oprește TX dacă SWR &gt; %1 timp de %2 s</translation>
+    </message>
+    <message>
         <source>Not available: choose an Icom radio (CI-V on USB or Icom LAN) in Rig Control and start the CAT.</source>
         <translation>Indisponibil: alegeți o stație Icom (CI-V pe USB sau Icom LAN) în Rig Control și porniți CAT.</translation>
     </message>
