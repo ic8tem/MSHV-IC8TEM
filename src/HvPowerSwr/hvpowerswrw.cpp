@@ -810,6 +810,7 @@ void HvPowerSwrW::TuneClicked()
 void HvPowerSwrW::Unlock()
 {
     f_blocked = false;
+    emit EmitTxBlocked(false);
     l_block->setHidden(true);
     pb_unlock->setHidden(true);
     Event(tr("TX unlocked"),false);
@@ -860,8 +861,18 @@ void HvPowerSwrW::SetFreqStr(QString s)
     QString b = BandOf(hz/1000000.0);
     if (b == s_band) return;
     s_band = b;
+    AutoMaxW();
     UpdatePowerLabels();
     ApplyBandMemory();
+}
+void HvPowerSwrW::AutoMaxW()//IC8TEM v28 IC-9700: the Po meter full scale is the power of the band
+{
+    if (cb_conn->currentIndex() != 0 || !s_cat_status.contains("9700")) return;
+    int w = 0;
+    if (s_band == "2 m") w = 100;
+    else if (s_band == "70 cm") w = 75;
+    else if (s_band == "23 cm") w = 10;
+    if (w > 0 && sb_maxw->value() != w) sb_maxw->setValue(w);
 }
 void HvPowerSwrW::SetModeName(QString m)
 {
@@ -912,6 +923,7 @@ void HvPowerSwrW::PollMeters()
 void HvPowerSwrW::SetStatus(QString s)
 {
     s_cat_status = s;
+    AutoMaxW();
     if (cb_conn->currentIndex() == 0 && l_status->text() != s)
     {
         l_status->setText(s);
@@ -1053,6 +1065,7 @@ void HvPowerSwrW::OnSwr(double swr)
             else if (now - swr_high_since >= (qint64)(sb_swr_sec->value()*1000.0) && !f_blocked)
             {
                 f_blocked = true;
+                emit EmitTxBlocked(true);
                 QString t = tr("TX STOPPED")+": "+tr("SWR")+" "+QString::number(last_swr,'f',1)+" "+
                             tr("check antenna and cables")+". "+tr("TX stays blocked until you press Unlock.");
                 l_block->setText(t);

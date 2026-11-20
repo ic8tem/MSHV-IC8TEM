@@ -545,6 +545,11 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     ac_2click_list_autu_on->setCheckable(true);
     Dlf_m->addAction(ac_2click_list_autu_on);
 
+    ac_auto_restart_tx = new QAction(tr("TO RADIO Call Decoded Again Sets Auto Is On")+" MSK FT JT65 Q65",this);//IC8TEM v28
+    ac_auto_restart_tx->setCheckable(true);
+    ac_auto_restart_tx->setChecked(false);
+    Dlf_m->addAction(ac_auto_restart_tx);
+
     ac_new_dec_clr_msg_list = new QAction(tr("New decode period to clear Message List")+" FT",this);
     ac_new_dec_clr_msg_list->setCheckable(true);
     Dlf_m->addAction(ac_new_dec_clr_msg_list);
@@ -841,6 +846,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvRigControl, SIGNAL(EmitGetedFreq(QString)), THvPowerSwrW, SLOT(SetFreqStr(QString)));
     connect(THvPowerSwrW, SIGNAL(EmitTune()), this, SLOT(Tune()));
     connect(THvPowerSwrW, SIGNAL(EmitStopTx()), this, SLOT(StopTxGlobal()));
+    connect(THvPowerSwrW, SIGNAL(EmitTxBlocked(bool)), THvTxW, SLOT(SetTxBlockedSwr(bool)));//IC8TEM v28
     if (THvPowerSwrW->WasVisible()) QTimer::singleShot(1500, Start_pwrswr_m, SLOT(toggle()));
     connect(THvTxW, SIGNAL(EmitAstroWIsClosed()), this, SLOT(SetAstroWIsClosed()));
 
@@ -1534,6 +1540,7 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(TDecodeList2, SIGNAL(ListSelectedRpt(QString)), THvTxW, SLOT(DecListTextRpt(QString)));
     connect(ac_2click_list_autu_on, SIGNAL(toggled(bool)), THvTxW, SLOT(Set2ClickDecListAutoOn(bool)));
     ac_2click_list_autu_on->setChecked(true);//2.51
+    connect(ac_auto_restart_tx, SIGNAL(toggled(bool)), THvTxW, SLOT(SetAutoRestartTx(bool)));//IC8TEM v28
     connect(ac_start_qso_from_tx2_or_tx1, SIGNAL(toggled(bool)), THvTxW, SLOT(SetStartFromTx2Tx1(bool)));
     connect(ac_new_dec_clr_msg_list, SIGNAL(toggled(bool)), TDecodeList1, SLOT(SetNewDecClrMsgListFlag(bool)));
     ac_new_dec_clr_msg_list->setChecked(false);
@@ -3880,6 +3887,7 @@ void Main_Ms::ModeChanged(bool fg)
     pb_clear_avgPi4->setHidden(true);
     ac_two_dec_list->setEnabled(false);
     ac_2click_list_autu_on->setEnabled(false);
+    ac_auto_restart_tx->setEnabled(false);//IC8TEM v28
     Direct_log_qso->setEnabled(false);
     Prompt_log_qso->setEnabled(false);
     cb_ap_decode->setEnabled(false);
@@ -3925,6 +3933,7 @@ void Main_Ms::ModeChanged(bool fg)
         Direct_log_qso->setEnabled(true);
         Prompt_log_qso->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
         //ac_start_qso_from_tx2_or_tx1->setEnabled(true);//2.61 in SetMactos
         ac_two_dec_list->setEnabled(true);
         ac_click_on_call_show_cty->setEnabled(true);
@@ -3951,6 +3960,7 @@ void Main_Ms::ModeChanged(bool fg)
         Direct_log_qso->setEnabled(true);
         Prompt_log_qso->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
         //ac_start_qso_from_tx2_or_tx1->setEnabled(true);//2.61 in SetMactos
         ac_two_dec_list->setEnabled(true);
         ac_areset_qso->setEnabled(true);
@@ -4014,6 +4024,7 @@ void Main_Ms::ModeChanged(bool fg)
         cb_ap_decode->setEnabled(true);
         ac_two_dec_list->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
     }
     if (rb_mode[8]->isChecked())
     {   // cps.
@@ -4032,6 +4043,7 @@ void Main_Ms::ModeChanged(bool fg)
         cb_ap_decode->setEnabled(true);
         ac_two_dec_list->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
     }
     if (rb_mode[9]->isChecked())
     {   // cps.
@@ -4050,6 +4062,7 @@ void Main_Ms::ModeChanged(bool fg)
         cb_ap_decode->setEnabled(true);
         ac_two_dec_list->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
     }
     if (rb_mode[10]->isChecked())
     {   // cps.
@@ -4077,6 +4090,7 @@ void Main_Ms::ModeChanged(bool fg)
         Prompt_log_qso->setEnabled(true);
         cb_ap_decode->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
         if (!g_block_mam)
         {
             MA_man_adding->setEnabled(true);
@@ -4109,6 +4123,7 @@ void Main_Ms::ModeChanged(bool fg)
         Prompt_log_qso->setEnabled(true);
         cb_ap_decode->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
         if (!g_block_mam)
         {
             MA_man_adding->setEnabled(true);
@@ -4142,6 +4157,7 @@ void Main_Ms::ModeChanged(bool fg)
         Prompt_log_qso->setEnabled(true);
         cb_ap_decode->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
         if (!g_block_mam)
         {
             MA_man_adding->setEnabled(true);
@@ -4181,6 +4197,7 @@ void Main_Ms::ModeChanged(bool fg)
         Prompt_log_qso->setEnabled(true);
         cb_ap_decode->setEnabled(true);
         ac_2click_list_autu_on->setEnabled(true);
+        ac_auto_restart_tx->setEnabled(true);//IC8TEM v28
         if (!g_block_mam)
         {
             MA_man_adding->setEnabled(true);
@@ -4357,7 +4374,7 @@ void Main_Ms::SetQActionCb(QString s, bool idp, QAction *ac)//idp priority of pr
 }
 void Main_Ms::Read_Settings(QString path)
 {
-    const int c_st_id = 114;//dopalva se tuk v kraia  IC8TEM 111=def_msk_nb_zap 112=def_dl_colw 113=def_nodec_lines
+    const int c_st_id = 115;//dopalva se tuk v kraia  IC8TEM 111=def_msk_nb_zap 112=def_dl_colw 113=def_nodec_lines 114=def_auto_restart_tx
     const QString st_id[c_st_id]=
         {
             "default_w","default_h","default_device_alsa","default_bitpersample","default_card_latency",
@@ -4383,7 +4400,7 @@ void Main_Ms::Read_Settings(QString path)
             "def_filter_list4","def_filter_list5","def_adle_vdsp","def_areset_qso","def_1_dec_sig_q65",
             "def_auto_clr_avg_afdec","def_dec_aft_eme_delay","def_max_drift","def_use_queue_cont","def_filter_list6",
             "use_aseq_max_dist","def_mod_bt_sw","def_show_lcols","vd_bw_lines_draw","def_band_bt_sw",
-            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col","def_msk_nb_zap","def_dl_colw","def_nodec_lines"
+            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col","def_msk_nb_zap","def_dl_colw","def_nodec_lines","def_auto_restart_tx"
         };
 
     QString st_res[c_st_id];
@@ -4858,6 +4875,7 @@ void Main_Ms::Read_Settings(QString path)
     }
     SetQActionCb(st_res[113], false, ac_nodec_lines);//IC8TEM v27 def true
     TDecodeList1->SetShowNoDecLines(ac_nodec_lines->isChecked());
+    SetQActionCb(st_res[114], true, ac_auto_restart_tx);//IC8TEM v28 def false
 
     THvTxW->SetBlockEmitFreqToRig(false);
 
@@ -5088,6 +5106,7 @@ void Main_Ms::Save_Settings(QString path)
     }
     out << "def_dl_colw=" << TDecodeList1->GetUserColWidths() << "|" << TDecodeList2->GetUserColWidths() << "\n";//IC8TEM v27
     out << "def_nodec_lines=" << QString("%1").arg(ac_nodec_lines->isChecked()) << "\n";//IC8TEM v27
+    out << "def_auto_restart_tx=" << QString("%1").arg(ac_auto_restart_tx->isChecked()) << "\n";//IC8TEM v28
 
     file.close();
 }

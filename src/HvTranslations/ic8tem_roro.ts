@@ -282,6 +282,10 @@
         <source>Default Column Widths (drag the column borders to change them)</source>
         <translation>Lățimea implicită a coloanelor (trageți marginile coloanelor pentru a o schimba)</translation>
     </message>
+    <message>
+        <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
+        <translation>Indicativul din Catre RADIO decodat din nou seteaza auto Pornit</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -381,6 +385,124 @@
     <message>
         <source>the port does not exist or another program is using it</source>
         <translation>portul nu există sau îl folosește alt program</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrc</name>
+    <message>
+        <source>Decodes of the last %1 periods</source>
+        <translation>Decodările din ultimele %1 perioade</translation>
+    </message>
+    <message>
+        <source>Online</source>
+        <translation>Online</translation>
+    </message>
+    <message>
+        <source>MSHV database</source>
+        <translation>Baza de date MSHV</translation>
+    </message>
+    <message>
+        <source>Locator of</source>
+        <translation>Locatorul lui</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>oprit</translation>
+    </message>
+    <message>
+        <source>not asked</source>
+        <translation>neîntrebat</translation>
+    </message>
+    <message>
+        <source>list not loaded</source>
+        <translation>listă neîncărcată</translation>
+    </message>
+    <message>
+        <source>Calls heard with a locator</source>
+        <translation>Indicative auzite cu locator</translation>
+    </message>
+    <message>
+        <source>Answers kept</source>
+        <translation>Răspunsuri păstrate</translation>
+    </message>
+    <message>
+        <source>asked since the start</source>
+        <translation>întrebări de la pornire</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Indicative</translation>
+    </message>
+    <message>
+        <source>List not loaded</source>
+        <translation>Listă neîncărcată</translation>
+    </message>
+    <message>
+        <source>downloaded</source>
+        <translation>descărcată</translation>
+    </message>
+    <message>
+        <source>downloading</source>
+        <translation>se descarcă</translation>
+    </message>
+    <message>
+        <source>waiting to download</source>
+        <translation>așteaptă descărcarea</translation>
+    </message>
+    <message>
+        <source>The downloaded file is not valid</source>
+        <translation>Fișierul descărcat nu este valid</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS indisponibil (fără OpenSSL și fără curl)</translation>
+    </message>
+    <message>
+        <source>no answer (timeout)</source>
+        <translation>niciun răspuns (timp expirat)</translation>
+    </message>
+    <message>
+        <source>Download failed</source>
+        <translation>Descărcarea a eșuat</translation>
+    </message>
+    <message>
+        <source>empty answer</source>
+        <translation>răspuns gol</translation>
+    </message>
+    <message>
+        <source>Cannot write</source>
+        <translation>Nu se poate scrie</translation>
+    </message>
+    <message>
+        <source>Online lookup failed</source>
+        <translation>Căutarea online a eșuat</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrcW</name>
+    <message>
+        <source>Locator lookup when the call is not in the MSHV database</source>
+        <translation>Căutarea locatorului când indicativul nu este în baza de date MSHV</translation>
+    </message>
+    <message>
+        <source>When the call in TO RADIO has no locator in the clicked message and in the MSHV database, MSHV looks in these sources, in this order. The label next to LOCATOR shows where the locator comes from (hold the mouse on it to see all the sources). ADD saves it in the MSHV database.</source>
+        <translation>Când indicativul din Catre RADIO nu are locator nici în mesajul pe care ați dat clic, nici în baza de date MSHV, MSHV îl caută în aceste surse, în această ordine. Eticheta de lângă Locatorul arată de unde vine locatorul (țineți mouse-ul deasupra pentru a vedea toate sursele). Adauga îl salvează în baza de date MSHV.</translation>
+    </message>
+    <message>
+        <source>The online lookup sends the call to api.g7vrd.co.uk only when no other source has the locator; the answers are kept for 30 days.</source>
+        <translation>Căutarea online trimite indicativul către api.g7vrd.co.uk doar când nicio altă sursă nu are locatorul; răspunsurile se păstrează 30 de zile.</translation>
+    </message>
+    <message>
+        <source>Download the lists and update them every %1 days</source>
+        <translation>Descarcă listele și actualizează-le la fiecare %1 zile</translation>
+    </message>
+    <message>
+        <source>Update Now</source>
+        <translation>Actualizează acum</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Surse</translation>
     </message>
 </context>
 </TS>

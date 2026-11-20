@@ -629,7 +629,7 @@ void HvRigCat::SetRig(int index)
     }
 #endif
 ////// omnirig end /////////
-    else if (rstruc.facid == NETWORK_ID && rstruc.model == HAMLIB_IC7300)//IC8TEM Icom IC-7300 (Hamlib)
+    else if (rstruc.facid == NETWORK_ID && IS_HAMLIB(rstruc.model))//IC8TEM Icom IC-7300/7610/9700 (Hamlib)
     {
         HamlibRig *THamlib = new HamlibRig(rstruc.model);
         connect(this, SIGNAL(EmitNetSP(QString)), THamlib, SLOT(ConnectNet(QString)));
@@ -934,7 +934,7 @@ void HvRigCat::SetReadedInfo(CmdID i,QString str)
 bool HvRigCat::PwrCapable()//IC8TEM Power & SWR: Icom CI-V (USB) or Icom LAN, CAT running
 {
     if (!s_port_poen || !f_rig_activ) return false;
-    return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && (IS_ICOMLAN(s_active_model_id) || s_active_model_id==HAMLIB_IC7300))
+    return (s_active_fact_id==ICOM_ID || (s_active_fact_id==NETWORK_ID && (IS_ICOMLAN(s_active_model_id) || IS_HAMLIB(s_active_model_id)))
             || PwrTextFamily() > 0
             || (s_active_fact_id==NETWORK_ID && (s_active_model_id==3 || s_active_model_id==4 || s_active_model_id==6)));//TCI, FlexRadio 6xxx
 }
@@ -946,7 +946,7 @@ QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
     QString kind;
     if (s_active_fact_id==ICOM_ID) kind = "Icom CI-V";
     else if (s_active_fact_id==NETWORK_ID && IS_ICOMLAN(s_active_model_id)) kind = "Icom LAN";
-    else if (s_active_fact_id==NETWORK_ID && s_active_model_id==HAMLIB_IC7300) kind = "Hamlib";
+    else if (s_active_fact_id==NETWORK_ID && IS_HAMLIB(s_active_model_id)) kind = "Hamlib";
     else if (PwrTextFamily()==1) kind = "Yaesu CAT";
     else if (PwrTextFamily()==2 || PwrTextFamily()==3) kind = "Kenwood CAT";
     else if (PwrTextFamily()==4 || PwrTextFamily()==5) kind = "Elecraft CAT";

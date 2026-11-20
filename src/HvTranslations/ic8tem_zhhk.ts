@@ -282,6 +282,10 @@
         <source>Default Column Widths (drag the column borders to change them)</source>
         <translation>預設欄寬（拖動欄邊界可更改）</translation>
     </message>
+    <message>
+        <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
+        <translation>再次解碼到呼號框中的呼號時自動呼叫</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -381,6 +385,124 @@
     <message>
         <source>the port does not exist or another program is using it</source>
         <translation>埠不存在或被其他程式佔用</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrc</name>
+    <message>
+        <source>Decodes of the last %1 periods</source>
+        <translation>最近 %1 個週期的解碼</translation>
+    </message>
+    <message>
+        <source>Online</source>
+        <translation>線上</translation>
+    </message>
+    <message>
+        <source>MSHV database</source>
+        <translation>MSHV 資料庫</translation>
+    </message>
+    <message>
+        <source>Locator of</source>
+        <translation>定位</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>not asked</source>
+        <translation>未查詢</translation>
+    </message>
+    <message>
+        <source>list not loaded</source>
+        <translation>列表未載入</translation>
+    </message>
+    <message>
+        <source>Calls heard with a locator</source>
+        <translation>收到的帶定位的呼號</translation>
+    </message>
+    <message>
+        <source>Answers kept</source>
+        <translation>保存的回覆</translation>
+    </message>
+    <message>
+        <source>asked since the start</source>
+        <translation>啟動以來的查詢</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>呼號</translation>
+    </message>
+    <message>
+        <source>List not loaded</source>
+        <translation>列表未載入</translation>
+    </message>
+    <message>
+        <source>downloaded</source>
+        <translation>下載於</translation>
+    </message>
+    <message>
+        <source>downloading</source>
+        <translation>正在下載</translation>
+    </message>
+    <message>
+        <source>waiting to download</source>
+        <translation>等待下載</translation>
+    </message>
+    <message>
+        <source>The downloaded file is not valid</source>
+        <translation>下載的檔案無效</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS 不可用（沒有 OpenSSL 也沒有 curl）</translation>
+    </message>
+    <message>
+        <source>no answer (timeout)</source>
+        <translation>無回應（逾時）</translation>
+    </message>
+    <message>
+        <source>Download failed</source>
+        <translation>下載失敗</translation>
+    </message>
+    <message>
+        <source>empty answer</source>
+        <translation>空回覆</translation>
+    </message>
+    <message>
+        <source>Cannot write</source>
+        <translation>無法寫入</translation>
+    </message>
+    <message>
+        <source>Online lookup failed</source>
+        <translation>線上查詢失敗</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrcW</name>
+    <message>
+        <source>Locator lookup when the call is not in the MSHV database</source>
+        <translation>呼號不在 MSHV 資料庫中時查找定位</translation>
+    </message>
+    <message>
+        <source>When the call in TO RADIO has no locator in the clicked message and in the MSHV database, MSHV looks in these sources, in this order. The label next to LOCATOR shows where the locator comes from (hold the mouse on it to see all the sources). ADD saves it in the MSHV database.</source>
+        <translation>當呼號框中的呼號在所點擊的訊息和 MSHV 資料庫中都沒有定位時，MSHV 按此順序在這些來源中查找。定位旁邊的標籤顯示定位的來源（將滑鼠停在上面可查看所有來源）。新增 將其儲存到 MSHV 資料庫。</translation>
+    </message>
+    <message>
+        <source>The online lookup sends the call to api.g7vrd.co.uk only when no other source has the locator; the answers are kept for 30 days.</source>
+        <translation>僅當其他來源都沒有定位時，線上查詢才會把呼號傳送到 api.g7vrd.co.uk；回覆保存 30 天。</translation>
+    </message>
+    <message>
+        <source>Download the lists and update them every %1 days</source>
+        <translation>下載列表並每 %1 天更新</translation>
+    </message>
+    <message>
+        <source>Update Now</source>
+        <translation>立即更新</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>來源</translation>
     </message>
 </context>
 </TS>

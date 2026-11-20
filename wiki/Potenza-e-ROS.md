@@ -5,7 +5,7 @@ Dalla versione **2.76.7-ic8tem.10**: **Options › View Power and SWR** apre una
 Si collega alla radio in tre modi (scheda *Impostazioni › Connessione*, dalla versione **2.76.7-ic8tem.15**):
 
 * **CAT di MSHV**, con il CAT di MSHV attivo:
-  * **Icom** con il cavo USB (CI-V), **Icom LAN** o **Icom IC-7300 (Hamlib)**;
+  * **Icom** con il cavo USB (CI-V), **Icom LAN** o le voci Hamlib **Icom IC-7300 / IC-7610 / IC-9700 (Hamlib)**;
   * **Yaesu** FT-991/FT-991A (stesso protocollo: voce "FT-991"), FT-DX10, FT-710, FT-DX101, FT-891, FT-DX1200, FT-DX3000, FT-DX5000, FT-950, FT-2000, FTX-1: potenza `PCnnn;`, Po `RM5;`, ROS `RM6;`, ALC `RM4;`;
   * **Kenwood** TS-2000, TS-590S, TS-590SG, TS-480: potenza `PCnnn;`, ROS e ALC `RM;`, Po `SM0;` durante la trasmissione. Con il TS-2000 `RM;` restituisce solo lo strumento scelto sulla radio (SWR o ALC);
   * **Elecraft K3, K3S, KX3, KX2** (voce "K3/KX3"): potenza `PCnnn;`, Po o ALC `BG;` secondo lo strumento scelto sulla radio (`TM`), ROS `SW;`.
@@ -48,6 +48,7 @@ In alto nella prima scheda si vede lo stato della connessione: con il CAT di MSH
 
 * **Con il transverter** (es. 144 → 28 MHz) la radio misura la potenza di pilotaggio e il ROS verso il transverter, **non** in antenna. Per il ROS dell'antenna serve un misuratore esterno.
 * Le scale di Po, ROS e ALC sono quelle dei manuali CI-V Icom (IC-7300: ROS 1,5 = 48, 2,0 = 80, 3,0 = 120). Su altri modelli possono differire leggermente.
+* **IC-9700**: Po al 100 % è la potenza massima della banda (100 W in 2 m, 75 W in 70 cm, 10 W in 23 cm). Con il CAT di MSHV e l'IC-9700 la *Potenza massima della radio* si imposta da sola a ogni cambio di banda (dalla versione **2.76.7-ic8tem.28**).
 * Comandi CI-V usati: `14 0A` potenza, `15 11` Po, `15 12` ROS, `15 13` ALC.
 * La finestra prende la misura della scheda aperta (dalla versione **2.76.7-ic8tem.25**): la scheda *Potenza e ROS* è piccola, *Impostazioni* e *CAT Log* la ingrandiscono quando le aprite e, tornando alla prima scheda, si rimpicciolisce.
 * Impostazioni salvate in `settings/ms_pwrswr`.

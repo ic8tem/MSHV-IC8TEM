@@ -1,4 +1,4 @@
-/* MSHV-IC8TEM  "Icom IC-7300 (Hamlib)". See hamlibrig.h.
+/* MSHV-IC8TEM  "Icom IC-7300/IC-7610/IC-9700 (Hamlib)". See hamlibrig.h.
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #include "hamlibrig.h"
@@ -6,7 +6,6 @@
 #define _NETWORK_RIGS_
 #include "../network/network_def.h"
 
-#define HL_MODEL_IC7300 3073   // RIG_MODEL_IC7300
 static QMutex g_hl_port;          // one Hamlib open/close at a time (a closing rig frees the COM port first)
 
 // ---------------------------------------------------------------- worker (own thread)
@@ -179,7 +178,7 @@ HamlibRig::HamlibRig(int ModelID,QObject *parent)
 {
     s_ModelID = ModelID;
     running = false;
-    w = new HamlibWorker(HL_MODEL_IC7300);
+    w = new HamlibWorker(HAMLIB_HL_MODEL(ModelID));//IC8TEM v28 IC-7300 3073, IC-7610 3078, IC-9700 3081
     thr = new QThread();
     w->moveToThread(thr);
     connect(this, SIGNAL(WOpen(QString,int)), w, SLOT(Open(QString,int)));
@@ -258,7 +257,7 @@ void HamlibRig::WStatus(QString s,int state)
     {
         running = true;//IC8TEM v24: after a reopen the commands were dropped (green "Connected" but no CAT)
         emit EmitNetConnInfo("<font color='#00b300'>"+s+"</font>",true,true);
-        emit EmitFullRigInfo("Icom IC-7300 (Hamlib)");
+        emit EmitFullRigInfo(QString(rigs_network[s_ModelID].name));
     }
 }
 void HamlibRig::WReaded(int id,QString s)

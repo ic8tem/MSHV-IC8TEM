@@ -59,6 +59,7 @@ signals:
     void EmitStopTx();
     void EmitClosed();
     void EmitAskCapable();
+    void EmitTxBlocked(bool);           // IC8TEM v28 SWR protection: no automatic TX restart
 
 public slots:
     void SetRigInfo(int,QString);
@@ -132,6 +133,7 @@ private:
     QTimer *t_fit;
     bool f_fit_exact;
     QWidget *TabPage(QWidget *content);
+    void AutoMaxW();//IC8TEM v28 IC-9700 power of the band
     void FitLater(bool exact);
     void Fit(bool exact);
     QLabel *l_head;

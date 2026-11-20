@@ -1,5 +1,10 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.28
+* **Ricerca del locatore**: se il nominativo in TO RADIO non è nel messaggio cliccato né nel database di MSHV, MSHV cerca il locatore nelle decodifiche degli ultimi 20 periodi (quello che la stazione stessa ha trasmesso), poi nelle liste **CALL3.TXT di WSJT-X Improved**, **CALL3.TXT EME di W7GJ** e **grid_data.bin di JTDX**, che scarica e aggiorna da solo ogni 14 giorni, e infine **in rete** (G7VRD). L'etichetta accanto a LOCATOR dice la fonte (`RX:FM05`, `C3:`, `EME:`, `JTDX:`, `WEB:`); col mouse sopra si vedono tutte. Impostazioni in *Options › Network Configuration › Page 4*. Vedi [[Ricerca del locatore|Ricerca-locatore]].
+* **Ripartenza della TX**: nuova opzione *TO RADIO Call Decoded Again Sets Auto Is On* (menu *Decode Lists Options*, spenta di serie). Se la TX si è fermata e il nominativo in TO RADIO viene decodificato di nuovo, MSHV riaccende AUTO e lo richiama nel periodo giusto (al massimo 3 volte per nominativo, non con il blocco ROS). Vedi [[Ripartenza della TX|Ripartenza-TX]].
+* **IC-7610 e IC-9700**: potenza, Po, ROS e ALC nella finestra Potenza e ROS funzionano con il CAT di MSHV (USB e LAN; provato con i simulatori di Hamlib). Nuove voci **Icom IC-7610 (Hamlib)** e **Icom IC-9700 (Hamlib)** in Rig Control (Windows), come l'IC-7300. Con l'IC-9700 la potenza massima si adatta alla banda (100 W in 2 m, 75 W in 70 cm, 10 W in 23 cm). Vedi [[IC-7300, IC-7610, IC-9700 con Hamlib|IC-7300-Hamlib]].
+
 ## 2.76.7-ic8tem.27
 * **Lista decodifiche**: le colonne si possono stringere o allargare trascinando il loro bordo nell'intestazione (doppio clic sul bordo: larghezza adatta al testo). Utile con i caratteri grandi. Le larghezze restano salvate, seguono la grandezza dei caratteri e sono le stesse nelle due liste; *Default Column Widths* nel menu della lista le riporta a quelle automatiche.
 * **Riga tratteggiata** con l'ora UTC per ogni periodo decodificato senza nessuna decodifica (tutti i modi, anche MSK144 in tempo reale); si spegne con *Dashed Line For Periods With No Decodes*. Vedi [[Lista decodifiche: colonne e periodi vuoti|Lista-decodifiche]].

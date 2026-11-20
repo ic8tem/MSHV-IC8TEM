@@ -14,6 +14,8 @@ M = "Main_Ms"
 L = "HvPwrLink"
 G = "HvLogW"
 C = "HvTxtColor"
+LS = "HvLocSrc"
+LW = "HvLocSrcW"
 
 def T(bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz):
     return dict(zip(LANGS, [bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz]))
@@ -551,4 +553,171 @@ MESSAGES = [
     "Standard kolonnebredder (dra i kolonnekantene for å endre dem)",
     "Larghezza colonne predefinita (trascinate i bordi delle colonne per cambiarla)",
     "Výchozí šířka sloupců (pro změnu přetáhněte okraje sloupců)")),
+# ---------------------------------------------------------------- v28 locator lookup, TX restart
+(LS, "Decodes of the last %1 periods", T(
+    "Декодирания от последните %1 периода", "Декодирования за последние %1 периодов", "最近 %1 个周期的解码", "最近 %1 個週期的解碼",
+    "Decodificaciones de los últimos %1 periodos", "Descodificacions dels darrers %1 períodes", "Descodificações dos últimos %1 períodos",
+    "Decodările din ultimele %1 perioade", "Dekodninger fra de sidste %1 perioder", "Dekodowania z ostatnich %1 okresów",
+    "Décodages des %1 dernières périodes", "Decodificações dos últimos %1 períodos", "Dekodinger fra de siste %1 periodene",
+    "Decodifiche degli ultimi %1 periodi", "Dekódování za posledních %1 period")),
+(LS, "Online", T(
+    "Онлайн", "Онлайн", "在线", "線上", "En línea", "En línia", "Online", "Online", "Online", "Online", "En ligne", "Online",
+    "På nett", "Online", "Online")),
+(LS, "MSHV database", T(
+    "База данни на MSHV", "База данных MSHV", "MSHV 数据库", "MSHV 資料庫", "Base de datos de MSHV", "Base de dades de MSHV",
+    "Base de dados do MSHV", "Baza de date MSHV", "MSHV-databasen", "Baza danych MSHV", "Base de données MSHV",
+    "Banco de dados do MSHV", "MSHV-databasen", "Database di MSHV", "Databáze MSHV")),
+(LS, "Locator of", T(
+    "Локатор на", "Локатор", "定位", "定位", "Locator de", "Locator de", "Locator de", "Locatorul lui", "Lokator for", "Lokator",
+    "Locator de", "Locator de", "Lokator for", "Locatore di", "Lokátor")),
+(LS, "off", T(
+    "изключено", "выкл.", "关闭", "關閉", "desactivado", "desactivat", "desativado", "oprit", "fra", "wyłączone", "désactivé",
+    "desativado", "av", "disattivato", "vypnuto")),
+(LS, "not asked", T(
+    "не е питано", "не запрашивалось", "未查询", "未查詢", "no consultado", "no consultat", "não consultado", "neîntrebat",
+    "ikke spurgt", "nie pytano", "non demandé", "não consultado", "ikke spurt", "non chiesto", "nedotázáno")),
+(LS, "list not loaded", T(
+    "списъкът не е зареден", "список не загружен", "列表未加载", "列表未載入", "lista no cargada", "llista no carregada",
+    "lista não carregada", "listă neîncărcată", "listen er ikke indlæst", "lista nie załadowana", "liste non chargée",
+    "lista não carregada", "listen er ikke lastet", "lista non caricata", "seznam nenačten")),
+(LS, "Calls heard with a locator", T(
+    "Чути позивни с локатор", "Услышанные позывные с локатором", "收到的带定位的呼号", "收到的帶定位的呼號",
+    "Indicativos oídos con locator", "Indicatius sentits amb locator", "Indicativos ouvidos com locator",
+    "Indicative auzite cu locator", "Kaldesignaler hørt med lokator", "Usłyszane znaki z lokatorem",
+    "Indicatifs entendus avec locator", "Indicativos ouvidos com locator", "Kallesignaler hørt med lokator",
+    "Nominativi ascoltati con locatore", "Slyšené značky s lokátorem")),
+(LS, "Answers kept", T(
+    "Запазени отговори", "Сохранённые ответы", "保存的答复", "保存的回覆", "Respuestas guardadas", "Respostes desades",
+    "Respostas guardadas", "Răspunsuri păstrate", "Gemte svar", "Zapisane odpowiedzi", "Réponses conservées",
+    "Respostas guardadas", "Lagrede svar", "Risposte conservate", "Uložené odpovědi")),
+(LS, "asked since the start", T(
+    "питани от стартирането", "запрошено с запуска", "启动以来的查询", "啟動以來的查詢", "consultas desde el inicio",
+    "consultes des de l'inici", "consultas desde o início", "întrebări de la pornire", "spurgt siden start",
+    "zapytań od uruchomienia", "demandes depuis le démarrage", "consultas desde o início", "spurt siden start",
+    "richieste dall'avvio", "dotazů od spuštění")),
+(LS, "Calls", T(
+    "Позивни", "Позывные", "呼号", "呼號", "Indicativos", "Indicatius", "Indicativos", "Indicative", "Kaldesignaler", "Znaki",
+    "Indicatifs", "Indicativos", "Kallesignaler", "Nominativi", "Značky")),
+(LS, "List not loaded", T(
+    "Списъкът не е зареден", "Список не загружен", "列表未加载", "列表未載入", "Lista no cargada", "Llista no carregada",
+    "Lista não carregada", "Listă neîncărcată", "Listen er ikke indlæst", "Lista nie załadowana", "Liste non chargée",
+    "Lista não carregada", "Listen er ikke lastet", "Lista non caricata", "Seznam nenačten")),
+(LS, "downloaded", T(
+    "изтеглен", "загружен", "下载于", "下載於", "descargada", "baixada", "transferida", "descărcată", "hentet", "pobrana",
+    "téléchargée", "baixada", "lastet ned", "scaricata", "staženo")),
+(LS, "downloading", T(
+    "изтегляне", "загрузка", "正在下载", "正在下載", "descargando", "baixant", "a transferir", "se descarcă", "henter", "pobieranie",
+    "téléchargement", "baixando", "laster ned", "download in corso", "stahování")),
+(LS, "waiting to download", T(
+    "чака изтегляне", "ожидает загрузки", "等待下载", "等待下載", "esperando la descarga", "esperant la baixada",
+    "à espera de transferência", "așteaptă descărcarea", "venter på hentning", "czeka na pobranie",
+    "en attente de téléchargement", "aguardando download", "venter på nedlasting", "in attesa di download", "čeká na stažení")),
+(LS, "The downloaded file is not valid", T(
+    "Изтегленият файл не е валиден", "Загруженный файл недействителен", "下载的文件无效", "下載的檔案無效",
+    "El archivo descargado no es válido", "El fitxer baixat no és vàlid", "O ficheiro transferido não é válido",
+    "Fișierul descărcat nu este valid", "Den hentede fil er ikke gyldig", "Pobrany plik jest nieprawidłowy",
+    "Le fichier téléchargé n'est pas valide", "O arquivo baixado não é válido", "Den nedlastede filen er ikke gyldig",
+    "Il file scaricato non è valido", "Stažený soubor není platný")),
+(LS, "HTTPS is not available (no OpenSSL and no curl)", T(
+    "HTTPS не е налично (няма OpenSSL и няма curl)", "HTTPS недоступен (нет OpenSSL и нет curl)", "HTTPS 不可用（没有 OpenSSL 也没有 curl）",
+    "HTTPS 不可用（沒有 OpenSSL 也沒有 curl）", "HTTPS no disponible (sin OpenSSL ni curl)", "HTTPS no disponible (sense OpenSSL ni curl)",
+    "HTTPS indisponível (sem OpenSSL nem curl)", "HTTPS indisponibil (fără OpenSSL și fără curl)",
+    "HTTPS er ikke tilgængelig (ingen OpenSSL og ingen curl)", "HTTPS niedostępny (brak OpenSSL i curl)",
+    "HTTPS indisponible (ni OpenSSL ni curl)", "HTTPS indisponível (sem OpenSSL e sem curl)",
+    "HTTPS er ikke tilgjengelig (ingen OpenSSL og ingen curl)", "HTTPS non disponibile (né OpenSSL né curl)",
+    "HTTPS není k dispozici (chybí OpenSSL i curl)")),
+(LS, "no answer (timeout)", T(
+    "няма отговор (изтекло време)", "нет ответа (тайм-аут)", "无应答（超时）", "無回應（逾時）", "sin respuesta (tiempo agotado)",
+    "sense resposta (temps esgotat)", "sem resposta (tempo esgotado)", "niciun răspuns (timp expirat)", "intet svar (timeout)",
+    "brak odpowiedzi (przekroczony czas)", "pas de réponse (délai dépassé)", "sem resposta (tempo esgotado)",
+    "ikke svar (tidsavbrudd)", "nessuna risposta (tempo scaduto)", "žádná odpověď (vypršel čas)")),
+(LS, "Download failed", T(
+    "Изтеглянето не успя", "Загрузка не удалась", "下载失败", "下載失敗", "La descarga falló", "La baixada ha fallat",
+    "A transferência falhou", "Descărcarea a eșuat", "Hentning mislykkedes", "Pobieranie nie powiodło się",
+    "Échec du téléchargement", "Falha no download", "Nedlastingen mislyktes", "Download non riuscito", "Stahování selhalo")),
+(LS, "empty answer", T(
+    "празен отговор", "пустой ответ", "空答复", "空回覆", "respuesta vacía", "resposta buida", "resposta vazia", "răspuns gol",
+    "tomt svar", "pusta odpowiedź", "réponse vide", "resposta vazia", "tomt svar", "risposta vuota", "prázdná odpověď")),
+(LS, "Cannot write", T(
+    "Не може да се запише", "Невозможно записать", "无法写入", "無法寫入", "No se puede escribir", "No es pot escriure",
+    "Não é possível escrever", "Nu se poate scrie", "Kan ikke skrive", "Nie można zapisać", "Impossible d'écrire",
+    "Não é possível gravar", "Kan ikke skrive", "Impossibile scrivere", "Nelze zapsat")),
+(LS, "Online lookup failed", T(
+    "Онлайн търсенето не успя", "Онлайн-поиск не удался", "在线查询失败", "線上查詢失敗", "La consulta en línea falló",
+    "La consulta en línia ha fallat", "A consulta online falhou", "Căutarea online a eșuat", "Online-opslag mislykkedes",
+    "Wyszukiwanie online nie powiodło się", "Échec de la recherche en ligne", "Falha na consulta online",
+    "Oppslag på nett mislyktes", "Ricerca online non riuscita", "Online vyhledání selhalo")),
+(LW, "Locator lookup when the call is not in the MSHV database", T(
+    "Търсене на локатор, когато позивната не е в базата данни на MSHV", "Поиск локатора, когда позывного нет в базе данных MSHV",
+    "呼号不在 MSHV 数据库中时查找定位", "呼號不在 MSHV 資料庫中時查找定位",
+    "Búsqueda del locator cuando el indicativo no está en la base de datos de MSHV",
+    "Cerca del locator quan l'indicatiu no és a la base de dades de MSHV",
+    "Procura do locator quando o indicativo não está na base de dados do MSHV",
+    "Căutarea locatorului când indicativul nu este în baza de date MSHV",
+    "Opslag af lokator, når kaldesignalet ikke er i MSHV-databasen", "Wyszukiwanie lokatora, gdy znaku nie ma w bazie danych MSHV",
+    "Recherche du locator quand l'indicatif n'est pas dans la base de données MSHV",
+    "Busca do locator quando o indicativo não está no banco de dados do MSHV",
+    "Oppslag av lokator når kallesignalet ikke er i MSHV-databasen",
+    "Ricerca del locatore quando il nominativo non è nel database di MSHV", "Vyhledání lokátoru, když značka není v databázi MSHV")),
+(LW, "When the call in TO RADIO has no locator in the clicked message and in the MSHV database, MSHV looks in these sources, in this order. The label next to LOCATOR shows where the locator comes from (hold the mouse on it to see all the sources). ADD saves it in the MSHV database.", T(
+    "Когато за позивната в ЗА РАДИО няма локатор нито в щракнатото съобщение, нито в базата данни на MSHV, MSHV търси в тези източници в този ред. Етикетът до ЛОКАТОР показва откъде идва локаторът (задръжте мишката върху него, за да видите всички източници). ДОБ го записва в базата данни на MSHV.",
+    "Если для позывного в поле «Позывной» нет локатора ни в выбранном сообщении, ни в базе данных MSHV, MSHV ищет его в этих источниках в указанном порядке. Метка рядом с полем «Локатор» показывает, откуда взят локатор (наведите на неё мышь, чтобы увидеть все источники). ADD сохраняет его в базе данных MSHV.",
+    "当呼号框中的呼号在所点击的消息和 MSHV 数据库中都没有定位时，MSHV 按此顺序在这些来源中查找。定位旁边的标签显示定位的来源（将鼠标停在上面可查看所有来源）。添加 将其保存到 MSHV 数据库。",
+    "當呼號框中的呼號在所點擊的訊息和 MSHV 資料庫中都沒有定位時，MSHV 按此順序在這些來源中查找。定位旁邊的標籤顯示定位的來源（將滑鼠停在上面可查看所有來源）。新增 將其儲存到 MSHV 資料庫。",
+    "Cuando el indicativo de A RADIO no tiene locator ni en el mensaje pulsado ni en la base de datos de MSHV, MSHV lo busca en estas fuentes, en este orden. La etiqueta junto a LOCATOR indica de dónde viene el locator (mantenga el ratón encima para ver todas las fuentes). ADD lo guarda en la base de datos de MSHV.",
+    "Quan l'indicatiu d'A RÀDIO no té locator ni al missatge clicat ni a la base de dades de MSHV, MSHV el cerca en aquestes fonts, en aquest ordre. L'etiqueta al costat de LOCATOR indica d'on ve el locator (manteniu el ratolí a sobre per veure totes les fonts). AFEGIR el desa a la base de dades de MSHV.",
+    "Quando o indicativo em ESTAÇÃO não tem locator nem na mensagem clicada nem na base de dados do MSHV, o MSHV procura nestas fontes, por esta ordem. A etiqueta junto a LOCATOR mostra de onde vem o locator (mantenha o rato por cima para ver todas as fontes). ADI guarda-o na base de dados do MSHV.",
+    "Când indicativul din Catre RADIO nu are locator nici în mesajul pe care ați dat clic, nici în baza de date MSHV, MSHV îl caută în aceste surse, în această ordine. Eticheta de lângă Locatorul arată de unde vine locatorul (țineți mouse-ul deasupra pentru a vedea toate sursele). Adauga îl salvează în baza de date MSHV.",
+    "Når kaldesignalet i TIL RADIO ikke har en lokator i den klikkede meddelelse eller i MSHV-databasen, søger MSHV i disse kilder i denne rækkefølge. Etiketten ved LOCATOR viser, hvor lokatoren kommer fra (hold musen over den for at se alle kilder). ADD gemmer den i MSHV-databasen.",
+    "Gdy dla znaku w polu ZNAK nie ma lokatora ani w klikniętej wiadomości, ani w bazie danych MSHV, MSHV szuka go w tych źródłach, w tej kolejności. Etykieta obok LOKATOR pokazuje, skąd pochodzi lokator (przytrzymaj nad nią mysz, aby zobaczyć wszystkie źródła). DODAJ zapisuje go w bazie danych MSHV.",
+    "Quand l'indicatif de Vers la RADIO n'a de locator ni dans le message cliqué ni dans la base de données MSHV, MSHV le cherche dans ces sources, dans cet ordre. L'étiquette à côté de Locator indique d'où vient le locator (laissez la souris dessus pour voir toutes les sources). AJOUT l'enregistre dans la base de données MSHV.",
+    "Quando o indicativo em ESTAÇÃO não tem locator nem na mensagem clicada nem no banco de dados do MSHV, o MSHV procura nestas fontes, nesta ordem. O rótulo ao lado de Locator mostra de onde vem o locator (mantenha o mouse sobre ele para ver todas as fontes). ADIC o grava no banco de dados do MSHV.",
+    "Når kallesignalet i TIL RADIO ikke har lokator i den klikkede meldingen eller i MSHV-databasen, søker MSHV i disse kildene i denne rekkefølgen. Etiketten ved LOKATOR viser hvor lokatoren kommer fra (hold musen over den for å se alle kildene). LEGG TIL lagrer den i MSHV-databasen.",
+    "Quando per il nominativo in TO RADIO il locatore non c'è né nel messaggio cliccato né nel database di MSHV, MSHV lo cerca in queste fonti, in quest'ordine. L'etichetta accanto a LOCATOR indica da dove viene il locatore (tieni il mouse sopra per vedere tutte le fonti). ADD lo salva nel database di MSHV.",
+    "Když pro značku v poli Do rádia není lokátor ve zprávě, na kterou jste klikli, ani v databázi MSHV, MSHV ho hledá v těchto zdrojích v tomto pořadí. Popisek vedle LOKÁTOR ukazuje, odkud lokátor pochází (podržte na něm myš a uvidíte všechny zdroje). Přidat ho uloží do databáze MSHV.")),
+(LW, "The online lookup sends the call to api.g7vrd.co.uk only when no other source has the locator; the answers are kept for 30 days.", T(
+    "Онлайн търсенето изпраща позивната до api.g7vrd.co.uk само когато никой друг източник няма локатора; отговорите се пазят 30 дни.",
+    "Онлайн-поиск отправляет позывной на api.g7vrd.co.uk, только если ни один другой источник не знает локатор; ответы хранятся 30 дней.",
+    "仅当其他来源都没有定位时，在线查询才会把呼号发送到 api.g7vrd.co.uk；答复保存 30 天。",
+    "僅當其他來源都沒有定位時，線上查詢才會把呼號傳送到 api.g7vrd.co.uk；回覆保存 30 天。",
+    "La consulta en línea envía el indicativo a api.g7vrd.co.uk solo cuando ninguna otra fuente tiene el locator; las respuestas se guardan 30 días.",
+    "La consulta en línia envia l'indicatiu a api.g7vrd.co.uk només quan cap altra font no té el locator; les respostes es desen 30 dies.",
+    "A consulta online envia o indicativo para api.g7vrd.co.uk só quando nenhuma outra fonte tem o locator; as respostas são guardadas durante 30 dias.",
+    "Căutarea online trimite indicativul către api.g7vrd.co.uk doar când nicio altă sursă nu are locatorul; răspunsurile se păstrează 30 de zile.",
+    "Online-opslaget sender kaldesignalet til api.g7vrd.co.uk kun når ingen anden kilde har lokatoren; svarene gemmes i 30 dage.",
+    "Wyszukiwanie online wysyła znak do api.g7vrd.co.uk tylko wtedy, gdy żadne inne źródło nie ma lokatora; odpowiedzi są przechowywane 30 dni.",
+    "La recherche en ligne envoie l'indicatif à api.g7vrd.co.uk seulement quand aucune autre source n'a le locator ; les réponses sont gardées 30 jours.",
+    "A consulta online envia o indicativo para api.g7vrd.co.uk somente quando nenhuma outra fonte tem o locator; as respostas são guardadas por 30 dias.",
+    "Oppslaget på nett sender kallesignalet til api.g7vrd.co.uk bare når ingen annen kilde har lokatoren; svarene lagres i 30 dager.",
+    "La ricerca online invia il nominativo ad api.g7vrd.co.uk solo quando nessun'altra fonte ha il locatore; le risposte sono conservate per 30 giorni.",
+    "Online vyhledání posílá značku na api.g7vrd.co.uk jen tehdy, když žádný jiný zdroj lokátor nemá; odpovědi se uchovávají 30 dní.")),
+(LW, "Download the lists and update them every %1 days", T(
+    "Изтегляй списъците и ги обновявай на всеки %1 дни", "Загружать списки и обновлять их каждые %1 дней", "下载列表并每 %1 天更新",
+    "下載列表並每 %1 天更新", "Descargar las listas y actualizarlas cada %1 días", "Baixar les llistes i actualitzar-les cada %1 dies",
+    "Transferir as listas e atualizá-las a cada %1 dias", "Descarcă listele și actualizează-le la fiecare %1 zile",
+    "Hent listerne og opdater dem hver %1. dag", "Pobieraj listy i aktualizuj je co %1 dni",
+    "Télécharger les listes et les mettre à jour tous les %1 jours", "Baixar as listas e atualizá-las a cada %1 dias",
+    "Last ned listene og oppdater dem hver %1. dag", "Scarica le liste e aggiornale ogni %1 giorni",
+    "Stahovat seznamy a aktualizovat je každých %1 dní")),
+(LW, "Update Now", T(
+    "Обнови сега", "Обновить сейчас", "立即更新", "立即更新", "Actualizar ahora", "Actualitza ara", "Atualizar agora", "Actualizează acum",
+    "Opdater nu", "Aktualizuj teraz", "Mettre à jour", "Atualizar agora", "Oppdater nå", "Aggiorna ora", "Aktualizovat nyní")),
+(LW, "Sources", T(
+    "Източници", "Источники", "来源", "來源", "Fuentes", "Fonts", "Fontes", "Surse", "Kilder", "Źródła", "Sources", "Fontes", "Kilder",
+    "Fonti", "Zdroje")),
+(M, "TO RADIO Call Decoded Again Sets Auto Is On", T(
+    "Позивната в ЗА РАДИО, декодирана отново, включва Автото",
+    "Повторное декодирование позывного из поля «Позывной» включает AUTO",
+    "再次解码到呼号框中的呼号时自动呼叫", "再次解碼到呼號框中的呼號時自動呼叫",
+    "Indicativo de A RADIO decodificado de nuevo: Auto está activado",
+    "Indicatiu d'A RÀDIO descodificat de nou: Auto està activat",
+    "Indicativo em ESTAÇÃO descodificado de novo ativa a Auto-Resposta",
+    "Indicativul din Catre RADIO decodat din nou seteaza auto Pornit",
+    "Call i TIL RADIO dekodet igen sætter Auto til On",
+    "Ponowne zdekodowanie znaku z pola ZNAK włącza tryb Automatyczny",
+    "Indicatif de Vers la RADIO décodé à nouveau : AUTO ON",
+    "Indicativo em ESTAÇÃO decodificado de novo ativa AUTO ON",
+    "Kallesignal i TIL RADIO dekodet igjen setter Auto på",
+    "Il nominativo in TO RADIO decodificato di nuovo attiva AUTO",
+    "Opětovné dekódování značky z pole Do rádia zapne AUTO")),
 ]

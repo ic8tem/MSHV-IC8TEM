@@ -1,4 +1,4 @@
-/* MSHV-IC8TEM  "Icom IC-7300 (Hamlib)": the radio driven by the Hamlib library
+/* MSHV-IC8TEM  "Icom IC-7300/IC-7610/IC-9700 (Hamlib)": the radio driven by the Hamlib library
  * (frequency, mode, PTT, RF power, Po/SWR/ALC meters).
  * Rig Control > Network: Server = serial port (e.g. COM5), Port = baud rate (e.g. 115200).
  * Hamlib calls are blocking, so they run in a worker thread.

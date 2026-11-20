@@ -290,10 +290,11 @@ HvRigControl::HvRigControl( QWidget *parent )
         netServPort[i].port="50001";
     }
 #if defined HAVE_HAMLIB
-    if (HAMLIB_IC7300 >= 0 && HAMLIB_IC7300 < NETWORK_COUNT)//IC8TEM Icom IC-7300 (Hamlib): serial port and baud rate
+    for (int i = HAMLIB_FIRST; i < HAMLIB_FIRST+HAMLIB_COUNT; ++i)//IC8TEM Icom (Hamlib): serial port and baud rate
     {
-        netServPort[HAMLIB_IC7300].serv="COM3";
-        netServPort[HAMLIB_IC7300].port="115200";
+        if (i < 0 || i >= NETWORK_COUNT) continue;
+        netServPort[i].serv="COM3";
+        netServPort[i].port="115200";
     }
 #endif
     //netServPort[15].serv="XXXX";
@@ -1744,7 +1745,7 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
         {
             TCPServer->setText(netServPort[s_net_model_id].serv);
             TCPPort->setText(netServPort[s_net_model_id].port);
-            if (s_net_model_id==HAMLIB_IC7300)//IC8TEM Icom IC-7300 (Hamlib)
+            if (IS_HAMLIB(s_net_model_id))//IC8TEM Icom (Hamlib)
             {
                 TCPServer->setToolTip(tr("Hamlib: serial port of the radio, e.g. COM5"));
                 TCPPort->setToolTip(tr("Hamlib: baud rate, e.g. 115200 (as CI-V USB Baud Rate of the radio)"));
@@ -1794,7 +1795,7 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
         gb_net->setEnabled(true);
         hamlib_active = false;//IC8TEM
         cb_port->setCurrentIndex(0);
-        if (s_net_model_id==HAMLIB_IC7300)//IC8TEM Icom IC-7300 (Hamlib): Port and Baud Rate of MSHV
+        if (IS_HAMLIB(s_net_model_id))//IC8TEM Icom (Hamlib): Port and Baud Rate of MSHV
         {
             hamlib_block = true;
             hamlib_active = true;

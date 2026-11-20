@@ -171,6 +171,7 @@ private:
 //#include "radlist.h"
 
 #include <QTreeView>
+#include <QTabWidget>//IC8TEM v28
 #include <QStandardItemModel>
 class HvRadList : public QTreeView
 {
@@ -237,6 +238,7 @@ public:
     void ShowBcnList();
     void FindFreqLocFromBcnList(QString hisCall,int id,QString &hisLoc,QString &sfrq);
     void SaveSettings();
+    void AddPage(QWidget *w);//IC8TEM v28 one more page (locator lookup)
     void SendOtpCheck(QString s);
 
     bool GetUdpBroadLoggedQso()
@@ -316,6 +318,7 @@ public slots:
     void SetUploadSelected(QByteArray);
     
 private:
+    QTabWidget *TW_pages;//IC8TEM v28
     QWidget *w_parent;
     int s_cont_id;
     bool f_mods_accept_cmd;

@@ -282,6 +282,10 @@
         <source>Default Column Widths (drag the column borders to change them)</source>
         <translation>Výchozí šířka sloupců (pro změnu přetáhněte okraje sloupců)</translation>
     </message>
+    <message>
+        <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
+        <translation>Opětovné dekódování značky z pole Do rádia zapne AUTO</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -381,6 +385,124 @@
     <message>
         <source>the port does not exist or another program is using it</source>
         <translation>port neexistuje nebo ho používá jiný program</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrc</name>
+    <message>
+        <source>Decodes of the last %1 periods</source>
+        <translation>Dekódování za posledních %1 period</translation>
+    </message>
+    <message>
+        <source>Online</source>
+        <translation>Online</translation>
+    </message>
+    <message>
+        <source>MSHV database</source>
+        <translation>Databáze MSHV</translation>
+    </message>
+    <message>
+        <source>Locator of</source>
+        <translation>Lokátor</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>vypnuto</translation>
+    </message>
+    <message>
+        <source>not asked</source>
+        <translation>nedotázáno</translation>
+    </message>
+    <message>
+        <source>list not loaded</source>
+        <translation>seznam nenačten</translation>
+    </message>
+    <message>
+        <source>Calls heard with a locator</source>
+        <translation>Slyšené značky s lokátorem</translation>
+    </message>
+    <message>
+        <source>Answers kept</source>
+        <translation>Uložené odpovědi</translation>
+    </message>
+    <message>
+        <source>asked since the start</source>
+        <translation>dotazů od spuštění</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Značky</translation>
+    </message>
+    <message>
+        <source>List not loaded</source>
+        <translation>Seznam nenačten</translation>
+    </message>
+    <message>
+        <source>downloaded</source>
+        <translation>staženo</translation>
+    </message>
+    <message>
+        <source>downloading</source>
+        <translation>stahování</translation>
+    </message>
+    <message>
+        <source>waiting to download</source>
+        <translation>čeká na stažení</translation>
+    </message>
+    <message>
+        <source>The downloaded file is not valid</source>
+        <translation>Stažený soubor není platný</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS není k dispozici (chybí OpenSSL i curl)</translation>
+    </message>
+    <message>
+        <source>no answer (timeout)</source>
+        <translation>žádná odpověď (vypršel čas)</translation>
+    </message>
+    <message>
+        <source>Download failed</source>
+        <translation>Stahování selhalo</translation>
+    </message>
+    <message>
+        <source>empty answer</source>
+        <translation>prázdná odpověď</translation>
+    </message>
+    <message>
+        <source>Cannot write</source>
+        <translation>Nelze zapsat</translation>
+    </message>
+    <message>
+        <source>Online lookup failed</source>
+        <translation>Online vyhledání selhalo</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrcW</name>
+    <message>
+        <source>Locator lookup when the call is not in the MSHV database</source>
+        <translation>Vyhledání lokátoru, když značka není v databázi MSHV</translation>
+    </message>
+    <message>
+        <source>When the call in TO RADIO has no locator in the clicked message and in the MSHV database, MSHV looks in these sources, in this order. The label next to LOCATOR shows where the locator comes from (hold the mouse on it to see all the sources). ADD saves it in the MSHV database.</source>
+        <translation>Když pro značku v poli Do rádia není lokátor ve zprávě, na kterou jste klikli, ani v databázi MSHV, MSHV ho hledá v těchto zdrojích v tomto pořadí. Popisek vedle LOKÁTOR ukazuje, odkud lokátor pochází (podržte na něm myš a uvidíte všechny zdroje). Přidat ho uloží do databáze MSHV.</translation>
+    </message>
+    <message>
+        <source>The online lookup sends the call to api.g7vrd.co.uk only when no other source has the locator; the answers are kept for 30 days.</source>
+        <translation>Online vyhledání posílá značku na api.g7vrd.co.uk jen tehdy, když žádný jiný zdroj lokátor nemá; odpovědi se uchovávají 30 dní.</translation>
+    </message>
+    <message>
+        <source>Download the lists and update them every %1 days</source>
+        <translation>Stahovat seznamy a aktualizovat je každých %1 dní</translation>
+    </message>
+    <message>
+        <source>Update Now</source>
+        <translation>Aktualizovat nyní</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Zdroje</translation>
     </message>
 </context>
 </TS>

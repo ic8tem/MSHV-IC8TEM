@@ -390,6 +390,19 @@ HvTxW::HvTxW(QString inst,QString path,int lid,bool f,int x,int y,QWidget * pare
     TMsDb = new MsDb(AppPath);
     connect(TMsDb, SIGNAL(Emit65DeepSearchDb(QStringList)), this, SIGNAL(Emit65DeepSearchDb(QStringList)));
 
+    //IC8TEM v28 locator lookup when the call is not in the MSHV database
+    TLocSrc = new HvLocSrc(AppPath,this);
+    connect(TLocSrc, SIGNAL(EmitOnline(QString,QString)), this, SLOT(SetOnlineLoc(QString,QString)));
+    connect(TLocSrc, SIGNAL(EmitListLoaded()), this, SLOT(LocSourcesChanged()));
+    t_loc_web = new QTimer(this);
+    t_loc_web->setSingleShot(true);
+    connect(t_loc_web, SIGNAL(timeout()), this, SLOT(LocWebTimer()));
+    TRadioAndNetW->AddPage(new HvLocSrcW(TLocSrc));
+    f_auto_restart_tx = false;//IC8TEM v28 TO RADIO call decoded again
+    f_tx_blocked_swr = false;
+    f_in_auto_restart = false;
+    c_auto_restarts = 0;
+
     V_l = new QVBoxLayout();
     V_l->setContentsMargins(1, 0, 1, 0); //2.15 (1, 1, 1, 1);
     V_l->setSpacing(0);//2.15 1 to 0
@@ -1972,6 +1985,11 @@ void HvTxW::AddToLogMultiAnswerQSO(QStringList l)
     }
 
     if (his_loc_t.isEmpty()) his_loc_t = TMsDb->CheckBD(l.at(1));// 1.73 if no loc try to find from DB        
+    if (his_loc_t.isEmpty())//IC8TEM v28 decodes of the last 20 periods, downloaded lists
+    {
+        int src = -1;
+        his_loc_t = TLocSrc->FindLocal(l.at(1),SB_PeriodTime->get_period_time(),src);
+    }
 
     QStringList lst;
     QString tfrq = FREQ_GLOBAL.mid(0,FREQ_GLOBAL.size()-2);
@@ -2121,6 +2139,93 @@ void HvTxW::SetRecognizeTp2(bool f)
 void HvTxW::Set2ClickDecListAutoOn(bool f)
 {
     s_2click_list_autu_on = f;
+}
+//IC8TEM v28 ------------------------------------------------ TO RADIO call decoded again: TX starts again
+#define MAX_AUTO_RESTARTS 3
+void HvTxW::SetAutoRestartTx(bool f)
+{
+    f_auto_restart_tx = f;
+    c_auto_restarts = 0;
+}
+void HvTxW::SetTxBlockedSwr(bool f)
+{
+    f_tx_blocked_swr = f;
+}
+static bool WordAllDigitsOrLetters(const QString &s)
+{
+    bool d = false, l = false;
+    for (int i = 0; i < s.count(); ++i)
+    {
+        if (s.at(i).isDigit()) d = true;
+        else if (s.at(i).isLetter()) l = true;
+    }
+    return !(d && l);
+}
+static QString MsgSenderCall(QString m)// the station that sent the message
+{
+    m.replace('\n',' ');
+    m.remove('<');
+    m.remove('>');
+    m = m.simplified();
+    if (m.startsWith("TU; ")) m.remove(0,4);
+    QStringList w = m.split(' ');
+    if (w.count() < 2) return QString();
+    if (w.count() >= 4 && w.at(1).endsWith(';')) return w.at(3);   //"K1ABC RR73; W9XYZ <KH1/KH7Z> -08"
+    if (w.at(0)=="CQ" || w.at(0)=="QRZ" || w.at(0)=="DE")
+    {
+        if (w.count() >= 3 && WordAllDigitsOrLetters(w.at(1))) return w.at(2);//"CQ DX K1ABC FN42" "CQ 123 K1ABC"
+        return w.at(1);
+    }
+    return w.at(1);                                                //"W1XYZ K1ABC RR73"
+}
+void HvTxW::CheckAutoRestartTx(const QString &t,const QString &msg)
+{
+    if (!(s_mode==0 || s_mode==11 || s_mode==12 || s_mode==13 || s_mode==18 || alljt65 || allq65)) return;
+    if (f_multi_answer_mod || f_tx_blocked_swr || block_call) return;
+    QString his = le_his_call->getText().trimmed().toUpper();
+    if (his.isEmpty()) return;
+    if (his != s_auto_restart_call)
+    {
+        s_auto_restart_call = his;
+        c_auto_restarts = 0;
+    }
+    if (c_auto_restarts >= MAX_AUTO_RESTARTS) return;
+    QString snd = MsgSenderCall(msg).toUpper();
+    if (snd.isEmpty()) return;
+    QString his_base = MultiAnswerMod->FindBaseFullCallRemAllSlash(his);
+    if (snd != his && (his_base.isEmpty() || MultiAnswerMod->FindBaseFullCallRemAllSlash(snd) != his_base)) return;
+    // the selected message must be for him and not the end of the QSO
+    QString txm;
+    for (int i = 0; i < count_tx_widget; ++i)
+    {
+        HvTxIn *TempHvTxIn = (HvTxIn*)V_l->itemAt(i)->widget();
+        if (TempHvTxIn->rb_tx->isChecked())
+        {
+            txm = TempHvTxIn->line_txt->text().simplified().toUpper();
+            break;
+        }
+    }
+    if (txm.isEmpty() || txm.startsWith("CQ ")) return;
+    QStringList tw = txm.split(' ');
+    bool for_him = false;
+    for (int i = 0; i < tw.count(); ++i)
+    {
+        QString x = tw.at(i);
+        x.remove('<');
+        x.remove('>');
+        if (x == his || (!his_base.isEmpty() && MultiAnswerMod->FindBaseFullCallRemAllSlash(x) == his_base))
+        {
+            for_him = true;
+            break;
+        }
+    }
+    QString last = tw.last();
+    if (!for_him || last=="73" || last=="RR73" || last=="RRR") return;
+    c_auto_restarts++;
+    if (f_recognize_tp2 && !t.isEmpty()) SetTimePeriod_p(t,1);//TX in the other period
+    f_in_auto_restart = true;
+    auto_on();
+    f_in_auto_restart = false;
 }
 void HvTxW::SetDoubleClickFromAllAutoOn()//2.45
 {
@@ -2626,6 +2731,71 @@ void HvTxW::CheckBD()
     //LeHisLoc->SetText(TMsDb->CheckBD(le_his_call->getText()));
     Check("call");
     //LeHisLoc->setErrorColorLe(false);
+}
+//IC8TEM v28 ------------------------------------------------ locator not in the MSHV database
+void HvTxW::LocFromOtherSources(bool start_web)
+{
+    QString call = le_his_call->getText().trimmed().toUpper();
+    double per = SB_PeriodTime->get_period_time();
+    int src = -1;
+    QString loc;
+    t_loc_web->stop();
+    if (!block_call) loc = TLocSrc->FindLocal(call,per,src);
+    LeHisLoc->setError(true);//not in the MSHV database: ADD saves it
+    if (!loc.isEmpty())
+    {
+        l_loc_from_db->setText(HvLocSrc::Tag(src)+":"+loc);
+        LeHisLoc->SetText(loc);
+    }
+    else
+    {
+        l_loc_from_db->setText("DB:NA");
+        LeHisLoc->SetText("");
+        if (start_web && !block_call && TLocSrc->IsOn(HvLocSrc::WEB))
+        {
+            s_loc_web_call = call;
+            t_loc_web->start(1200);//the clicked message may still bring the locator; typing goes on
+        }
+    }
+    l_loc_from_db->setToolTip(TLocSrc->Tooltip(call,per,QString()));
+}
+void HvTxW::LocWebTimer()
+{
+    QString call = le_his_call->getText().trimmed().toUpper();
+    if (block_call || call != s_loc_web_call || !LeHisLoc->getText().isEmpty()) return;
+    l_loc_from_db->setText("WEB:...");
+    TLocSrc->RequestOnline(call);
+}
+void HvTxW::SetOnlineLoc(QString call,QString loc)
+{
+    QString cur = le_his_call->getText().trimmed().toUpper();
+    if (call != cur) return;
+    bool waiting = (l_loc_from_db->text()=="WEB:...");
+    if (!loc.isEmpty() && LeHisLoc->getText().isEmpty() && !block_call)
+    {
+        l_loc_from_db->setText("WEB:"+loc);
+        LeHisLoc->setError(true);
+        LeHisLoc->SetText(loc);
+    }
+    else if (waiting) l_loc_from_db->setText("DB:NA");
+    l_loc_from_db->setToolTip(TLocSrc->Tooltip(cur,SB_PeriodTime->get_period_time(),TMsDb->CheckBD(cur)));
+}
+void HvTxW::LocSourcesChanged()// a list was loaded: try again if the locator is still empty
+{
+    if (block_call || !LeHisLoc->getText().isEmpty()) return;
+    if (!TMsDb->CheckBD(le_his_call->getText()).isEmpty()) return;
+    if (l_loc_from_db->text()=="WEB:...") return;
+    LocFromOtherSources(false);
+}
+QString HvTxW::DecodedMsgText(const QStringList &l)// the message column of a decoded line
+{
+    int c = -1;
+    if (s_mode==11 || s_mode==13 || s_mode==18 || allq65) c = 4;  //FT8 FT4 FT2 Q65
+    else if (s_mode==0 || s_mode==12) c = 6;                     //MSK144 MSK40
+    else if (s_mode==6) c = 5;                                   //JT6M
+    else if (s_mode>=1 && s_mode<=10) c = 6;                     //JTMS FSK441 FSK315 ISCAT JT65 PI4
+    if (c < 0 || c >= l.count()) return QString();
+    return l.at(c);
 }
 void HvTxW::ExpandShrinkDf(bool f)//2.05
 {
@@ -3637,6 +3807,7 @@ void HvTxW::auto_on()
     else
     {
         f_auto_on = true;
+        if (!f_in_auto_restart) c_auto_restarts = 0;//IC8TEM v28 started by the operator
         b_auto_on->setText(tr("AUTO IS ON"));
         if (dsty) b_auto_on->setStyleSheet("QPushButton{background-color:rgb(170,28,28);}");
         else b_auto_on->setStyleSheet("QPushButton{background-color:rgb(255,128,128);}");
@@ -4386,9 +4557,11 @@ void HvTxW::Check(QString s_type)
         QString dbloc = TMsDb->CheckBD(le_his_call->getText());
         if (dbloc!="")
         {
+            t_loc_web->stop();//IC8TEM v28
             if (dsty) pb_checkdb->setStyleSheet("QPushButton{color:rgb(255,255,255)}");
             else pb_checkdb->setStyleSheet("QPushButton{color:"+ColorStr_[0]+"}");
             l_loc_from_db->setText("DB:"+dbloc);
+            l_loc_from_db->setToolTip(TLocSrc->Tooltip(le_his_call->getText(),SB_PeriodTime->get_period_time(),dbloc));
 
             if (LeHisLoc->getText()==dbloc)
                 //LeHisLoc->setErrorColorLe(false);
@@ -4402,10 +4575,8 @@ void HvTxW::Check(QString s_type)
         {
             if (dsty) pb_checkdb->setStyleSheet("QPushButton{color:rgb(255,200,0)}");
             else pb_checkdb->setStyleSheet("QPushButton{color:"+ColorStr_[1]+"}");
-            l_loc_from_db->setText("DB:NA");
-            //LeHisLoc->setErrorColorLe(true);
-            LeHisLoc->setError(true);
-            LeHisLoc->SetText("");
+            //IC8TEM v28: decodes of the last 20 periods, downloaded lists, then online
+            LocFromOtherSources(true);
         }
         emit EmitFileNameChenged();
         RfreshDxParm();//2.66
@@ -4645,6 +4816,15 @@ void HvTxW::TryFindCallLocForSpot(QString in,QString &call,QString &loc)
 }
 void HvTxW::ValidateStationInfo(QStringList list_in, int id, bool emitudpdectxt,uint8_t id_voms)//id 0->to psk reporter 1->to dx clusters spot,  bool emitudpdectxt
 {
+    if (!list_in.isEmpty() && id==0 && id_voms==0)//IC8TEM v28 live decodes: locators heard, TO RADIO call heard again
+    {
+        QString dmsg = DecodedMsgText(list_in);
+        if (!dmsg.isEmpty() && !list_in.at(1).startsWith("TX"))
+        {
+            TLocSrc->AddRx(dmsg);
+            if (f_auto_restart_tx && !f_auto_on) CheckAutoRestartTx(list_in.at(0),dmsg);
+        }
+    }
     if (!list_in.isEmpty())
     {
         QString hisCall_spot = "";

@@ -282,6 +282,10 @@
         <source>Default Column Widths (drag the column borders to change them)</source>
         <translation>Ширина столбцов по умолчанию (чтобы изменить, перетащите границы столбцов)</translation>
     </message>
+    <message>
+        <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
+        <translation>Повторное декодирование позывного из поля «Позывной» включает AUTO</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -381,6 +385,124 @@
     <message>
         <source>the port does not exist or another program is using it</source>
         <translation>порт не существует или занят другой программой</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrc</name>
+    <message>
+        <source>Decodes of the last %1 periods</source>
+        <translation>Декодирования за последние %1 периодов</translation>
+    </message>
+    <message>
+        <source>Online</source>
+        <translation>Онлайн</translation>
+    </message>
+    <message>
+        <source>MSHV database</source>
+        <translation>База данных MSHV</translation>
+    </message>
+    <message>
+        <source>Locator of</source>
+        <translation>Локатор</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>выкл.</translation>
+    </message>
+    <message>
+        <source>not asked</source>
+        <translation>не запрашивалось</translation>
+    </message>
+    <message>
+        <source>list not loaded</source>
+        <translation>список не загружен</translation>
+    </message>
+    <message>
+        <source>Calls heard with a locator</source>
+        <translation>Услышанные позывные с локатором</translation>
+    </message>
+    <message>
+        <source>Answers kept</source>
+        <translation>Сохранённые ответы</translation>
+    </message>
+    <message>
+        <source>asked since the start</source>
+        <translation>запрошено с запуска</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Позывные</translation>
+    </message>
+    <message>
+        <source>List not loaded</source>
+        <translation>Список не загружен</translation>
+    </message>
+    <message>
+        <source>downloaded</source>
+        <translation>загружен</translation>
+    </message>
+    <message>
+        <source>downloading</source>
+        <translation>загрузка</translation>
+    </message>
+    <message>
+        <source>waiting to download</source>
+        <translation>ожидает загрузки</translation>
+    </message>
+    <message>
+        <source>The downloaded file is not valid</source>
+        <translation>Загруженный файл недействителен</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS недоступен (нет OpenSSL и нет curl)</translation>
+    </message>
+    <message>
+        <source>no answer (timeout)</source>
+        <translation>нет ответа (тайм-аут)</translation>
+    </message>
+    <message>
+        <source>Download failed</source>
+        <translation>Загрузка не удалась</translation>
+    </message>
+    <message>
+        <source>empty answer</source>
+        <translation>пустой ответ</translation>
+    </message>
+    <message>
+        <source>Cannot write</source>
+        <translation>Невозможно записать</translation>
+    </message>
+    <message>
+        <source>Online lookup failed</source>
+        <translation>Онлайн-поиск не удался</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrcW</name>
+    <message>
+        <source>Locator lookup when the call is not in the MSHV database</source>
+        <translation>Поиск локатора, когда позывного нет в базе данных MSHV</translation>
+    </message>
+    <message>
+        <source>When the call in TO RADIO has no locator in the clicked message and in the MSHV database, MSHV looks in these sources, in this order. The label next to LOCATOR shows where the locator comes from (hold the mouse on it to see all the sources). ADD saves it in the MSHV database.</source>
+        <translation>Если для позывного в поле «Позывной» нет локатора ни в выбранном сообщении, ни в базе данных MSHV, MSHV ищет его в этих источниках в указанном порядке. Метка рядом с полем «Локатор» показывает, откуда взят локатор (наведите на неё мышь, чтобы увидеть все источники). ADD сохраняет его в базе данных MSHV.</translation>
+    </message>
+    <message>
+        <source>The online lookup sends the call to api.g7vrd.co.uk only when no other source has the locator; the answers are kept for 30 days.</source>
+        <translation>Онлайн-поиск отправляет позывной на api.g7vrd.co.uk, только если ни один другой источник не знает локатор; ответы хранятся 30 дней.</translation>
+    </message>
+    <message>
+        <source>Download the lists and update them every %1 days</source>
+        <translation>Загружать списки и обновлять их каждые %1 дней</translation>
+    </message>
+    <message>
+        <source>Update Now</source>
+        <translation>Обновить сейчас</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Источники</translation>
     </message>
 </context>
 </TS>

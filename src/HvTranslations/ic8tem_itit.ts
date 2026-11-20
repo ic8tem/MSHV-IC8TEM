@@ -282,6 +282,10 @@
         <source>Default Column Widths (drag the column borders to change them)</source>
         <translation>Larghezza colonne predefinita (trascinate i bordi delle colonne per cambiarla)</translation>
     </message>
+    <message>
+        <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
+        <translation>Il nominativo in TO RADIO decodificato di nuovo attiva AUTO</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -381,6 +385,124 @@
     <message>
         <source>the port does not exist or another program is using it</source>
         <translation>la porta non esiste o la sta usando un altro programma</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrc</name>
+    <message>
+        <source>Decodes of the last %1 periods</source>
+        <translation>Decodifiche degli ultimi %1 periodi</translation>
+    </message>
+    <message>
+        <source>Online</source>
+        <translation>Online</translation>
+    </message>
+    <message>
+        <source>MSHV database</source>
+        <translation>Database di MSHV</translation>
+    </message>
+    <message>
+        <source>Locator of</source>
+        <translation>Locatore di</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>disattivato</translation>
+    </message>
+    <message>
+        <source>not asked</source>
+        <translation>non chiesto</translation>
+    </message>
+    <message>
+        <source>list not loaded</source>
+        <translation>lista non caricata</translation>
+    </message>
+    <message>
+        <source>Calls heard with a locator</source>
+        <translation>Nominativi ascoltati con locatore</translation>
+    </message>
+    <message>
+        <source>Answers kept</source>
+        <translation>Risposte conservate</translation>
+    </message>
+    <message>
+        <source>asked since the start</source>
+        <translation>richieste dall'avvio</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Nominativi</translation>
+    </message>
+    <message>
+        <source>List not loaded</source>
+        <translation>Lista non caricata</translation>
+    </message>
+    <message>
+        <source>downloaded</source>
+        <translation>scaricata</translation>
+    </message>
+    <message>
+        <source>downloading</source>
+        <translation>download in corso</translation>
+    </message>
+    <message>
+        <source>waiting to download</source>
+        <translation>in attesa di download</translation>
+    </message>
+    <message>
+        <source>The downloaded file is not valid</source>
+        <translation>Il file scaricato non è valido</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS non disponibile (né OpenSSL né curl)</translation>
+    </message>
+    <message>
+        <source>no answer (timeout)</source>
+        <translation>nessuna risposta (tempo scaduto)</translation>
+    </message>
+    <message>
+        <source>Download failed</source>
+        <translation>Download non riuscito</translation>
+    </message>
+    <message>
+        <source>empty answer</source>
+        <translation>risposta vuota</translation>
+    </message>
+    <message>
+        <source>Cannot write</source>
+        <translation>Impossibile scrivere</translation>
+    </message>
+    <message>
+        <source>Online lookup failed</source>
+        <translation>Ricerca online non riuscita</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrcW</name>
+    <message>
+        <source>Locator lookup when the call is not in the MSHV database</source>
+        <translation>Ricerca del locatore quando il nominativo non è nel database di MSHV</translation>
+    </message>
+    <message>
+        <source>When the call in TO RADIO has no locator in the clicked message and in the MSHV database, MSHV looks in these sources, in this order. The label next to LOCATOR shows where the locator comes from (hold the mouse on it to see all the sources). ADD saves it in the MSHV database.</source>
+        <translation>Quando per il nominativo in TO RADIO il locatore non c'è né nel messaggio cliccato né nel database di MSHV, MSHV lo cerca in queste fonti, in quest'ordine. L'etichetta accanto a LOCATOR indica da dove viene il locatore (tieni il mouse sopra per vedere tutte le fonti). ADD lo salva nel database di MSHV.</translation>
+    </message>
+    <message>
+        <source>The online lookup sends the call to api.g7vrd.co.uk only when no other source has the locator; the answers are kept for 30 days.</source>
+        <translation>La ricerca online invia il nominativo ad api.g7vrd.co.uk solo quando nessun'altra fonte ha il locatore; le risposte sono conservate per 30 giorni.</translation>
+    </message>
+    <message>
+        <source>Download the lists and update them every %1 days</source>
+        <translation>Scarica le liste e aggiornale ogni %1 giorni</translation>
+    </message>
+    <message>
+        <source>Update Now</source>
+        <translation>Aggiorna ora</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Fonti</translation>
     </message>
 </context>
 </TS>

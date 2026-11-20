@@ -1711,6 +1711,7 @@ RadioAndNetW::RadioAndNetW(QString inst,QString path,bool indsty,int x,int y,QWi
     for (int i = 0; i < 20; ++i) _kkwe2_ += QString("%1").arg(digg[i],2,16,QLatin1Char('0'));
     
     QTabWidget *TW = new QTabWidget();
+    TW_pages = TW;//IC8TEM v28
     QWidget *T0 = new QWidget();
     V_l->setAlignment(Qt::AlignTop);
     T0->setLayout(V_l);
@@ -2971,6 +2972,10 @@ void RadioAndNetW::SetFont(QFont f)
     l_tcpcon_info->setFont(f_t);
     TSpotDialog->SetFont(f);
     LClubLogCall->setFont(f);
+}
+void RadioAndNetW::AddPage(QWidget *w)//IC8TEM v28
+{
+    TW_pages->addTab(w," "+tr("Page")+"  "+QString::number(TW_pages->count()+1));
 }
 void RadioAndNetW::SetLocFromDB(QString loc)
 {

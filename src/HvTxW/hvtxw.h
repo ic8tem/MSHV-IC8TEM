@@ -145,6 +145,7 @@ private:
 #include "hvspinbox.h"
 #include "../HvButtons/hvbutton_lrc.h"
 #include "../HvRigControl/HvRigCat/network/flexpanel.h"
+#include "hvlocsrc.h"//IC8TEM v28
 
 //#define _BANDS_H_
 //#define _FREQTOBAND_H_
@@ -308,7 +309,9 @@ public slots:
     void SetRecognizeTp1(bool f);
     void SetRecognizeTp2(bool f);
     void Set2ClickDecListAutoOn(bool f);
-    
+    void SetAutoRestartTx(bool f);//IC8TEM v28
+    void SetTxBlockedSwr(bool f);//IC8TEM v28 SWR protection of the Power & SWR window
+
     void SetButClrQueuedCall(); 
     void SetDoQRG(QString,QString);
     void DecListTextAll(QString,QString,QString,QString,QString);
@@ -440,9 +443,23 @@ private slots:
     void SetHisCalls(QStringList);
     void MshfChanget(bool);//2.76
     void UpdateFlexMeter(bool,bool,double,double,bool);
+    void LocWebTimer();//IC8TEM v28 locator lookup
+    void SetOnlineLoc(QString,QString);
+    void LocSourcesChanged();
 
 private:
-	FlexPanel *flex_panel;	
+    HvLocSrc *TLocSrc;//IC8TEM v28 locator lookup: decodes, CALL3, grid_data.bin, online
+    QTimer *t_loc_web;
+    QString s_loc_web_call;
+    void LocFromOtherSources(bool start_web);
+    QString DecodedMsgText(const QStringList &l);
+    bool f_auto_restart_tx;//IC8TEM v28 TO RADIO call decoded again: TX starts again
+    bool f_tx_blocked_swr;
+    bool f_in_auto_restart;
+    int c_auto_restarts;
+    QString s_auto_restart_call;
+    void CheckAutoRestartTx(const QString &t,const QString &msg);
+	FlexPanel *flex_panel;
 	uint8_t id_mshf;//2.76
 	bool f_ma_first_tx;
 	bool dsty;

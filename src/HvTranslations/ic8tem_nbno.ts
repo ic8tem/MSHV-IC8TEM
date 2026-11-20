@@ -282,6 +282,10 @@
         <source>Default Column Widths (drag the column borders to change them)</source>
         <translation>Standard kolonnebredder (dra i kolonnekantene for å endre dem)</translation>
     </message>
+    <message>
+        <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
+        <translation>Kallesignal i TIL RADIO dekodet igjen setter Auto på</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -381,6 +385,124 @@
     <message>
         <source>the port does not exist or another program is using it</source>
         <translation>porten finnes ikke, eller et annet program bruker den</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrc</name>
+    <message>
+        <source>Decodes of the last %1 periods</source>
+        <translation>Dekodinger fra de siste %1 periodene</translation>
+    </message>
+    <message>
+        <source>Online</source>
+        <translation>På nett</translation>
+    </message>
+    <message>
+        <source>MSHV database</source>
+        <translation>MSHV-databasen</translation>
+    </message>
+    <message>
+        <source>Locator of</source>
+        <translation>Lokator for</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>av</translation>
+    </message>
+    <message>
+        <source>not asked</source>
+        <translation>ikke spurt</translation>
+    </message>
+    <message>
+        <source>list not loaded</source>
+        <translation>listen er ikke lastet</translation>
+    </message>
+    <message>
+        <source>Calls heard with a locator</source>
+        <translation>Kallesignaler hørt med lokator</translation>
+    </message>
+    <message>
+        <source>Answers kept</source>
+        <translation>Lagrede svar</translation>
+    </message>
+    <message>
+        <source>asked since the start</source>
+        <translation>spurt siden start</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Kallesignaler</translation>
+    </message>
+    <message>
+        <source>List not loaded</source>
+        <translation>Listen er ikke lastet</translation>
+    </message>
+    <message>
+        <source>downloaded</source>
+        <translation>lastet ned</translation>
+    </message>
+    <message>
+        <source>downloading</source>
+        <translation>laster ned</translation>
+    </message>
+    <message>
+        <source>waiting to download</source>
+        <translation>venter på nedlasting</translation>
+    </message>
+    <message>
+        <source>The downloaded file is not valid</source>
+        <translation>Den nedlastede filen er ikke gyldig</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS er ikke tilgjengelig (ingen OpenSSL og ingen curl)</translation>
+    </message>
+    <message>
+        <source>no answer (timeout)</source>
+        <translation>ikke svar (tidsavbrudd)</translation>
+    </message>
+    <message>
+        <source>Download failed</source>
+        <translation>Nedlastingen mislyktes</translation>
+    </message>
+    <message>
+        <source>empty answer</source>
+        <translation>tomt svar</translation>
+    </message>
+    <message>
+        <source>Cannot write</source>
+        <translation>Kan ikke skrive</translation>
+    </message>
+    <message>
+        <source>Online lookup failed</source>
+        <translation>Oppslag på nett mislyktes</translation>
+    </message>
+</context>
+<context>
+    <name>HvLocSrcW</name>
+    <message>
+        <source>Locator lookup when the call is not in the MSHV database</source>
+        <translation>Oppslag av lokator når kallesignalet ikke er i MSHV-databasen</translation>
+    </message>
+    <message>
+        <source>When the call in TO RADIO has no locator in the clicked message and in the MSHV database, MSHV looks in these sources, in this order. The label next to LOCATOR shows where the locator comes from (hold the mouse on it to see all the sources). ADD saves it in the MSHV database.</source>
+        <translation>Når kallesignalet i TIL RADIO ikke har lokator i den klikkede meldingen eller i MSHV-databasen, søker MSHV i disse kildene i denne rekkefølgen. Etiketten ved LOKATOR viser hvor lokatoren kommer fra (hold musen over den for å se alle kildene). LEGG TIL lagrer den i MSHV-databasen.</translation>
+    </message>
+    <message>
+        <source>The online lookup sends the call to api.g7vrd.co.uk only when no other source has the locator; the answers are kept for 30 days.</source>
+        <translation>Oppslaget på nett sender kallesignalet til api.g7vrd.co.uk bare når ingen annen kilde har lokatoren; svarene lagres i 30 dager.</translation>
+    </message>
+    <message>
+        <source>Download the lists and update them every %1 days</source>
+        <translation>Last ned listene og oppdater dem hver %1. dag</translation>
+    </message>
+    <message>
+        <source>Update Now</source>
+        <translation>Oppdater nå</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Kilder</translation>
     </message>
 </context>
 </TS>

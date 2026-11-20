@@ -349,7 +349,8 @@ private:
     
     bool two_dec_list_all[COUNT_MODE];
     QAction *ac_two_dec_list; 
-    QAction *ac_2click_list_autu_on;  
+    QAction *ac_2click_list_autu_on;
+    QAction *ac_auto_restart_tx;//IC8TEM v28  
     QAction *ac_start_qso_from_tx2_or_tx1; 
     QAction *ac_use_queue_cont; 
     QAction *ac_new_dec_clr_msg_list; 
