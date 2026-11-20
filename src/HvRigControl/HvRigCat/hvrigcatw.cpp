@@ -79,6 +79,7 @@ HvRigCat::HvRigCat( QWidget *parent )
     s_port_type = RIG_PORT_NONE;
     s_port_poen = false;
     pwr_k3_tm = 0;//IC8TEM
+    pwr_tx = false;//IC8TEM v29
     vita_rx = 0;
     vita_tx = false;
 
@@ -456,6 +457,8 @@ void HvRigCat::SetRig(int index)
         connect(this, SIGNAL(EmitReadyRead(QByteArray,int)), TElecraft, SLOT(SetReadyRead(QByteArray,int)));
         connect(TElecraft, SIGNAL(EmitReadedInfo(CmdID,QString)), this, SLOT(SetReadedInfo(CmdID,QString)));
         have_read_data_rts_on = 3;
+        s_active_model_id = rstruc.model;//IC8TEM v29: needed by the Power & SWR window (was never set for Elecraft)
+        s_active_fact_id = ELECRAFT_ID;
         ////////////////////////////////////////////////////////end new read com
 
         //SetPttCaps(false);
@@ -947,9 +950,10 @@ QString HvRigCat::PwrStatus()//IC8TEM Power & SWR: why it is (not) available
     if (s_active_fact_id==ICOM_ID) kind = "Icom CI-V";
     else if (s_active_fact_id==NETWORK_ID && IS_ICOMLAN(s_active_model_id)) kind = "Icom LAN";
     else if (s_active_fact_id==NETWORK_ID && IS_HAMLIB(s_active_model_id)) kind = "Hamlib";
-    else if (PwrTextFamily()==1) kind = "Yaesu CAT";
-    else if (PwrTextFamily()==2 || PwrTextFamily()==3) kind = "Kenwood CAT";
+    else if (PwrTextFamily()==1 || PwrTextFamily()==8) kind = "Yaesu CAT";
+    else if (PwrTextFamily()==2 || PwrTextFamily()==3 || PwrTextFamily()==6 || PwrTextFamily()==7) kind = "Kenwood CAT";
     else if (PwrTextFamily()==4 || PwrTextFamily()==5) kind = "Elecraft CAT";
+    else if (PwrTextFamily()==9) kind = "PowerSDR/Thetis CAT";
     else if (s_active_fact_id==NETWORK_ID && (s_active_model_id==3 || s_active_model_id==4)) kind = "TCI";
     else if (s_active_fact_id==NETWORK_ID && s_active_model_id==6) kind = "FlexRadio";
     else if (s_active_fact_id==11) kind = "OmniRig";//OMNIRIGHV_ID (Windows only header)
@@ -961,6 +965,7 @@ void HvRigCat::SendPwrCmd(int id,QString str)//IC8TEM
 {
     if (!PwrCapable()) return;
     if (id!=SET_RFPOWER && id!=GET_RFPOWER && id!=GET_METERS) return;
+    if (id==GET_METERS) pwr_tx = (str=="tx" || s_f_ptt);//IC8TEM v29: TX also with PTT by RTS/DTR (window tells it)
     if (PwrTextFamily() > 0)
     {
         PwrTextCmd(id,str);
@@ -969,50 +974,93 @@ void HvRigCat::SendPwrCmd(int id,QString str)//IC8TEM
     emit SetCmd((CmdID)id,RIG_PTT_OFF,str);
 }
 //IC8TEM ---------------------------------------------------------------- text CAT radios
-// Commands and meter scales as in Hamlib (newcat.c, ts590.c, ts2000.c, k3.c):
-//  Yaesu NEWCAT  PCnnn (W) / RM5 Po / RM6 SWR / RM4 ALC   (0-255)
-//  Kenwood       PCnnn (W) / RM; -> RM1 SWR, RM2 COMP, RM3 ALC (0-30) / SM0 = Po while transmitting
-//  Elecraft K3   PCnnn (W) / TM; BG; -> BGnnT (TM0 power 0-10+, TM1 ALC 0-7) / SWnnn = SWR x10
+// Commands and meter scales as in Hamlib 4.6 (newcat.c, ft450, ft9000, ts590.c, ts2000.c, ts870s.c, ts850.c,
+// ts890s.c, ts990s.c, k3.c, flex6xxx.c):
+//  1 Yaesu NEWCAT     PCnnn (W) / RM5 Po / RM6 SWR / RM4 ALC (0-255)
+//  8 Yaesu FTDX-9000  PCnnn (W, 200 W) / RM08 Po / RM09 SWR / RM07 ALC
+//  2 Kenwood TS-590, TS-480 (and clones)  PCnnn / RM; -> RM1 SWR, RM2 COMP, RM3 ALC (0-30) / SM0 = Po while transmitting
+//  3 Kenwood TS-2000 (and SDR Console)    as 2, RM; gives only the meter chosen on the radio
+//  6 Kenwood TS-870S, TS-850, TS-690S, TS-450S  RM; -> the meter chosen on the radio (RM1 SWR, RM3 ALC, 0-30);
+//    PCnnn only on TS-870S (TS-450S: read only; TS-850, TS-690S: no power by CAT)
+//  7 Kenwood TS-890S, TS-990S  RM11; RM21; (ALC and SWR readings on) RM; -> RM1 ALC, RM2 SWR (0-70); TS-890S: SM; = Po in TX
+//  4 Elecraft K3      PCnnn (W) / TM; BG; -> BGnnT (TM0 power 0-10+, TM1 ALC 0-7) / SWnnn = SWR x10
+//  5 Elecraft K4      PCnnnH / TM; -> ALC, CMP, FWD W, SWR x10
+//  9 PowerSDR, Thetis ZZPCnnn (%) / ZZRM5 Po (W) / ZZRM8 SWR
+QString HvRigCat::PwrModelName()// the model without the maker: the list shows "Yaesu FT-991", the table "FT-991"
+{
+    if (!f_rig_activ || s_active_model_id < 0) return QString();
+    if (s_active_fact_id==YAESU_ID && s_active_model_id < YAESU_COUNT) return QString(rigs_yeasu[s_active_model_id].name);
+    if (s_active_fact_id==KENWOOD_ID && s_active_model_id < KENWOOD_COUNT) return QString(rigs_kenwood[s_active_model_id].name);
+    if (s_active_fact_id==ELECRAFT_ID && s_active_model_id < ELECRAFT_COUNT) return QString(rigs_elecraft[s_active_model_id].name);
+    if (s_active_fact_id==SDRS_ID && s_active_model_id < SDRS_COUNT) return QString(rigs_sdrs[s_active_model_id].name);
+    return QString();
+}
 int HvRigCat::PwrTextFamily()
 {
-    if (!f_rig_activ) return 0;
-    QString n = get_rig_name();
+    QString n = PwrModelName();
+    if (n.isEmpty()) return 0;
     if (s_active_fact_id==YAESU_ID)
     {
         if (n=="FT-991" || n=="FT-710" || n=="FT-DX10" || n=="FT-DX101" || n=="FT-891" || n=="FT-DX1200" ||
-                n=="FT-DX3000" || n=="FT-DX5000" || n=="FT-950" || n=="FTX-1" || n=="FT-2000") return 1;
+                n=="FT-DX3000" || n=="FT-DX5000" || n=="FT-950" || n=="FTX-1" || n=="FT-2000" ||
+                n=="FT-450" || n=="FT-450D") return 1;
+        if (n=="FTDX-9000") return 8;
         return 0;
     }
     if (s_active_fact_id==KENWOOD_ID)
     {
-        if (n=="TS-590S" || n=="TS-590SG" || n=="TS-480") return 2;
-        if (n=="TS-2000") return 3;
+        if (n=="TS-590S" || n=="TS-590SG" || n=="TS-480" || n=="BG2FX FX4/C/CR/L" || n=="Hilberling PT-8000A") return 2;
+        if (n=="TS-2000" || n=="SDR Radio SDRConsole") return 3;
+        if (n=="TS-870S" || n=="TS-850" || n=="TS-690S" || n=="TS-450S") return 6;
+        if (n=="TS-890S" || n=="TS-990s") return 7;
         return 0;
     }
     if (s_active_fact_id==ELECRAFT_ID && n=="K3/KX3") return 4;
     if (s_active_fact_id==ELECRAFT_ID && n=="K4") return 5;
+    if (s_active_fact_id==SDRS_ID && (n=="FlexRadio/Apache PowerSDR" || n=="Thetis")) return 9;
     return 0;
+}
+static bool PwrIs200W(const QString &n)// PC in watts up to 200
+{
+    return (n=="TS-990s" || n=="FTDX-9000");
 }
 void HvRigCat::PwrTextCmd(int id,const QString &str)
 {
     int fam = PwrTextFamily();
+    QString n = PwrModelName();
     QString c;
     if (id==SET_RFPOWER)
     {
         int pct = (int)(str.toInt()*100.0/255.0+0.5);
-        if (fam!=4 && fam!=5 && pct < 5) pct = 5;//Yaesu and Kenwood: 5..100 W
-        if (fam==5 && pct < 1) pct = 1;
         if (pct > 100) pct = 100;
-        if (fam==5) c = QString("PC%1H;").arg(pct,3,10,QChar('0'));//K4: H = 1 W units
-        else c = QString("PC%1;").arg(pct,3,10,QChar('0'));
+        if (pct < 0) pct = 0;
+        if (fam==9) c = QString("ZZPC%1;").arg(pct,3,10,QChar('0'));
+        else if (fam==6 && n!="TS-870S") return;//TS-850, TS-690S, TS-450S: no power setting by CAT
+        else
+        {
+            if (fam!=4 && fam!=5 && pct < 5) pct = 5;//Yaesu and Kenwood: 5..100 W
+            if (fam==5 && pct < 1) pct = 1;
+            int w = PwrIs200W(n) ? pct*2 : pct;
+            if (fam==5) c = QString("PC%1H;").arg(pct,3,10,QChar('0'));//K4: H = 1 W units
+            else c = QString("PC%1;").arg(w,3,10,QChar('0'));
+        }
     }
-    else if (id==GET_RFPOWER) c = "PC;";
+    else if (id==GET_RFPOWER)
+    {
+        if (fam==9) c = "ZZPC;";
+        else if (fam==6 && n!="TS-870S" && n!="TS-450S") return;
+        else c = "PC;";
+    }
     else if (id==GET_METERS)
     {
         if (fam==1) c = "RM5;RM6;RM4;";
-        else if (fam==2 || fam==3) c = s_f_ptt ? "RM;SM0;" : "RM;";
+        else if (fam==2 || fam==3) c = pwr_tx ? "RM;SM0;" : "RM;";
         else if (fam==4) c = "TM;BG;SW;";
         else if (fam==5) c = "TM;";//K4: ALC, CMP, forward power, SWR in one answer
+        else if (fam==6) c = "RM;";
+        else if (fam==7) c = (pwr_tx && n=="TS-890S") ? "RM11;RM21;RM;SM;" : "RM11;RM21;RM;";
+        else if (fam==8) c = "RM08;RM09;RM07;";
+        else if (fam==9 && pwr_tx) c = "ZZRM5;ZZRM8;";
     }
     if (c.isEmpty()) return;
     emit EmitPwrInfo((int)LOG_TX,c);
@@ -1026,34 +1074,63 @@ static double PwrCal(double raw,const double (*t)[2],int n)//IC8TEM linear inter
         if (raw <= t[i][0]) return t[i-1][1] + (t[i][1]-t[i-1][1])*(raw-t[i-1][0])/(t[i][0]-t[i-1][0]);
     return t[n-1][1];
 }
+static double PwrFirstNumber(const QString &s)// "ZZRM5 50 W" -> 50, "ZZRM81.5" -> 1.5
+{
+    int i = 0;
+    while (i < s.length() && !s.at(i).isDigit()) i++;
+    int j = i;
+    while (j < s.length() && (s.at(j).isDigit() || s.at(j)==QChar('.'))) j++;
+    return s.mid(i,j-i).toDouble();
+}
 void HvRigCat::PwrTextParse(const QByteArray &tok)
 {
     int fam = PwrTextFamily();
+    QString n = PwrModelName();
     QString t = QString::fromLatin1(tok);
-    bool mine = t.startsWith("PC") || t.startsWith("RM") || (t.startsWith("SM0") && fam!=1 && fam!=4) ||
-                (fam==4 && (t.startsWith("BG") || t.startsWith("SW") || t.startsWith("TM"))) ||
-                (fam==5 && t.startsWith("TM"));
+    bool mine = false;
+    if (fam==9) mine = t.startsWith("ZZPC") || t.startsWith("ZZRM5") || t.startsWith("ZZRM8");
+    else
+    {
+        mine = t.startsWith("PC") || t.startsWith("RM");
+        if ((fam==2 || fam==3) && t.startsWith("SM0")) mine = true;
+        if (fam==7 && n=="TS-890S" && t.startsWith("SM")) mine = true;
+        if (fam==4 && (t.startsWith("BG") || t.startsWith("SW") || t.startsWith("TM"))) mine = true;
+        if (fam==5 && t.startsWith("TM")) mine = true;
+    }
     if (!mine) return;
     emit EmitPwrInfo((int)LOG_RX,t+";");
+    if (fam==9)
+    {
+        if (t.startsWith("ZZPC"))
+            emit EmitPwrInfo((int)READ_RFPOWER,"f:"+QString::number(qBound(0.0,PwrFirstNumber(t.mid(4))/100.0,1.0),'f',4));
+        else if (!pwr_tx) return;
+        else if (t.startsWith("ZZRM5")) emit EmitPwrInfo((int)READ_PO,"w:"+QString::number(PwrFirstNumber(t.mid(5)),'f',1));
+        else if (t.startsWith("ZZRM8"))
+        {
+            double swr = PwrFirstNumber(t.mid(5));
+            emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(swr < 1.0 ? 1.0 : swr,'f',3));
+        }
+        return;
+    }
     if (t.startsWith("PC") && t.length() >= 5)
     {
         double w = t.mid(2,3).toInt();
         if ((fam==4 || fam==5) && t.length() >= 6 && (t.at(5)=='0' || t.at(5)=='L')) w /= 10.0;//K3 PCnnnx x=0 / K4 PCnnnL: tenths of watt
-        emit EmitPwrInfo((int)READ_RFPOWER,"f:"+QString::number(w/100.0,'f',4));
+        if (PwrIs200W(n)) w /= 2.0;
+        emit EmitPwrInfo((int)READ_RFPOWER,"f:"+QString::number(qMin(w/100.0,1.0),'f',4));
         return;
     }
     if (fam==1 && t.startsWith("RM") && t.length() >= 6)
     {
         QChar m = t.at(2);
         double raw = t.mid(3,3).toInt();
-        QString n = get_rig_name();
         if (m=='5')//Po, watts
         {
             static const double c991[][2] = {{0,0},{10,0.8},{50,8},{100,26},{150,54},{200,92},{250,140}};
             static const double c10[][2]  = {{0,0},{27,5},{94,25},{147,50},{176,75},{205,100}};
             static const double cdef[][2] = {{0,0},{148,50},{255,100}};
             double w;
-            if (n=="FT-991") w = PwrCal(raw,c991,7);
+            if (n=="FT-991" || n=="FT-450" || n=="FT-450D") w = PwrCal(raw,c991,7);
             else if (n=="FT-DX10" || n=="FT-710" || n=="FT-DX101") w = PwrCal(raw,c10,6);
             else w = PwrCal(raw,cdef,3);
             emit EmitPwrInfo((int)READ_PO,"f:"+QString::number(qMin(w/100.0,1.0),'f',4));
@@ -1069,6 +1146,24 @@ void HvRigCat::PwrTextParse(const QByteArray &tok)
             emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(raw/128.0,'f',4));
         return;
     }
+    if (fam==8 && t.startsWith("RM0") && t.length() >= 7)//FTDX-9000 RM08nnn RM09nnn RM07nnn
+    {
+        QString m = t.mid(2,2);
+        double raw = t.mid(4,3).toInt();
+        if (m=="08")
+        {
+            static const double c9000[][2] = {{0,0},{35,10},{53,20},{80,40},{97,60},{119,80},{137,100},{154,120},
+                                              {167,140},{177,160},{188,180},{197,200}};
+            emit EmitPwrInfo((int)READ_PO,"w:"+QString::number(PwrCal(raw,c9000,12),'f',1));
+        }
+        else if (m=="09")
+        {
+            static const double sdef[][2] = {{0,1.0},{12,1.0},{39,1.35},{65,1.5},{89,2.0},{242,5.0}};
+            emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(PwrCal(raw,sdef,6),'f',3));
+        }
+        else if (m=="07") emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(raw/128.0,'f',4));
+        return;
+    }
     if ((fam==2 || fam==3) && t.startsWith("RM") && t.length() >= 4)
     {
         QChar m = t.at(2);
@@ -1081,9 +1176,49 @@ void HvRigCat::PwrTextParse(const QByteArray &tok)
         else if (m=='3') emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(raw/(fam==3 ? 20.0 : 30.0),'f',4));
         return;
     }
+    if (fam==6 && t.startsWith("RM") && t.length() >= 4)//TS-870S, TS-850, TS-690S, TS-450S: 0-30
+    {
+        QChar m = t.at(2);
+        double raw = t.mid(3).toInt();
+        if (m=='1')
+        {
+            double swr = (raw >= 27.0) ? 10.0 : 60.0/(30.0-raw)-1.0;
+            emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(swr < 1.0 ? 1.0 : swr,'f',3));
+        }
+        else if (m=='3') emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(raw/30.0,'f',4));
+        return;
+    }
+    if (fam==7 && t.startsWith("RM") && t.length() >= 4)//TS-890S, TS-990S: RM1 ALC, RM2 SWR (0-70)
+    {
+        QChar m = t.at(2);
+        double raw = t.mid(3).toInt();
+        if (m=='1') emit EmitPwrInfo((int)READ_ALC,"f:"+QString::number(raw/35.0,'f',4));
+        else if (m=='2')
+        {
+            double swr;
+            if (n=="TS-990s")
+            {
+                static const double s990[][2] = {{0,1.0},{7,1.5},{36,3.0},{43,6.0},{70,10.0}};
+                swr = PwrCal(raw,s990,5);
+            }
+            else if (raw < 12) swr = 1.0 + raw/22.0;
+            else if (raw < 24) swr = 1.5 + (raw-11)/24.0;
+            else if (raw < 36) swr = 2.0 + (raw-23)/12.0;
+            else swr = 3.0 + (raw-35)/6.0;
+            emit EmitPwrInfo((int)READ_SWR,"f:"+QString::number(swr,'f',3));
+        }
+        return;
+    }
+    if (fam==7 && t.startsWith("SM") && t.length() >= 3)//TS-890S: SMnnnn while transmitting = Po (0-70)
+    {
+        if (!pwr_tx) return;
+        static const double p890[][2] = {{0,0},{5,5},{10,10},{19,25},{35,50},{59,100},{70,150}};
+        emit EmitPwrInfo((int)READ_PO,"w:"+QString::number(PwrCal(t.mid(2).toInt(),p890,7),'f',1));
+        return;
+    }
     if ((fam==2 || fam==3) && t.startsWith("SM0") && t.length() >= 4)
     {
-        if (!s_f_ptt) return;//S-meter while receiving
+        if (!pwr_tx) return;//S-meter while receiving
         double raw = t.mid(3).toInt();
         double frac;
         if (fam==2)

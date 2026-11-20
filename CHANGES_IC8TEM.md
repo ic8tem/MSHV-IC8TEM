@@ -173,3 +173,9 @@ All modified lines carry the comment `IC8TEM mod`. A unified diff against the or
 * `src/HvTxW/HvRadioNetW/radionetw.*` — `AddPage()` for page 4.
 * `packaging/i18n/ic8tem_strings.py` — 29 new strings in 15 languages.
 
+## 2026-11-20 — ic8tem.29
+* `src/HvRigControl/HvRigCat/hvrigcatw.*` — fix: `PwrTextFamily()` compared `get_rig_name()` ("Yaesu FT-991", the list text with the maker) with the bare model names, so no Yaesu/Kenwood/Elecraft radio was ever recognised since ic8tem.20; new `PwrModelName()` takes the name from the family table. The Elecraft branch of `SetRig()` now sets `s_active_model_id`/`s_active_fact_id` (never set before).
+* New text CAT families (commands and scales from Hamlib 4.6): Yaesu FT-450/FT-450D (family 1), FTDX-9000 (8: `RM08` Po W, `RM09` SWR, `RM07` ALC, PC 200 W); Kenwood TS-890S/TS-990S (7: `RM11;RM21;RM;` ALC/SWR 0-70, TS-890S `SM;` Po in TX, PC 200 W on the TS-990S), TS-870S/TS-850/TS-690S/TS-450S (6: `RM;` selected meter, SWR = 60/(30-n)-1, ALC n/30; PC only on TS-870S, read only on TS-450S), clones BG2FX FX4 and Hilberling PT-8000A (2), SDR Console (3); PowerSDR/Thetis (9: `ZZPC`, `ZZRM5` Po W, `ZZRM8` SWR, in TX).
+* `pwr_tx`: GET_METERS carries "tx" from the Power & SWR window (`hvpowerswrw.cpp`), so Po is asked in TX also with PTT on RTS/DTR (before: only with CAT PTT, `s_f_ptt`).
+* Tested with the Hamlib 4.6.5 simulators (FT-991, FT-450, TS-890S, TS-990S, TS-590SG, K3, K4, PowerSDR) and a parser test for every family.
+

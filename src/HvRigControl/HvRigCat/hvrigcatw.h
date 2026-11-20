@@ -195,11 +195,13 @@ private:
     bool s_f_ptt;
     //IC8TEM Power & SWR for text CAT radios (Yaesu NEWCAT, Kenwood TS-2000/TS-590 family, Elecraft K3 family)
     int PwrTextFamily();
+    QString PwrModelName();//IC8TEM v29
     void PwrTextCmd(int id,const QString &str);
     void PwrTextParse(const QByteArray &tok);
     QByteArray pwr_rx_buf;
     QByteArray pwr_tx_buf;
     int pwr_k3_tm;
+    bool pwr_tx;//IC8TEM v29 transmitting (CAT PTT or told by the Power & SWR window)
     int tci_select;
     int max4min;
     bool f_rig_active_never_stop;//2.76.1 Flex Slice

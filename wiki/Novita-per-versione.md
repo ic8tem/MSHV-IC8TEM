@@ -1,5 +1,10 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.29
+* **Potenza e ROS con il CAT di MSHV, senza Hamlib**: corretto. Le radio Yaesu, Kenwood ed Elecraft dell'elenco (dalla versione .20) non venivano riconosciute, perché MSHV confrontava il nome con il marchio davanti ("Yaesu FT-991") e per le Elecraft non registrava il tipo di radio: la finestra restava "non disponibile". Ora funzionano.
+* **Nuove radio** nella finestra Potenza e ROS: Yaesu **FT-450**, **FT-450D** e **FTDX-9000**; Kenwood **TS-890S** (potenza, Po in watt, ROS, ALC), **TS-990S** (potenza, ROS, ALC), **TS-870S** (potenza, ROS o ALC), **TS-850**, **TS-690S**, **TS-450S** (ROS o ALC); **PowerSDR** e **Thetis** (potenza, Po, ROS). Da provare: BG2FX FX-4CR, Hilberling PT-8000A, SDR Console. Comandi e scale come in Hamlib. Vedi [[Potenza e ROS|Potenza-e-ROS]].
+* Po (e ROS con PowerSDR/Thetis) si legge durante la trasmissione anche quando il PTT è su RTS o DTR: prima solo con il PTT via CAT.
+
 ## 2.76.7-ic8tem.28
 * **Ricerca del locatore**: se il nominativo in TO RADIO non è nel messaggio cliccato né nel database di MSHV, MSHV cerca il locatore nelle decodifiche degli ultimi 20 periodi (quello che la stazione stessa ha trasmesso), poi nelle liste **CALL3.TXT di WSJT-X Improved**, **CALL3.TXT EME di W7GJ** e **grid_data.bin di JTDX**, che scarica e aggiorna da solo ogni 14 giorni, e infine **in rete** (G7VRD). L'etichetta accanto a LOCATOR dice la fonte (`RX:FM05`, `C3:`, `EME:`, `JTDX:`, `WEB:`); col mouse sopra si vedono tutte. Impostazioni in *Options › Network Configuration › Page 4*. Vedi [[Ricerca del locatore|Ricerca-locatore]].
 * **Ripartenza della TX**: nuova opzione *TO RADIO Call Decoded Again Sets Auto Is On* (menu *Decode Lists Options*, spenta di serie). Se la TX si è fermata e il nominativo in TO RADIO viene decodificato di nuovo, MSHV riaccende AUTO e lo richiama nel periodo giusto (al massimo 3 volte per nominativo, non con il blocco ROS). Vedi [[Ripartenza della TX|Ripartenza-TX]].

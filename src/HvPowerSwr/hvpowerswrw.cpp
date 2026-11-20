@@ -918,7 +918,7 @@ void HvPowerSwrW::PollMeters()
 {
     if (!f_capable || (!isVisible() && !cb_prot->isChecked())) return;
     if (cb_only_tx->isChecked() && !f_tx) return;
-    RigCmd(GET_METERS,QString());
+    RigCmd(GET_METERS,f_tx ? QString("tx") : QString());//IC8TEM v29: text CAT radios read Po only in TX
 }
 void HvPowerSwrW::SetStatus(QString s)
 {
@@ -938,7 +938,7 @@ void HvPowerSwrW::ReadNow()
         return;
     }
     RigCmd(GET_RFPOWER,QString());
-    RigCmd(GET_METERS,QString());
+    RigCmd(GET_METERS,f_tx ? QString("tx") : QString());//IC8TEM v29: text CAT radios read Po only in TX
 }
 void HvPowerSwrW::LogClear()
 {
