@@ -386,6 +386,10 @@
         <source>the port does not exist or another program is using it</source>
         <translation>le port n'existe pas ou un autre programme l'utilise</translation>
     </message>
+    <message>
+        <source>libusb-1.0.dll is missing in the hamlib folder: install MSHV-IC8TEM again</source>
+        <translation>libusb-1.0.dll manque dans le dossier hamlib : réinstallez MSHV-IC8TEM</translation>
+    </message>
 </context>
 <context>
     <name>HvLocSrc</name>

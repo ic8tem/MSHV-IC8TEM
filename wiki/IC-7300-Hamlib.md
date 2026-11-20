@@ -24,4 +24,5 @@ La radio deve avere l'indirizzo CI-V predefinito: IC-7300 `94h`, IC-7610 `98h`, 
 ## Da sapere
 
 * La libreria Hamlib (`libhamlib-4.dll`, licenza LGPL) è nella cartella `hamlib` accanto a MSHV ed è caricata solo quando scegliete questa radio. Se non si carica, la riga di Rig Control dice perché e il resto di MSHV funziona normalmente.
+* Fino alla versione **2.76.7-ic8tem.29**, su un PC senza Hamlib installato, la riga diceva *Hamlib: cannot load libhamlib-4.dll ... Impossibile trovare il modulo specificato*: Windows non trovava `libusb-1.0.dll`, che sta nella cartella `hamlib`. Corretto nella **2.76.7-ic8tem.30**. Con la .28 o la .29 basta copiare `hamlib\libusb-1.0.dll` nella cartella di `MSHV-IC8TEM.exe`.
 * Su Windows ARM, Linux, macOS e BSD questa voce non c'è: lì usate *Hamlib NET rigctl* con `rigctld`, oppure la connessione *Hamlib rigctld* della finestra Potenza e ROS.

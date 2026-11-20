@@ -4,5 +4,5 @@
  */
 #ifndef MSHV_IC8TEM_VERSION_H
 #define MSHV_IC8TEM_VERSION_H
-#define MSHV_IC8TEM_VERSION "2.76.7-ic8tem.29"
+#define MSHV_IC8TEM_VERSION "2.76.7-ic8tem.30"
 #endif

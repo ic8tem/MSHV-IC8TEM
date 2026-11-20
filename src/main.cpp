@@ -14,6 +14,14 @@
 #include <QSplashScreen>
 #include "main_ms.h"
 #include "config.h"
+#if defined HAVE_HAMLIB
+#include <QCoreApplication>
+#include <QLibrary>
+#include <QDir>
+#include <QFile>
+#include <cstring>
+#include "HvRigControl/HvRigCat/hamlibrig/hamlib_wrap.h"
+#endif
 //#include <unistd.h> //usleep
 
 //#define TXT_CODEC_LIN "UTF-8"
@@ -54,6 +62,33 @@ public:
 QSplashScreen *splash = 0;
 int main(int argc, char ** argv)
 {
+#if defined HAVE_HAMLIB
+    //IC8TEM v30: "--hamlib-check=<file>" loads the Hamlib library as the "(Hamlib)" radios do,
+    //writes the result to <file> and quits; "--hamlib-check-plain=<file>" does it with a plain
+    //QLibrary, as up to 2.76.7-ic8tem.29. The Windows builds test their package with them.
+    for (int i = 1; i < argc; ++i)
+    {
+        const bool plain = strncmp(argv[i],"--hamlib-check-plain=",21) == 0;
+        if (!plain && strncmp(argv[i],"--hamlib-check=",15) != 0) continue;
+        QCoreApplication capp(argc,argv);
+        QString res;
+        bool ok;
+        if (plain)
+        {
+            QLibrary l(QDir::toNativeSeparators(QCoreApplication::applicationDirPath()+"/hamlib/libhamlib-4.dll"));
+            ok = l.load();
+            res = ok ? QString("OK") : l.errorString();
+        }
+        else
+        {
+            ok = HlWrap::Load(res);
+            if (ok) res = "OK "+HlWrap::Version();
+        }
+        QFile f(QString::fromLocal8Bit(argv[i]+(plain ? 21 : 15)));
+        if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) f.write((res+"\n").toUtf8());
+        return ok ? 0 : 1;
+    }
+#endif
     //QApplication::setDesktopSettingsAware(false); remove desktop settings
     QApplication app(argc,argv);
     /* no used just test

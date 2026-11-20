@@ -10,6 +10,9 @@
 #include <QFile>
 #include <QStringList>
 #include <hamlib/rig.h>
+#if defined _WIN32
+#include <windows.h>    // LoadLibraryExW (rig.h of Hamlib 4.6/4.7 includes it already)
+#endif
 
 namespace
 {
@@ -40,19 +43,40 @@ bool HlWrap::Load(QString &err)
     QString dir = QCoreApplication::applicationDirPath();
     QStringList cand;
     cand << dir+"/hamlib/libhamlib-4.dll" << dir+"/libhamlib-4.dll" << "libhamlib-4.dll";
-    QString tried;
+    QString first;
     for (int i = 0; i < cand.count(); ++i)
     {
         if (i < 2 && !QFile::exists(cand.at(i))) continue;
-        lib = new QLibrary(QDir::toNativeSeparators(cand.at(i)));
-        if (lib->load()) break;
-        tried += lib->errorString()+" ";
+        QString file = QDir::toNativeSeparators(cand.at(i));
+#if defined _WIN32
+        //IC8TEM v30: libhamlib-4.dll needs libusb-1.0.dll, which is next to it in the hamlib folder,
+        //but Windows looks for it only in the program folder, the system folders and PATH ("The
+        //specified module could not be found"). The library is loaded first with the search path
+        //of its own folder; QLibrary then takes the module already in memory.
+        HMODULE pre = 0;
+        if (i < 2)
+        {
+            UINT oldmode = SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOOPENFILEERRORBOX);// no message box (as QLibrary)
+            pre = LoadLibraryExW((LPCWSTR)file.utf16(),NULL,LOAD_WITH_ALTERED_SEARCH_PATH);
+            SetErrorMode(oldmode);
+        }
+#endif
+        lib = new QLibrary(file);
+        bool ok = lib->load();
+#if defined _WIN32
+        if (pre) FreeLibrary(pre);  // QLibrary holds its own reference
+#endif
+        if (ok) break;
+        if (first.isEmpty()) first = lib->errorString();
         delete lib;
         lib = 0;
     }
     if (!lib)
     {
-        err = "Hamlib: cannot load libhamlib-4.dll "+tried;
+        //IC8TEM v30: only the first error (the hamlib folder), not one per attempt
+        err = "Hamlib: "+(first.isEmpty() ? QString("libhamlib-4.dll not found") : first);
+        if (QFile::exists(cand.at(0)) && !QFile::exists(dir+"/hamlib/libusb-1.0.dll") && !QFile::exists(dir+"/libusb-1.0.dll"))
+            err += " - "+QCoreApplication::translate("HamlibRig","libusb-1.0.dll is missing in the hamlib folder: install MSHV-IC8TEM again");
         return false;
     }
 #define HL_RES(var,name) var = (decltype(var))lib->resolve(name); if (!var) { err = QString("Hamlib: missing function ")+name; return false; }

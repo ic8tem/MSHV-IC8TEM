@@ -1,5 +1,8 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.30
+* **IC-7300, IC-7610 e IC-9700 (Hamlib)**: corretto. Su un PC senza Hamlib installato la riga di Rig Control restava rossa con "Hamlib: cannot load libhamlib-4.dll ... Impossibile trovare il modulo specificato". La libreria di Hamlib ha bisogno di `libusb-1.0.dll`, che sta accanto a lei nella cartella `hamlib`, ma Windows la cercava solo nella cartella del programma. Ora MSHV carica Hamlib in modo che Windows cerchi le sue DLL nella cartella `hamlib`, e ogni compilazione per Windows prova che la libreria si carichi davvero. Vedi [[IC-7300, IC-7610, IC-9700 con Hamlib|IC-7300-Hamlib]].
+
 ## 2.76.7-ic8tem.29
 * **Potenza e ROS con il CAT di MSHV, senza Hamlib**: corretto. Le radio Yaesu, Kenwood ed Elecraft dell'elenco (dalla versione .20) non venivano riconosciute, perché MSHV confrontava il nome con il marchio davanti ("Yaesu FT-991") e per le Elecraft non registrava il tipo di radio: la finestra restava "non disponibile". Ora funzionano.
 * **Nuove radio** nella finestra Potenza e ROS: Yaesu **FT-450**, **FT-450D** e **FTDX-9000**; Kenwood **TS-890S** (potenza, Po in watt, ROS, ALC), **TS-990S** (potenza, ROS, ALC), **TS-870S** (potenza, ROS o ALC), **TS-850**, **TS-690S**, **TS-450S** (ROS o ALC); **PowerSDR** e **Thetis** (potenza, Po, ROS). Da provare: BG2FX FX-4CR, Hilberling PT-8000A, SDR Console. Comandi e scale come in Hamlib. Vedi [[Potenza e ROS|Potenza-e-ROS]].
