@@ -50,6 +50,20 @@ static QString PsQ(const QString &s)
     return "'"+r+"'";
 }
 #endif
+//IC8TEM v31: several installations (one per radio) update each their own folder: short tag of the
+//program folder for the temporary folders, so two running installations never share a download
+static QString InstallTag()
+{
+    QByteArray p = QDir::cleanPath(QCoreApplication::applicationDirPath()).toLower().toUtf8();
+    return QString::fromLatin1(QCryptographicHash::hash(p,QCryptographicHash::Sha1).toHex().left(8));
+}
+//IC8TEM v31: MSHV starts again with the same command line (for example --inst-name=)
+static QStringList RestartArgs()
+{
+    QStringList a = QCoreApplication::arguments();
+    if (!a.isEmpty()) a.removeFirst();
+    return a;
+}
 
 MshvUpdater::MshvUpdater(QString app_path,QWidget *main_window,const bool *tx_flag)
         : QObject(main_window)
@@ -149,7 +163,7 @@ QString MshvUpdater::SetTmpDir()
 {
     QString t = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     if (t.isEmpty()) t = QDir::tempPath();
-    t += "/MSHV-IC8TEM-update";
+    t += "/MSHV-IC8TEM-update-"+InstallTag();//IC8TEM v31: one folder per installation
     QDir(t).removeRecursively();
     QDir().mkpath(t);
     s_tmpdir = t;
@@ -365,7 +379,8 @@ void MshvUpdater::AskUser()
     QMessageBox mb(s_main);
     mb.setWindowTitle("MSHV-IC8TEM");
     mb.setIcon(QMessageBox::Information);
-    mb.setText("<b>MSHV-IC8TEM "+r_version+"</b> "+tr("is available")+".<br>"+tr("Installed version")+": "+CurrentVersion());
+    mb.setText("<b>MSHV-IC8TEM "+r_version+"</b> "+tr("is available")+".<br>"+tr("Installed version")+": "+CurrentVersion()+
+               "<br>"+tr("Installation")+": "+QDir::toNativeSeparators(QCoreApplication::applicationDirPath()).toHtmlEscaped());//IC8TEM v31
     QString info;
     if (can)
     {
@@ -468,24 +483,43 @@ bool MshvUpdater::StartHelper()
     const qint64 pid = QCoreApplication::applicationPid();
 #if defined Q_OS_WIN
     script = s_tmpdir+"/mshv_update.ps1";
+    const QString dir = QDir::toNativeSeparators(app_dir);
+    QString restart = "Start-Process -FilePath "+PsQ(QDir::toNativeSeparators(exe))+" -WorkingDirectory "+PsQ(dir);
+    QStringList ra = RestartArgs();
+    if (!ra.isEmpty())
+    {
+        QStringList q;
+        for (int i = 0; i < ra.count(); ++i)
+        {
+            QString a = ra.at(i);
+            a.remove('"');
+            q << "\""+a+"\"";
+        }
+        restart += " -ArgumentList "+PsQ(q.join(" "));
+    }
     QString s;
     s += "$ErrorActionPreference = 'SilentlyContinue'\r\n";
     s += "Wait-Process -Id "+QString::number(pid)+" -Timeout 180\r\n";
     s += "Start-Sleep -Milliseconds 800\r\n";
     if (d_kind=="winsetup")
     {
-        s += "Start-Process -FilePath "+PsQ(pkg)+" -ArgumentList '/SILENT','/SUPPRESSMSGBOXES','/NORESTART','/AUTOUPDATE=1'\r\n";
+        //IC8TEM v31: the installer updates the folder of THIS installation (/DIR). Before, it always
+        //installed into its default folder (C:\MSHV-IC8TEM-NEW), so a second installation in another
+        //folder was never updated. AUTOUPDATE=2: the installer does not start MSHV, this script starts
+        //it when the installer has finished, with the same command line.
+        s += "Start-Process -FilePath "+PsQ(pkg)+" -ArgumentList "+
+             PsQ("/SILENT /SUPPRESSMSGBOXES /NORESTART /AUTOUPDATE=2 /DIR=\""+dir+"\"")+" -Wait\r\n";
     }
     else
     {
-        QString dir = QDir::toNativeSeparators(app_dir);
-        s += "$t = Join-Path $env:TEMP 'MSHV-IC8TEM-unzip'\r\n";
+        s += "$t = Join-Path $env:TEMP "+PsQ("MSHV-IC8TEM-unzip-"+InstallTag())+"\r\n";//IC8TEM v31: per installation
         s += "Remove-Item $t -Recurse -Force\r\n";
         s += "Expand-Archive -Path "+PsQ(pkg)+" -DestinationPath $t -Force\r\n";
         s += "$src = Join-Path $t 'MSHV-IC8TEM'\r\n";
         s += "if (Test-Path $src) { robocopy $src "+PsQ(dir)+" /E /XD settings log RxWavs ExportLog AllTxtMonthly Screenshots /R:5 /W:1 /NFL /NDL /NJH /NJS | Out-Null }\r\n";
-        s += "Start-Process -FilePath "+PsQ(QDir::toNativeSeparators(exe))+" -WorkingDirectory "+PsQ(dir)+"\r\n";
+        s += "Remove-Item $t -Recurse -Force\r\n";
     }
+    s += restart+"\r\n";
     QFile f(script);
     if (!f.open(QIODevice::WriteOnly))
     {
@@ -504,6 +538,9 @@ bool MshvUpdater::StartHelper()
     return true;
 #else
     script = s_tmpdir+"/mshv_update.sh";
+    QString args;                                    //IC8TEM v31: same command line after the update
+    QStringList ra = RestartArgs();
+    for (int i = 0; i < ra.count(); ++i) args += " "+ShQ(ra.at(i));
     QString s = "#!/bin/sh\n";
     s += "P="+QString::number(pid)+"\n";
     s += "i=0; while kill -0 $P 2>/dev/null && [ $i -lt 360 ]; do sleep 0.5; i=$((i+1)); done\n";
@@ -526,7 +563,7 @@ bool MshvUpdater::StartHelper()
         s += "  hdiutil detach -quiet \"$M\"\n";
         s += "  xattr -dr com.apple.quarantine \"$APP\" 2>/dev/null\n";
         s += "fi\n";
-        s += "open -n \"$APP\"\n";
+        s += "open -n \"$APP\""+(args.isEmpty() ? QString() : " --args"+args)+"\n";
     }
     else if (d_kind=="appimage")
     {
@@ -538,7 +575,7 @@ bool MshvUpdater::StartHelper()
         }
         s += "OLD="+ShQ(ai)+"\n";
         s += "chmod +x \"$PKG\" && cp -f \"$PKG\" \"$OLD.new\" && chmod +x \"$OLD.new\" && mv -f \"$OLD.new\" \"$OLD\"\n";
-        s += "nohup \"$OLD\" >/dev/null 2>&1 &\n";
+        s += "nohup \"$OLD\""+args+" >/dev/null 2>&1 &\n";
     }
     else if (d_kind=="tar")
     {
@@ -558,7 +595,7 @@ bool MshvUpdater::StartHelper()
         s += "  done\n";
         s += "fi\n";
         s += "rm -rf \"$T\"\n";
-        s += "cd \"$DIR\" && nohup \"$EXE\" >/dev/null 2>&1 &\n";
+        s += "cd \"$DIR\" && nohup \"$EXE\""+args+" >/dev/null 2>&1 &\n";
     }
     else
     {
@@ -567,7 +604,7 @@ bool MshvUpdater::StartHelper()
         else if (d_kind=="rpm") cmd = "if command -v dnf >/dev/null; then dnf install -y \"$1\"; elif command -v zypper >/dev/null; then zypper --non-interactive install --allow-unsigned-rpm \"$1\"; else rpm -Uvh --replacepkgs \"$1\"; fi";
         else cmd = "PATH=/sbin:/usr/sbin:$PATH upgradepkg --install-new \"$1\"";
         s += "pkexec /bin/sh -c "+ShQ(cmd)+" sh \"$PKG\"\n";
-        s += "nohup /usr/bin/mshv-ic8tem >/dev/null 2>&1 &\n";
+        s += "nohup /usr/bin/mshv-ic8tem"+args+" >/dev/null 2>&1 &\n";
     }
     QFile f(script);
     if (!f.open(QIODevice::WriteOnly))

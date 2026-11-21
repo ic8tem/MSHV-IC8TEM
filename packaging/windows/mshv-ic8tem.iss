@@ -5,6 +5,10 @@
 ; before: %LOCALAPPDATA%\Programs\MSHV-IC8TEM), so MSHV can keep its settings and logs next to the
 ; program, as in the zip version. Settings and logs of the previous folder are copied once.
 ; Existing settings/logs are never overwritten by an update and never removed by uninstall.
+;
+; More installations side by side (for example one per radio, each in its own folder): the automatic
+; update of MSHV passes /DIR=<its folder> and /AUTOUPDATE=2, so every installation updates itself
+; (from 2.76.7-ic8tem.31); shortcuts of a folder other than the default one carry the folder name.
 
 #ifndef AppVersion
   #define AppVersion "dev"
@@ -68,22 +72,53 @@ Name: "{app}\AllTxtMonthly"; Flags: uninsneveruninstall
 Name: "{app}\Screenshots"; Flags: uninsneveruninstall
 
 [Icons]
-Name: "{group}\MSHV-IC8TEM"; Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir: "{app}"
-Name: "{group}\{cm:UninstallProgram,MSHV-IC8TEM}"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\MSHV-IC8TEM"; Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+; automatic update: the shortcuts are left as they are
+Name: "{group}\{code:IconName}"; Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir: "{app}"; Check: not IsAutoUpdate
+Name: "{group}\{code:UninstallIconName}"; Filename: "{uninstallexe}"; Check: not IsAutoUpdate
+Name: "{userdesktop}\{code:IconName}"; Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir: "{app}"; Tasks: desktopicon; Check: not IsAutoUpdate
 
 [Run]
 Filename: "{app}\MSHV-IC8TEM.exe"; Description: "{cm:LaunchProgram,MSHV-IC8TEM}"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
-; automatic update started by MSHV (setup.exe /SILENT /AUTOUPDATE=1): start MSHV again
-Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir: "{app}"; Flags: nowait; Check: IsAutoUpdate
+; automatic update started by MSHV up to 2.76.7-ic8tem.30 (setup.exe /SILENT /AUTOUPDATE=1): start MSHV again
+; (from ic8tem.31 MSHV passes /AUTOUPDATE=2 and starts itself again with its own command line)
+Filename: "{app}\MSHV-IC8TEM.exe"; WorkingDir: "{app}"; Flags: nowait; Check: IsAutoUpdateRestart
 
 [Code]
 var
   OldDir: String;
+  FreshDir: Boolean;
 
+{ /AUTOUPDATE=1 (MSHV up to ic8tem.30) or /AUTOUPDATE=2 (MSHV from ic8tem.31) }
 function IsAutoUpdate(): Boolean;
 begin
+  Result := ExpandConstant('{param:AUTOUPDATE|0}') <> '0';
+end;
+
+function IsAutoUpdateRestart(): Boolean;
+begin
   Result := ExpandConstant('{param:AUTOUPDATE|0}') = '1';
+end;
+
+{ shortcut name: "MSHV-IC8TEM" in the default folder, "MSHV-IC8TEM (<folder>)" elsewhere, so a second
+  installation does not take the shortcuts of the first one }
+function IconName(Param: String): String;
+var
+  Dir, Name: String;
+begin
+  Dir := RemoveBackslashUnlessRoot(ExpandConstant('{app}'));
+  if CompareText(Dir, ExpandConstant('{sd}\MSHV-IC8TEM-NEW')) = 0 then
+    Result := 'MSHV-IC8TEM'
+  else
+  begin
+    Name := ExtractFileName(Dir);
+    if Name = '' then Name := Copy(Dir, 1, 1);
+    Result := 'MSHV-IC8TEM (' + Name + ')';
+  end;
+end;
+
+function UninstallIconName(Param: String): String;
+begin
+  Result := FmtMessage(CustomMessage('UninstallProgram'), [IconName('')]);
 end;
 
 { previous installation folder (before C:\MSHV-IC8TEM-NEW) }
@@ -129,7 +164,15 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   NewDir, Marker: String;
 begin
+  { only into a new folder (ic8tem.31): with two installations the registered folder can be the other
+    one, and an installation that already has its settings must never get those of another }
+  if CurStep = ssInstall then
+  begin
+    FreshDir := not FileExists(ExpandConstant('{app}\settings\ms_settings'));
+    exit;
+  end;
   if CurStep <> ssPostInstall then exit;
+  if IsAutoUpdate() or not FreshDir then exit;
   NewDir := ExpandConstant('{app}');
   if (OldDir = '') or (CompareText(OldDir, NewDir) = 0) or not DirExists(OldDir) then exit;
   Marker := NewDir + '\settings\.migrated-from-old-folder';

@@ -1,5 +1,11 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.31
+* **Aggiornamento automatico con più installazioni** (per esempio una per radio, ognuna nella sua cartella): ora ogni installazione aggiorna **la propria cartella**. Prima, con l'installatore di Windows, l'aggiornamento finiva sempre in `C:\MSHV-IC8TEM-NEW`: una seconda installazione in un'altra cartella non veniva mai aggiornata, e chiedendo l'aggiornamento da lì si chiudeva e riapriva l'MSHV dell'altra cartella. Vedi [[Aggiornamenti automatici|Aggiornamenti-automatici]].
+* MSHV riparte con la stessa riga di comando (per esempio `--inst-name=`). Due installazioni aperte insieme non si cancellano più a vicenda il file scaricato.
+* L'installatore dà ai collegamenti di una seconda cartella un nome proprio, per esempio *MSHV-IC8TEM (MSHV-NEW-9700)*, così non prende quelli della prima, e non copia mai le impostazioni di un'installazione in un'altra.
+* **Una volta sola**: una seconda installazione fuori da `C:\MSHV-IC8TEM-NEW` va portata alla .31 a mano (basta copiare `MSHV-IC8TEM.exe` dallo zip nella sua cartella); dalla .31 in poi si aggiorna da sola.
+
 ## 2.76.7-ic8tem.30
 * **IC-7300, IC-7610 e IC-9700 (Hamlib)**: corretto. Su un PC senza Hamlib installato la riga di Rig Control restava rossa con "Hamlib: cannot load libhamlib-4.dll ... Impossibile trovare il modulo specificato". La libreria di Hamlib ha bisogno di `libusb-1.0.dll`, che sta accanto a lei nella cartella `hamlib`, ma Windows la cercava solo nella cartella del programma. Ora MSHV carica Hamlib in modo che Windows cerchi le sue DLL nella cartella `hamlib`, e ogni compilazione per Windows prova che la libreria si carichi davvero. Vedi [[IC-7300, IC-7610, IC-9700 con Hamlib|IC-7300-Hamlib]].
 
