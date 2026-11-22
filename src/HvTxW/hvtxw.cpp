@@ -262,6 +262,7 @@ HvTxW::HvTxW(QString inst,QString path,int lid,bool f,int x,int y,QWidget * pare
     AppPath = path;
     l_mam_hiscals_.clear();
     id_mshf = 10;//2.76
+    TPskHeard = new HvPskHeard(this);//IC8TEM v32 calls that heard me (PSKReporter), before the macros
 
     THvMakros = new HvMakros(AppPath,dsty,this);
     connect(THvMakros,SIGNAL(EmitRptRsq(bool)),this,SLOT(SetRptRsq(bool)));
@@ -3469,6 +3470,7 @@ void HvTxW::SetBand(QString s,int id)
     if (s_band==s) return;//only once because is radio buttons
 
     s_band = s;
+    TPskHeard->SetBand(s_band);//IC8TEM v32
     if (s_mode==11 || s_mode==13 || s_mode==18 || allq65) fpsk_restrict = true; //only ft8 ft4  || allq65
 
     //l_mycall_loc->setText(list_macros.at(0)+" "+list_macros.at(1)+"   Band "+s_band);
@@ -3640,6 +3642,7 @@ void HvTxW::SetMacros(QStringList list,int id_c0,QString cont_exch,QString trmN)
 
     list_macros = list;
     s_my_base_call = MultiAnswerMod->FindBaseFullCallRemAllSlash(list_macros.at(0));
+    TPskHeard->SetMyCall(list_macros.at(0));//IC8TEM v32
     //s_my_call_is_std = MultiAnswerMod->isStandardCall(list_macros.at(0));
     MultiAnswerMod->SetMacros(list,s_cont_id,s_cont_type);//2.23
 

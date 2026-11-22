@@ -4,6 +4,7 @@
  */
 #include "decodelist.h"
 #include "hvworked.h"//IC8TEM
+#include "../HvTxW/hvpskheard.h"//IC8TEM v32 calls that heard me
 #include "../mshv_ic8tem_path.h"//MSHV-IC8TEM data folder
 #include "../HvTxW/HvRadioNetW/hvlotwusers.h"//IC8TEM mod LoTW
 #include "../config.h"
@@ -173,6 +174,8 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     c_mark_txt[4] = QColor(255,255,150);//qsy in list2
     c_mark_txt[5] = QColor(255,180,100);//2.56 my call
     c_mark_txt[6] = QColor(100,210,255);//2.63 his call
+    c_mark_txt[7] = QColor(255,170,225);//IC8TEM worked on other bands (until Text Highlight sends its colors)
+    c_mark_txt[8] = QColor(230,255,0);//IC8TEM v32 heard me (PSKReporter): fluorescent yellow underline
     f_mark_tx = true;
     f_mark_qsy = true;
     f_mark_txqsy = false;//tx=0 qsy=1;
@@ -193,6 +196,7 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     s_mark_b4q_pos = 10;
     s_mark_loc_pos = 20;
     f_mark_pink = false;//IC8TEM
+    f_mark_heard = false;//IC8TEM v32
     f_mark_newgrid = false;//IC8TEM
     f_block_colw = true;//IC8TEM v27 until the constructor has set the columns
     f_nodec_lines = true;//IC8TEM v27
@@ -2256,6 +2260,17 @@ void DecodeList::SetWorkedOpts(bool pink,bool newgrid)
     f_mark_newgrid = newgrid;
     viewport()->update();
 }
+//IC8TEM v32: underline (Text Highlight color 8, fluorescent yellow) the calls of the stations
+//that received me on this band according to PSKReporter (HvPskHeard)
+void DecodeList::SetHeardOpts(bool f)
+{
+    f_mark_heard = f;
+    viewport()->update();
+}
+void DecodeList::RefreshMarks()
+{
+    viewport()->update();
+}
 bool DecodeList::GridWorked(const QString &g) const
 {
     if (g.count()==4) return set_grid_pfx4.contains(g);
@@ -2265,7 +2280,8 @@ void DecodeList::PaintIc8temMarks(QPainter *painter,const QStyleOptionViewItem &
 {
     bool pink = f_mark_pink && !HvWorked::Calls().isEmpty();
     bool ngrid = f_mark_newgrid && HvWorked::GridsReady();
-    if (!pink && !ngrid) return;
+    bool heard = f_mark_heard && HvPskHeard::Active();//IC8TEM v32
+    if (!pink && !ngrid && !heard) return;
     if (msg_column >= model.columnCount() || !model.item(index.row(),msg_column)) return;
     QString str_row = model.item(index.row(),msg_column)->text();
     if (str_row.isEmpty()) return;
@@ -2284,6 +2300,8 @@ void DecodeList::PaintIc8temMarks(QPainter *painter,const QStyleOptionViewItem &
         t.remove('<');
         t.remove('>');
         int ci = -1;
+        //IC8TEM v32: under the call, also when another color already marks it
+        bool ul = heard && t.count()>2 && !rxg.exactMatch(t) && HvPskHeard::IsHeard(t);
         if (!t.isEmpty() && !s_mark_txt.contains(t) && !s_mark_txt.contains(w))
         {
             if (ngrid && t!="RR73" && rxg.exactMatch(t))
@@ -2292,7 +2310,7 @@ void DecodeList::PaintIc8temMarks(QPainter *painter,const QStyleOptionViewItem &
             }
             else if (pink && t.count()>2 && HvWorked::Calls().contains(t) && !list_b4qso.contains(t)) ci = 7;
         }
-        if (ci >= 0)
+        if (ci >= 0 || ul)
         {
             int ls = str_row.lastIndexOf('\n',pos-1) + 1;
             int line = str_row.left(pos).count('\n');
@@ -2307,9 +2325,20 @@ void DecodeList::PaintIc8temMarks(QPainter *painter,const QStyleOptionViewItem &
             {
                 QRect r1(sta_1,line*fm.height(),end_1,fm.height()-2);
                 r1.translate(header()->sectionPosition(msg_column)+opt.rect.x()+5,opt.rect.y()+1);
-                painter->fillRect(r1,c_mark_txt[ci]);
-                r1.translate(0,-1);
-                painter->drawText(r1,w);
+                if (ci >= 0)
+                {
+                    painter->fillRect(r1,c_mark_txt[ci]);
+                    QRect rt = r1;
+                    rt.translate(0,-1);
+                    painter->drawText(rt,w);
+                }
+                if (ul)//IC8TEM v32 thick underline at the bottom of the word
+                {
+                    int th = qMax(2,fm.height()/7);
+                    QRect ru(r1.left(),r1.bottom()-th+1,r1.width()-1,th);
+                    if (!dsty) painter->fillRect(ru.adjusted(0,1,0,1),QColor(120,130,0));// darker edge: visible also on light rows
+                    painter->fillRect(ru,c_mark_txt[8]);
+                }
             }
         }
         pos += len;

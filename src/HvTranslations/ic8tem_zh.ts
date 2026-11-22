@@ -375,6 +375,18 @@
         <source>Choose Worked on other bands Color</source>
         <translation>选择其他波段已通联的颜色</translation>
     </message>
+    <message>
+        <source>Underline calls that heard me (PSKReporter)</source>
+        <translation>为收到我的呼号加下划线（PSKReporter）</translation>
+    </message>
+    <message>
+        <source>Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)</source>
+        <translation>根据 PSKReporter，最近 30 分钟内在此波段收到你的电台（发射期间每 5 分钟查询一次）</translation>
+    </message>
+    <message>
+        <source>Choose Heard me Color</source>
+        <translation>选择收到我的颜色</translation>
+    </message>
 </context>
 <context>
     <name>HamlibRig</name>
@@ -507,6 +519,33 @@
     <message>
         <source>Sources</source>
         <translation>来源</translation>
+    </message>
+</context>
+<context>
+    <name>HvPskHeard</name>
+    <message>
+        <source>PSKReporter: your call is not set (Options &gt; Macros)</source>
+        <translation>PSKReporter：未设置你的呼号（选项 &gt; 自定义文字）</translation>
+    </message>
+    <message>
+        <source>PSKReporter: error %1</source>
+        <translation>PSKReporter：错误 %1</translation>
+    </message>
+    <message>
+        <source>PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit</source>
+        <translation>PSKReporter：启动约一分钟后首次查询，之后在发射期间每 5 分钟查询一次</translation>
+    </message>
+    <message>
+        <source>Stations that heard you on %2: %1 (PSKReporter, %3 UTC)</source>
+        <translation>在 %2 收到你的电台：%1（PSKReporter，%3 UTC）</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS 不可用（没有 OpenSSL 也没有 curl）</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>无应答</translation>
     </message>
 </context>
 </TS>

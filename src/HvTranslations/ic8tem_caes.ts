@@ -375,6 +375,18 @@
         <source>Choose Worked on other bands Color</source>
         <translation>Trieu el color de treballats en altres bandes</translation>
     </message>
+    <message>
+        <source>Underline calls that heard me (PSKReporter)</source>
+        <translation>Subratlla els indicatius que m'han sentit (PSKReporter)</translation>
+    </message>
+    <message>
+        <source>Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)</source>
+        <translation>Estacions que us han rebut en els darrers 30 minuts en aquesta banda, segons PSKReporter (consulta cada 5 minuts mentre transmeteu)</translation>
+    </message>
+    <message>
+        <source>Choose Heard me Color</source>
+        <translation>Trieu el color dels que m'han sentit</translation>
+    </message>
 </context>
 <context>
     <name>HamlibRig</name>
@@ -507,6 +519,33 @@
     <message>
         <source>Sources</source>
         <translation>Fonts</translation>
+    </message>
+</context>
+<context>
+    <name>HvPskHeard</name>
+    <message>
+        <source>PSKReporter: your call is not set (Options &gt; Macros)</source>
+        <translation>PSKReporter: el vostre indicatiu no està configurat (Opcions &gt; Macros)</translation>
+    </message>
+    <message>
+        <source>PSKReporter: error %1</source>
+        <translation>PSKReporter: error %1</translation>
+    </message>
+    <message>
+        <source>PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit</source>
+        <translation>PSKReporter: primera consulta un minut després de l'inici, després cada 5 minuts mentre transmeteu</translation>
+    </message>
+    <message>
+        <source>Stations that heard you on %2: %1 (PSKReporter, %3 UTC)</source>
+        <translation>Estacions que us han sentit a %2: %1 (PSKReporter, %3 UTC)</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS no disponible (sense OpenSSL ni curl)</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>sense resposta</translation>
     </message>
 </context>
 </TS>

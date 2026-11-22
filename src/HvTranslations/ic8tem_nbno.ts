@@ -375,6 +375,18 @@
         <source>Choose Worked on other bands Color</source>
         <translation>Velg farge for kjørt på andre bånd</translation>
     </message>
+    <message>
+        <source>Underline calls that heard me (PSKReporter)</source>
+        <translation>Understrek kallesignaler som har hørt meg (PSKReporter)</translation>
+    </message>
+    <message>
+        <source>Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)</source>
+        <translation>Stasjoner som har mottatt deg de siste 30 minuttene på dette båndet, ifølge PSKReporter (spørres hvert 5. minutt mens du sender)</translation>
+    </message>
+    <message>
+        <source>Choose Heard me Color</source>
+        <translation>Velg farge for dem som har hørt meg</translation>
+    </message>
 </context>
 <context>
     <name>HamlibRig</name>
@@ -507,6 +519,33 @@
     <message>
         <source>Sources</source>
         <translation>Kilder</translation>
+    </message>
+</context>
+<context>
+    <name>HvPskHeard</name>
+    <message>
+        <source>PSKReporter: your call is not set (Options &gt; Macros)</source>
+        <translation>PSKReporter: kallesignalet ditt er ikke satt (Opsjoner &gt; Makroer)</translation>
+    </message>
+    <message>
+        <source>PSKReporter: error %1</source>
+        <translation>PSKReporter: feil %1</translation>
+    </message>
+    <message>
+        <source>PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit</source>
+        <translation>PSKReporter: første forespørsel ca. ett minutt etter start, deretter hvert 5. minutt mens du sender</translation>
+    </message>
+    <message>
+        <source>Stations that heard you on %2: %1 (PSKReporter, %3 UTC)</source>
+        <translation>Stasjoner som har hørt deg på %2: %1 (PSKReporter, %3 UTC)</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS er ikke tilgjengelig (ingen OpenSSL og ingen curl)</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>ikke svar</translation>
     </message>
 </context>
 </TS>

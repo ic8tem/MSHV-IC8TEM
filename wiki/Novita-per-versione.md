@@ -1,5 +1,11 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.32
+* **Chi ti ha ricevuto (PSKReporter)**: nelle liste delle decodifiche i nominativi delle stazioni che ti hanno ricevuto sulla banda in uso negli ultimi 30 minuti, secondo PSKReporter, sono **sottolineati in giallo fluo**. Vedi [[Chi ti ha ricevuto|Chi-ti-ha-ricevuto]].
+* *Options › Text Highlight*, riquadro **PSKReporter**: casella per accenderlo o spegnerlo (acceso di serie), tasto **COLOR** per il colore della sottolineatura, stato (quante stazioni ti hanno ricevuto e ora dell'ultimo aggiornamento).
+* PSKReporter viene interrogato circa un minuto dopo l'avvio, poi ogni 5 minuti solo mentre trasmetti (o fino a 30 minuti dopo l'ultima trasmissione).
+* Idea da *WsjtxUtils.Searchlight* di KC3PIB (per WSJT-X); il codice in MSHV è nuovo.
+
 ## 2.76.7-ic8tem.31
 * **Aggiornamento automatico con più installazioni** (per esempio una per radio, ognuna nella sua cartella): ora ogni installazione aggiorna **la propria cartella**. Prima, con l'installatore di Windows, l'aggiornamento finiva sempre in `C:\MSHV-IC8TEM-NEW`: una seconda installazione in un'altra cartella non veniva mai aggiornata, e chiedendo l'aggiornamento da lì si chiudeva e riapriva l'MSHV dell'altra cartella. Vedi [[Aggiornamenti automatici|Aggiornamenti-automatici]].
 * MSHV riparte con la stessa riga di comando (per esempio `--inst-name=`). Due installazioni aperte insieme non si cancellano più a vicenda il file scaricato.

@@ -10,3 +10,5 @@ Menu **Options › Text Highlight**, sezione 2.
 Per **non vedere** le stazioni già collegate: *Filtri › Hide QSO B4 Messages*. Con *By Band* e *By Mode* tolti nella riga *QSO B4 Call in MSG* vengono nascoste tutte quelle presenti nel log, su qualsiasi banda e modo (vale anche per *Warn Me If QSO Before*).
 
 Se è attivo il [[Annullamento fittizio del log|Annullamento-fittizio-del-log]], i QSO precedenti a quella data non contano per nessuno di questi colori.
+
+La **sottolineatura gialla** (stazioni che ti hanno ricevuto secondo PSKReporter) è nel riquadro *PSKReporter* della stessa finestra: vedi [[Chi ti ha ricevuto|Chi-ti-ha-ricevuto]].

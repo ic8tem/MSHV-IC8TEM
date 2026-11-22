@@ -16,6 +16,7 @@ G = "HvLogW"
 C = "HvTxtColor"
 LS = "HvLocSrc"
 LW = "HvLocSrcW"
+H = "HvPskHeard"
 
 def T(bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz):
     return dict(zip(LANGS, [bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz]))
@@ -735,4 +736,85 @@ MESSAGES = [
     "Kallesignal i TIL RADIO dekodet igjen setter Auto på",
     "Il nominativo in TO RADIO decodificato di nuovo attiva AUTO",
     "Opětovné dekódování značky z pole Do rádia zapne AUTO")),
+# IC8TEM v32: calls that heard me (PSKReporter)
+(C, "Underline calls that heard me (PSKReporter)", T(
+    "Подчертай позивните, които са ме чули (PSKReporter)", "Подчёркивать позывные, которые меня приняли (PSKReporter)",
+    "为收到我的呼号加下划线（PSKReporter）", "為收到我的呼號加底線（PSKReporter）",
+    "Subrayar los indicativos que me han oído (PSKReporter)", "Subratlla els indicatius que m'han sentit (PSKReporter)",
+    "Sublinhar os indicativos que me ouviram (PSKReporter)", "Subliniază indicativele care m-au auzit (PSKReporter)",
+    "Understreg kaldesignaler der har hørt mig (PSKReporter)", "Podkreśl znaki stacji, które mnie słyszały (PSKReporter)",
+    "Souligner les indicatifs qui m'ont entendu (PSKReporter)", "Sublinhar os indicativos que me ouviram (PSKReporter)",
+    "Understrek kallesignaler som har hørt meg (PSKReporter)", "Sottolinea i nominativi che mi hanno ricevuto (PSKReporter)",
+    "Podtrhnout značky stanic, které mě slyšely (PSKReporter)")),
+(C, "Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)", T(
+    "Станции, които са ви приели през последните 30 минути на тази лента, според PSKReporter (запитване на всеки 5 минути, докато предавате)",
+    "Станции, принявшие вас за последние 30 минут на этом диапазоне, по данным PSKReporter (запрос каждые 5 минут, пока вы передаёте)",
+    "根据 PSKReporter，最近 30 分钟内在此波段收到你的电台（发射期间每 5 分钟查询一次）",
+    "根據 PSKReporter，最近 30 分鐘內在此波段收到你的電台（發射期間每 5 分鐘查詢一次）",
+    "Estaciones que le han recibido en los últimos 30 minutos en esta banda, según PSKReporter (consulta cada 5 minutos mientras transmite)",
+    "Estacions que us han rebut en els darrers 30 minuts en aquesta banda, segons PSKReporter (consulta cada 5 minuts mentre transmeteu)",
+    "Estações que o receberam nos últimos 30 minutos nesta banda, segundo o PSKReporter (consulta a cada 5 minutos enquanto transmite)",
+    "Stațiile care v-au recepționat în ultimele 30 de minute pe această bandă, conform PSKReporter (interogare la fiecare 5 minute cât timp emiteți)",
+    "Stationer der har modtaget dig de sidste 30 minutter på dette bånd, ifølge PSKReporter (spørges hvert 5. minut mens du sender)",
+    "Stacje, które odebrały Cię w ciągu ostatnich 30 minut na tym paśmie, według PSKReporter (zapytanie co 5 minut podczas nadawania)",
+    "Stations qui vous ont reçu ces 30 dernières minutes sur cette bande, selon PSKReporter (interrogé toutes les 5 minutes pendant l'émission)",
+    "Estações que receberam você nos últimos 30 minutos nesta banda, segundo o PSKReporter (consulta a cada 5 minutos enquanto você transmite)",
+    "Stasjoner som har mottatt deg de siste 30 minuttene på dette båndet, ifølge PSKReporter (spørres hvert 5. minutt mens du sender)",
+    "Stazioni che ti hanno ricevuto negli ultimi 30 minuti su questa banda, secondo PSKReporter (interrogato ogni 5 minuti mentre trasmetti)",
+    "Stanice, které vás přijaly za posledních 30 minut na tomto pásmu, podle PSKReporter (dotaz každých 5 minut během vysílání)")),
+(C, "Choose Heard me Color", T(
+    "Изберете цвят за чулите ме", "Выберите цвет для принявших меня", "选择收到我的颜色", "選擇收到我的顏色",
+    "Elija el color de los que me han oído", "Trieu el color dels que m'han sentit", "Escolha a cor dos que me ouviram",
+    "Alegeți culoarea pentru cei care m-au auzit", "Vælg farve for dem der har hørt mig", "Wybierz kolor dla stacji, które mnie słyszały",
+    "Choisir la couleur de ceux qui m'ont entendu", "Escolha a cor dos que me ouviram", "Velg farge for dem som har hørt meg",
+    "Scegli il colore di chi mi ha ricevuto", "Vyberte barvu pro ty, kdo mě slyšeli")),
+(H, "PSKReporter: your call is not set (Options > Macros)", T(
+    "PSKReporter: позивната ви не е зададена (Опции > Макроси)", "PSKReporter: ваш позывной не задан (Опции > Макросы)",
+    "PSKReporter：未设置你的呼号（选项 > 自定义文字）", "PSKReporter：未設定你的呼號（選項 > 自定義文字）",
+    "PSKReporter: su indicativo no está configurado (Opciones > Macros)", "PSKReporter: el vostre indicatiu no està configurat (Opcions > Macros)",
+    "PSKReporter: o seu indicativo não está definido (Configurações > Macros)", "PSKReporter: indicativul dvs. nu este setat (Optiuni > Mesaje)",
+    "PSKReporter: dit kaldesignal er ikke indstillet (Options > Macros)", "PSKReporter: Twój znak nie jest ustawiony (Ustawienia > Makra)",
+    "PSKReporter : votre indicatif n'est pas défini (Options > Macros)", "PSKReporter: seu indicativo não está definido (Opções > Macros)",
+    "PSKReporter: kallesignalet ditt er ikke satt (Opsjoner > Makroer)", "PSKReporter: il tuo nominativo non è impostato (Opzioni > Macro)",
+    "PSKReporter: vaše značka není nastavena (Možnosti > Makra)")),
+(H, "PSKReporter: error %1", T(
+    "PSKReporter: грешка %1", "PSKReporter: ошибка %1", "PSKReporter：错误 %1", "PSKReporter：錯誤 %1", "PSKReporter: error %1",
+    "PSKReporter: error %1", "PSKReporter: erro %1", "PSKReporter: eroare %1", "PSKReporter: fejl %1", "PSKReporter: błąd %1",
+    "PSKReporter : erreur %1", "PSKReporter: erro %1", "PSKReporter: feil %1", "PSKReporter: errore %1", "PSKReporter: chyba %1")),
+(H, "PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit", T(
+    "PSKReporter: първа заявка около минута след стартиране, после на всеки 5 минути, докато предавате",
+    "PSKReporter: первый запрос примерно через минуту после запуска, затем каждые 5 минут, пока вы передаёте",
+    "PSKReporter：启动约一分钟后首次查询，之后在发射期间每 5 分钟查询一次",
+    "PSKReporter：啟動約一分鐘後首次查詢，之後在發射期間每 5 分鐘查詢一次",
+    "PSKReporter: primera consulta un minuto después del inicio, luego cada 5 minutos mientras transmite",
+    "PSKReporter: primera consulta un minut després de l'inici, després cada 5 minuts mentre transmeteu",
+    "PSKReporter: primeira consulta cerca de um minuto após o arranque, depois a cada 5 minutos enquanto transmite",
+    "PSKReporter: prima interogare la aproximativ un minut după pornire, apoi la fiecare 5 minute cât timp emiteți",
+    "PSKReporter: første forespørgsel ca. et minut efter start, derefter hvert 5. minut mens du sender",
+    "PSKReporter: pierwsze zapytanie około minuty po starcie, potem co 5 minut podczas nadawania",
+    "PSKReporter : première requête environ une minute après le démarrage, puis toutes les 5 minutes pendant l'émission",
+    "PSKReporter: primeira consulta cerca de um minuto após o início, depois a cada 5 minutos enquanto você transmite",
+    "PSKReporter: første forespørsel ca. ett minutt etter start, deretter hvert 5. minutt mens du sender",
+    "PSKReporter: prima richiesta circa un minuto dopo l'avvio, poi ogni 5 minuti mentre trasmetti",
+    "PSKReporter: první dotaz asi minutu po spuštění, potom každých 5 minut během vysílání")),
+(H, "Stations that heard you on %2: %1 (PSKReporter, %3 UTC)", T(
+    "Станции, които са ви чули на %2: %1 (PSKReporter, %3 UTC)", "Станции, принявшие вас на %2: %1 (PSKReporter, %3 UTC)",
+    "在 %2 收到你的电台：%1（PSKReporter，%3 UTC）", "在 %2 收到你的電台：%1（PSKReporter，%3 UTC）",
+    "Estaciones que le han oído en %2: %1 (PSKReporter, %3 UTC)", "Estacions que us han sentit a %2: %1 (PSKReporter, %3 UTC)",
+    "Estações que o ouviram em %2: %1 (PSKReporter, %3 UTC)", "Stații care v-au auzit pe %2: %1 (PSKReporter, %3 UTC)",
+    "Stationer der har hørt dig på %2: %1 (PSKReporter, %3 UTC)", "Stacje, które Cię słyszały na %2: %1 (PSKReporter, %3 UTC)",
+    "Stations qui vous ont entendu sur %2 : %1 (PSKReporter, %3 UTC)", "Estações que ouviram você em %2: %1 (PSKReporter, %3 UTC)",
+    "Stasjoner som har hørt deg på %2: %1 (PSKReporter, %3 UTC)", "Stazioni che ti hanno ricevuto in %2: %1 (PSKReporter, %3 UTC)",
+    "Stanice, které vás slyšely na %2: %1 (PSKReporter, %3 UTC)")),
+(H, "HTTPS is not available (no OpenSSL and no curl)", T(
+    "HTTPS не е налично (няма OpenSSL и няма curl)", "HTTPS недоступен (нет OpenSSL и нет curl)", "HTTPS 不可用（没有 OpenSSL 也没有 curl）",
+    "HTTPS 不可用（沒有 OpenSSL 也沒有 curl）", "HTTPS no disponible (sin OpenSSL ni curl)", "HTTPS no disponible (sense OpenSSL ni curl)",
+    "HTTPS indisponível (sem OpenSSL nem curl)", "HTTPS indisponibil (fără OpenSSL și fără curl)",
+    "HTTPS er ikke tilgængelig (ingen OpenSSL og ingen curl)", "HTTPS niedostępny (brak OpenSSL i curl)",
+    "HTTPS indisponible (ni OpenSSL ni curl)", "HTTPS indisponível (sem OpenSSL e sem curl)",
+    "HTTPS er ikke tilgjengelig (ingen OpenSSL og ingen curl)", "HTTPS non disponibile (né OpenSSL né curl)",
+    "HTTPS není k dispozici (chybí OpenSSL i curl)")),
+(H, "no answer", T(
+    "няма отговор", "нет ответа", "无应答", "無回應", "sin respuesta", "sense resposta", "sem resposta", "niciun răspuns",
+    "intet svar", "brak odpowiedzi", "pas de réponse", "sem resposta", "ikke svar", "nessuna risposta", "žádná odpověď")),
 ]

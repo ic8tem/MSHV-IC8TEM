@@ -873,6 +873,13 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
     connect(THvTxtColor, SIGNAL(EmitTextMark(bool*,QString)),FilterDialog,SLOT(SetTextMark(bool*,QString)));//2.69
     connect(THvTxtColor, SIGNAL(EmitWorkedOpts(bool,bool)), TDecodeList1, SLOT(SetWorkedOpts(bool,bool)));//IC8TEM
     connect(THvTxtColor, SIGNAL(EmitWorkedOpts(bool,bool)), TDecodeList2, SLOT(SetWorkedOpts(bool,bool)));//IC8TEM
+    //IC8TEM v32 calls that heard me (PSKReporter): underlined in both lists
+    connect(THvTxtColor, SIGNAL(EmitHeardOpts(bool)), TDecodeList1, SLOT(SetHeardOpts(bool)));
+    connect(THvTxtColor, SIGNAL(EmitHeardOpts(bool)), TDecodeList2, SLOT(SetHeardOpts(bool)));
+    connect(THvTxtColor, SIGNAL(EmitHeardOpts(bool)), THvTxW->PskHeard(), SLOT(SetEnabled(bool)));
+    connect(THvTxW->PskHeard(), SIGNAL(Updated()), TDecodeList1, SLOT(RefreshMarks()));
+    connect(THvTxW->PskHeard(), SIGNAL(Updated()), TDecodeList2, SLOT(RefreshMarks()));
+    connect(THvTxW->PskHeard(), SIGNAL(Status(QString)), THvTxtColor, SLOT(SetHeardStatus(QString)));
 
     connect(THvTxW, SIGNAL(EmitDListMarkText(QStringList,int,int,int,int,int)), TDecodeList1, SLOT(SetDListMarkText(QStringList,int,int,int,int,int)));
     connect(THvTxW, SIGNAL(EmitDListMarkText(QStringList,int,int,int,int,int)), TDecodeList2, SLOT(SetDListMarkText(QStringList,int,int,int,int,int)));
@@ -2909,6 +2916,7 @@ void Main_Ms::SetRigTxRx(bool f)
 	if (f_tx_busy == f) return;//2.76.7 Protection MAC and PC from bad Machine Clock
     f_tx_busy = f;//2.47  //if (f_tx_busy == f) return;
     if (THvPowerSwrW) THvPowerSwrW->SetTx(f);//IC8TEM Power & SWR
+    THvTxW->PskHeard()->NoteTx(f);//IC8TEM v32 PSKReporter is asked while transmitting
     THvRigControl->SetPtt(f,0);//id 0=All 1=p1 2=p2
     THvTxW->SetTxRxCountAutoSeq(f);//qDebug()<<"SetRigTxRx...................."<<f;
     if (f)
@@ -4580,6 +4588,7 @@ void Main_Ms::Read_Settings(QString path)
     if (!st_res[31].isEmpty()) THvTxW->SetPiriodTimeAllModes(st_res[31]);
 
     if (!st_res[32].isEmpty()) THvTxtColor->SetTextMark(st_res[32]);
+    else THvTxtColor->Refresh();//IC8TEM v32 first start: the default options reach the lists too
     if (!st_res[72].isEmpty()) THvTxtColor->SetTextColor(st_res[72]);
 
     if (!st_res[38].isEmpty())

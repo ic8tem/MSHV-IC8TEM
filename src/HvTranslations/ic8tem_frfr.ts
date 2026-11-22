@@ -375,6 +375,18 @@
         <source>Choose Worked on other bands Color</source>
         <translation>Choisir la couleur des contactés sur d'autres bandes</translation>
     </message>
+    <message>
+        <source>Underline calls that heard me (PSKReporter)</source>
+        <translation>Souligner les indicatifs qui m'ont entendu (PSKReporter)</translation>
+    </message>
+    <message>
+        <source>Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)</source>
+        <translation>Stations qui vous ont reçu ces 30 dernières minutes sur cette bande, selon PSKReporter (interrogé toutes les 5 minutes pendant l'émission)</translation>
+    </message>
+    <message>
+        <source>Choose Heard me Color</source>
+        <translation>Choisir la couleur de ceux qui m'ont entendu</translation>
+    </message>
 </context>
 <context>
     <name>HamlibRig</name>
@@ -507,6 +519,33 @@
     <message>
         <source>Sources</source>
         <translation>Sources</translation>
+    </message>
+</context>
+<context>
+    <name>HvPskHeard</name>
+    <message>
+        <source>PSKReporter: your call is not set (Options &gt; Macros)</source>
+        <translation>PSKReporter : votre indicatif n'est pas défini (Options &gt; Macros)</translation>
+    </message>
+    <message>
+        <source>PSKReporter: error %1</source>
+        <translation>PSKReporter : erreur %1</translation>
+    </message>
+    <message>
+        <source>PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit</source>
+        <translation>PSKReporter : première requête environ une minute après le démarrage, puis toutes les 5 minutes pendant l'émission</translation>
+    </message>
+    <message>
+        <source>Stations that heard you on %2: %1 (PSKReporter, %3 UTC)</source>
+        <translation>Stations qui vous ont entendu sur %2 : %1 (PSKReporter, %3 UTC)</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS indisponible (ni OpenSSL ni curl)</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>pas de réponse</translation>
     </message>
 </context>
 </TS>

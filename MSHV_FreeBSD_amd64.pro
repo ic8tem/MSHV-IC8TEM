@@ -71,6 +71,7 @@ HEADERS = src/main_ms.h \
  src/HvTxW/hvqthloc.h \
  src/HvTxW/hvmsdb.h \
  src/HvTxW/hvlocsrc.h \
+ src/HvTxW/hvpskheard.h \
  src/HvTxW/hvinle.h \
  src/HvTxW/hvspinbox.h \
  src/HvTxW/hvcustomw.h \
@@ -184,6 +185,7 @@ SOURCES = src/main.cpp \
  src/HvTxW/hvqthloc.cpp \
  src/HvTxW/hvmsdb.cpp \
  src/HvTxW/hvlocsrc.cpp \
+ src/HvTxW/hvpskheard.cpp \
  src/HvTxW/hvinle.cpp \
  src/HvTxW/hvspinbox.cpp \
  src/HvTxW/hvcustomw.cpp \

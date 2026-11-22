@@ -105,6 +105,8 @@ public slots:
     void SetFontHeader(QFont f);
     void SetTextMarkColors(QColor*,int,bool,bool);
     void SetWorkedOpts(bool,bool);//IC8TEM
+    void SetHeardOpts(bool);//IC8TEM v32 calls that heard me (PSKReporter)
+    void RefreshMarks();//IC8TEM v32
     void SetStaticGBlockListExp(bool);
     void SetNewDecClrMsgListFlag(bool);
     void SetUdpCmdDl(QStringList l); 
@@ -203,6 +205,7 @@ private:
     QColor c_mark_txt[11];
     bool f_mark_pink;//IC8TEM calls worked on other bands
     bool f_mark_newgrid;//IC8TEM grid color only for new grids
+    bool f_mark_heard;//IC8TEM v32 underline the calls that heard me (PSKReporter)
     QSet<QString> set_grid_full, set_grid_pfx4;//IC8TEM worked grids (as in the log list) and their 4-char prefixes
     bool GridWorked(const QString &g) const;
     void PaintIc8temMarks(QPainter *painter,const QStyleOptionViewItem &opt,const QModelIndex &index) const;

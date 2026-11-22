@@ -19,6 +19,8 @@
 | EME `CALL3.TXT` for the locator lookup | Lance Collister, W7GJ — <https://www.bigskyspaces.com/w7gj/> | data file | downloaded at run time (every 14 days), read only |
 | `grid_data.bin` (call → locator) for the locator lookup | JTDX team — <https://sourceforge.net/projects/jtdx/> | data file | downloaded at run time (every 14 days), read only; format as read by Decodium `UsStateDataManager` (GPLv3) |
 | Online locator lookup | G7VRD public APIs — <https://g7vrd.co.uk/public-apis> | free hobby service (beta) | asked only when no other source has the locator; answers kept 30 days |
+| "Calls that heard me" (underline of the stations that received you) | idea from WsjtxUtils.Searchlight — KC3PIB — <https://github.com/KC3PIB/WsjtxUtils.Searchlight> | MIT | idea only; the C++ code in `src/HvTxW/hvpskheard.*` is new |
+| Reception reports for "Calls that heard me" | PSKReporter — Philip Gladstone, N1DQ — <https://pskreporter.info> | free service | asked at run time (`retrieve.pskreporter.info`), at most every 5 minutes and only while transmitting |
 | Windows installer | Inno Setup — Jordan Russell and Martijn Laan | Inno Setup License | build tool |
 | AppImage | linuxdeploy and Qt plugin — <https://github.com/linuxdeploy> | MIT | build tool |
 

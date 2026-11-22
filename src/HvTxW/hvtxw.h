@@ -146,6 +146,7 @@ private:
 #include "../HvButtons/hvbutton_lrc.h"
 #include "../HvRigControl/HvRigCat/network/flexpanel.h"
 #include "hvlocsrc.h"//IC8TEM v28
+#include "hvpskheard.h"//IC8TEM v32
 
 //#define _BANDS_H_
 //#define _FREQTOBAND_H_
@@ -162,6 +163,7 @@ public:
     virtual ~HvTxW();
 
 	void SetMacrosFirstStart();
+    HvPskHeard *PskHeard() { return TPskHeard; }//IC8TEM v32 calls that heard me (PSKReporter)
     void SetBand(QString,int id);//0<-from App 1<-from Rig
     void CloseAllWidget();
     void StartStopZap();
@@ -449,6 +451,7 @@ private slots:
 
 private:
     HvLocSrc *TLocSrc;//IC8TEM v28 locator lookup: decodes, CALL3, grid_data.bin, online
+    HvPskHeard *TPskHeard;//IC8TEM v32 calls that heard me (PSKReporter)
     QTimer *t_loc_web;
     QString s_loc_web_call;
     void LocFromOtherSources(bool start_web);

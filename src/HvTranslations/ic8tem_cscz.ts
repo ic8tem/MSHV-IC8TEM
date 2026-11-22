@@ -375,6 +375,18 @@
         <source>Choose Worked on other bands Color</source>
         <translation>Vyberte barvu pro spojení na jiných pásmech</translation>
     </message>
+    <message>
+        <source>Underline calls that heard me (PSKReporter)</source>
+        <translation>Podtrhnout značky stanic, které mě slyšely (PSKReporter)</translation>
+    </message>
+    <message>
+        <source>Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)</source>
+        <translation>Stanice, které vás přijaly za posledních 30 minut na tomto pásmu, podle PSKReporter (dotaz každých 5 minut během vysílání)</translation>
+    </message>
+    <message>
+        <source>Choose Heard me Color</source>
+        <translation>Vyberte barvu pro ty, kdo mě slyšeli</translation>
+    </message>
 </context>
 <context>
     <name>HamlibRig</name>
@@ -507,6 +519,33 @@
     <message>
         <source>Sources</source>
         <translation>Zdroje</translation>
+    </message>
+</context>
+<context>
+    <name>HvPskHeard</name>
+    <message>
+        <source>PSKReporter: your call is not set (Options &gt; Macros)</source>
+        <translation>PSKReporter: vaše značka není nastavena (Možnosti &gt; Makra)</translation>
+    </message>
+    <message>
+        <source>PSKReporter: error %1</source>
+        <translation>PSKReporter: chyba %1</translation>
+    </message>
+    <message>
+        <source>PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit</source>
+        <translation>PSKReporter: první dotaz asi minutu po spuštění, potom každých 5 minut během vysílání</translation>
+    </message>
+    <message>
+        <source>Stations that heard you on %2: %1 (PSKReporter, %3 UTC)</source>
+        <translation>Stanice, které vás slyšely na %2: %1 (PSKReporter, %3 UTC)</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS není k dispozici (chybí OpenSSL i curl)</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>žádná odpověď</translation>
     </message>
 </context>
 </TS>

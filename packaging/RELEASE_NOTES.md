@@ -1,6 +1,8 @@
 **MSHV-IC8TEM** — modified version of MSHV 2.76.7 by LZ2HV, with additions by IC8TEM.
 Not the official MSHV: please report problems with this version to IC8TEM.
 
+**ic8tem.32:** **Calls that heard me (PSKReporter)**: in the decode lists the calls of the stations that received you on the band in use in the last 30 minutes, according to PSKReporter, are **underlined in fluorescent yellow** · Options → Text Highlight → *PSKReporter*: on/off (on by default), underline color, status (how many stations, time of the last update) · PSKReporter is asked about one minute after the start, then every 5 minutes only while you transmit · idea from WsjtxUtils.Searchlight by KC3PIB.
+
 **ic8tem.31:** **Automatic update with several installations** (for example one per radio): every installation now updates **its own folder** — before, the Windows installer always updated `C:\MSHV-IC8TEM-NEW`, so a second installation in another folder was never updated · MSHV starts again with the same command line (`--inst-name=` kept) · two installations running together no longer share the download folder · the installer gives the shortcuts of a second folder their own name ("MSHV-IC8TEM (folder)") and never copies the settings of one installation into another. **Up to ic8tem.30 a second installation outside `C:\MSHV-IC8TEM-NEW` must be brought to ic8tem.31 by hand once.**
 
 **ic8tem.30:** **Icom IC-7300 / IC-7610 / IC-9700 (Hamlib)**: fix — on a PC without Hamlib installed the radio stayed at "Hamlib: cannot load libhamlib-4.dll ... The specified module could not be found" (Windows did not find `libusb-1.0.dll`, which is next to `libhamlib-4.dll` in the `hamlib` folder); every Windows build now checks that its Hamlib library loads.

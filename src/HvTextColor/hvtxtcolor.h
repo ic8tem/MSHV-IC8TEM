@@ -12,10 +12,11 @@
 #include <QColor>
 #include <QColorDialog>
 #include <QGroupBox>
-#define C_COLORS 8 //IC8TEM: +7 worked on other bands (pink)
+#include <QLabel>
+#define C_COLORS 9 //IC8TEM: +7 worked on other bands (pink), +8 calls that heard me (PSKReporter, underline)
 #define C_SHEM 2
 #define C_CB 29
-#define C_BT 8
+#define C_BT 9
 
 #include "../HvTxW/hvinle.h"
 //#include "../config.h"
@@ -51,11 +52,16 @@ public:
         return s;
     };
     void SetFont(QFont f);
+    void Refresh() { TextMarkChanged(true); }//IC8TEM v32 send the current options
 
 signals:
     void EmitTextMark(bool *f,QString);
     void EmitTextMarkColors(QColor*,int,bool,bool);
     void EmitWorkedOpts(bool,bool);//IC8TEM pink calls, new grids only
+    void EmitHeardOpts(bool);//IC8TEM v32 underline the calls that heard me (PSKReporter)
+
+public slots:
+    void SetHeardStatus(QString);//IC8TEM v32
 
 private slots:
     void TextMarkChanged(bool);
@@ -68,6 +74,7 @@ private slots:
     void OpenCDBoxMC();
     void OpenCDBoxHC();
     void OpenCDBoxPK();//IC8TEM
+    void OpenCDBoxHD();//IC8TEM v32
     void setDefColors();
     void ColorChanged(QColor);
     //void LeTextChanged(QString);
@@ -77,6 +84,8 @@ private:
     QCheckBox *cb[C_CB];
     QCheckBox *cb_pink;//IC8TEM
     QCheckBox *cb_newgrid;//IC8TEM
+    QCheckBox *cb_heard;//IC8TEM v32
+    QLabel *l_heard;//IC8TEM v32 PSKReporter status
     HvLeWithSpace *le_cals_msg;    
     QColor collors[C_SHEM][C_COLORS];
     QColor collors0[C_SHEM][C_COLORS];

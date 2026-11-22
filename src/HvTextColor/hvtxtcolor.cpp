@@ -82,6 +82,11 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     cb_newgrid = new QCheckBox(tr("New grids only"));//IC8TEM
     cb_newgrid->setChecked(true);
     cb_newgrid->setToolTip(tr("The grid color marks only the grids not yet in the log (needs B4 Grid in MSG)"));
+    cb_heard = new QCheckBox(tr("Underline calls that heard me (PSKReporter)"));//IC8TEM v32
+    cb_heard->setChecked(true);
+    cb_heard->setToolTip(tr("Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)"));
+    l_heard = new QLabel();
+    l_heard->setWordWrap(true);
     le_cals_msg = new HvLeWithSpace();
     le_cals_msg->setMaxLength(150);
     le_cals_msg->setToolTip("LZ2HV,K1ABC  "+tr("(Call: Minimum 3 Characters)"));//Maximum 150 Characters
@@ -93,6 +98,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
 	connect(cb[28], SIGNAL(toggled(bool)), this, SLOT(TextMarkChanged(bool)));
 	connect(cb_pink, SIGNAL(toggled(bool)), this, SLOT(TextMarkChanged(bool)));//IC8TEM
 	connect(cb_newgrid, SIGNAL(toggled(bool)), this, SLOT(TextMarkChanged(bool)));//IC8TEM
+	connect(cb_heard, SIGNAL(toggled(bool)), this, SLOT(TextMarkChanged(bool)));//IC8TEM v32
 
     QVBoxLayout *V_l0m = new QVBoxLayout();
     V_l0m->setContentsMargins (0, 0, 0, 0);
@@ -147,6 +153,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     b_[5] = new QPushButton(tr("COLOR"));
     b_[6] = new QPushButton(tr("COLOR"));
     b_[7] = new QPushButton(tr("COLOR"));//IC8TEM
+    b_[8] = new QPushButton(tr("COLOR"));//IC8TEM v32
 
     QPushButton *b_set_default = new QPushButton(tr("SET DEFAULT COLORS"));
     
@@ -226,6 +233,19 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     QGroupBox *GB_C2 = new QGroupBox(tr("SECTION 2: QSO B4, Band Mode, will change filter Warn Me If QSO B4"));
     GB_C2->setLayout(V_l2);
 
+    QHBoxLayout *H_hhd = new QHBoxLayout();//IC8TEM v32 calls that heard me (PSKReporter)
+    H_hhd->setContentsMargins (0, 0, 0, 0);
+    H_hhd->setSpacing(4);
+    H_hhd->addWidget(cb_heard);
+    H_hhd->addWidget(b_[8]);
+    QVBoxLayout *V_lhd = new QVBoxLayout();
+    V_lhd->setContentsMargins (1, 1, 1, 1);
+    V_lhd->setSpacing(3);
+    V_lhd->addLayout(H_hhd);
+    V_lhd->addWidget(l_heard);
+    QGroupBox *GB_C3 = new QGroupBox("PSKReporter");
+    GB_C3->setLayout(V_lhd);
+
     connect(b_[0], SIGNAL(clicked(bool)), this, SLOT(OpenCDBox1()));
     connect(b_[1], SIGNAL(clicked(bool)), this, SLOT(OpenCDBox2()));
     connect(b_[2], SIGNAL(clicked(bool)), this, SLOT(OpenCDBox3()));
@@ -234,6 +254,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     connect(b_[5], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxMC()));
     connect(b_[6], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxHC()));
     connect(b_[7], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxPK()));//IC8TEM
+    connect(b_[8], SIGNAL(clicked(bool)), this, SLOT(OpenCDBoxHD()));//IC8TEM v32
     connect(b_set_default, SIGNAL(clicked(bool)), this, SLOT(setDefColors()));
 
     CD_box = new QColorDialog(this);
@@ -250,6 +271,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     V_l->addWidget(GB_C0h);
     V_l->addWidget(GB_C1);
     V_l->addWidget(GB_C2);
+    V_l->addWidget(GB_C3);//IC8TEM v32
     //V_l->addLayout(H_h2);
     //V_l->addLayout(H_h3);
     /*V_l->addWidget(GB_C2);
@@ -267,6 +289,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     collors[0][5] = collors0[0][5] = QColor(255,180,100);//2.56 mycall
     collors[0][6] = collors0[0][6] = QColor(100,210,255);//2.63 hiscall
     collors[0][7] = collors0[0][7] = QColor(255,170,225);//IC8TEM worked on other bands (pink)
+    collors[0][8] = collors0[0][8] = QColor(230,255,0);//IC8TEM v32 heard me: fluorescent yellow underline
 	//default dark sheme
     collors[1][0] = collors0[1][0] = QColor(0,125,0);//CQ RRR 73
     collors[1][1] = collors0[1][1] = QColor(130,0,0);//QSO B4
@@ -276,6 +299,7 @@ HvTxtColor::HvTxtColor(bool f,QWidget *parent )
     collors[1][5] = collors0[1][5] = QColor(100,70,40);//2.56 mycall
     collors[1][6] = collors0[1][6] = QColor(50,100,140);//2.63 hiscall
     collors[1][7] = collors0[1][7] = QColor(130,50,100);//IC8TEM worked on other bands (pink)
+    collors[1][8] = collors0[1][8] = QColor(230,255,0);//IC8TEM v32 heard me: fluorescent yellow underline
 
     RefreshAll();
 }
@@ -347,6 +371,17 @@ void HvTxtColor::OpenCDBoxPK()//IC8TEM
     CD_box->open();
     CD_box->setCurrentColor(collors[dsty][7].rgb());
 }
+void HvTxtColor::OpenCDBoxHD()//IC8TEM v32
+{
+    b_ident = 8;
+    CD_box->setWindowTitle(tr("Choose Heard me Color"));
+    CD_box->open();
+    CD_box->setCurrentColor(collors[dsty][8].rgb());
+}
+void HvTxtColor::SetHeardStatus(QString s)//IC8TEM v32
+{
+    l_heard->setText(s);
+}
 void HvTxtColor::SetFont(QFont f)
 {
     for (int i =0; i<C_BT; ++i) b_[i]->setFont(f);
@@ -377,6 +412,7 @@ void HvTxtColor::setDefColors()
     collors[dsty][5] = collors0[dsty][5];
     collors[dsty][6] = collors0[dsty][6];
     collors[dsty][7] = collors0[dsty][7];//IC8TEM
+    collors[dsty][8] = collors0[dsty][8];//IC8TEM v32
     RefreshAll();
 }
 void HvTxtColor::SetTextColor(QString s)
@@ -417,6 +453,7 @@ QString HvTxtColor::GetTextMark()
     res.append(le_cals_msg->text());//29
     res.append(cb_pink->isChecked() ? "#1" : "#0");//30 IC8TEM
     res.append(cb_newgrid->isChecked() ? "#1" : "#0");//31 IC8TEM
+    res.append(cb_heard->isChecked() ? "#1" : "#0");//32 IC8TEM v32
     return res;
 }
 QString HvTxtColor::CorrectSyntax(QString txt ,bool cordot)
@@ -454,7 +491,7 @@ void HvTxtColor::SetTextMark(QString s)
 {
     QStringList ls=s.split("#");
     ls<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<
-        "1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1";//31	  
+        "1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1"<<"1";//33 IC8TEM v32
 	for (int i = 0; i < C_CB; ++i)
 	{
 		if (!ls.at(i).isEmpty() && ls.at(i)=="1") cb[i]->setChecked(true);
@@ -466,6 +503,7 @@ void HvTxtColor::SetTextMark(QString s)
    	}
     cb_pink->setChecked(ls.at(30)!="0");//IC8TEM (older settings: ON)
     cb_newgrid->setChecked(ls.at(31)!="0");//IC8TEM
+    cb_heard->setChecked(ls.at(32)!="0");//IC8TEM v32 (older settings: ON)
   	TextMarkChanged(true);//refresh
 }
 void HvTxtColor::TxTextMarkChanged(bool)
@@ -496,4 +534,5 @@ void HvTxtColor::TextMarkChanged(bool)
     le_cals_msg->setText(CorrectSyntax(le_cals_msg->text(),true));      
     emit EmitTextMark(f,le_cals_msg->text());
     emit EmitWorkedOpts(f[29],f[30]);//IC8TEM //qDebug()<<f[0]<<f[1]<<f[28]<<le_cals_msg->text();
+    emit EmitHeardOpts(cb_heard->isChecked());//IC8TEM v32
 }

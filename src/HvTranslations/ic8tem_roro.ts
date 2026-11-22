@@ -375,6 +375,18 @@
         <source>Choose Worked on other bands Color</source>
         <translation>Alegeți culoarea pentru lucrați pe alte benzi</translation>
     </message>
+    <message>
+        <source>Underline calls that heard me (PSKReporter)</source>
+        <translation>Subliniază indicativele care m-au auzit (PSKReporter)</translation>
+    </message>
+    <message>
+        <source>Stations that received you in the last 30 minutes on this band, according to PSKReporter (asked every 5 minutes while you transmit)</source>
+        <translation>Stațiile care v-au recepționat în ultimele 30 de minute pe această bandă, conform PSKReporter (interogare la fiecare 5 minute cât timp emiteți)</translation>
+    </message>
+    <message>
+        <source>Choose Heard me Color</source>
+        <translation>Alegeți culoarea pentru cei care m-au auzit</translation>
+    </message>
 </context>
 <context>
     <name>HamlibRig</name>
@@ -507,6 +519,33 @@
     <message>
         <source>Sources</source>
         <translation>Surse</translation>
+    </message>
+</context>
+<context>
+    <name>HvPskHeard</name>
+    <message>
+        <source>PSKReporter: your call is not set (Options &gt; Macros)</source>
+        <translation>PSKReporter: indicativul dvs. nu este setat (Optiuni &gt; Mesaje)</translation>
+    </message>
+    <message>
+        <source>PSKReporter: error %1</source>
+        <translation>PSKReporter: eroare %1</translation>
+    </message>
+    <message>
+        <source>PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit</source>
+        <translation>PSKReporter: prima interogare la aproximativ un minut după pornire, apoi la fiecare 5 minute cât timp emiteți</translation>
+    </message>
+    <message>
+        <source>Stations that heard you on %2: %1 (PSKReporter, %3 UTC)</source>
+        <translation>Stații care v-au auzit pe %2: %1 (PSKReporter, %3 UTC)</translation>
+    </message>
+    <message>
+        <source>HTTPS is not available (no OpenSSL and no curl)</source>
+        <translation>HTTPS indisponibil (fără OpenSSL și fără curl)</translation>
+    </message>
+    <message>
+        <source>no answer</source>
+        <translation>niciun răspuns</translation>
     </message>
 </context>
 </TS>
