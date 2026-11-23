@@ -16,7 +16,7 @@ Non è l'MSHV ufficiale: i problemi di questa versione vanno segnalati a IC8TEM.
 | Sblocco TX Slots (acceso di default) | *Multi Answer Auto Seq Protocol* | [[Multi Answer TX Slots|Multi-Answer-TX-Slots]] |
 | Colonna Width (durata del ping) in MSK144 | Menu della lista decodifiche | [[Durata del ping MSK144|Durata-ping-MSK144]] |
 | Colonne della lista più strette o più larghe (trascinando il bordo) e riga tratteggiata per i periodi senza decodifiche | Lista decodifiche e suo menu | [[Lista decodifiche: colonne e periodi vuoti|Lista-decodifiche]] |
-| **Chi ti ha ricevuto**: nominativi sottolineati in giallo fluo se ti hanno ricevuto su questa banda negli ultimi 30 minuti, secondo PSKReporter | *Options › Text Highlight*, riquadro *PSKReporter* | [[Chi ti ha ricevuto|Chi-ti-ha-ricevuto]] |
+| **Chi ti ha ricevuto**: nominativi sottolineati in giallo fluo se ti hanno ricevuto su questa banda negli ultimi 30 minuti, secondo PSKReporter; tutte le bande, da 135 kHz a 248 GHz (HF, VHF, UHF, microonde) | *Options › Text Highlight*, riquadro *PSKReporter* | [[Chi ti ha ricevuto|Chi-ti-ha-ricevuto]] |
 | **Ricerca del locatore** quando il nominativo non è nel database: decodifiche degli ultimi 20 periodi, CALL3 (WSJT-X Improved e W7GJ EME), grid_data.bin di JTDX scaricati da soli, G7VRD in rete; l'etichetta dice la fonte | Accanto a *LOCATOR*; *Options › Network Configuration › Page 4* | [[Ricerca del locatore|Ricerca-locatore]] |
 | **Ripartenza della TX** quando il nominativo in TO RADIO viene decodificato di nuovo | *Options › Decode Lists Options* | [[Ripartenza della TX|Ripartenza-TX]] |
 | **Icom LAN**: IC-7300MK2, IC-705, IC-9700, IC-7610, IC-905 via rete con CAT e audio | *Rig Control* e *Sound Settings* | [[Icom LAN|Icom-LAN]] |

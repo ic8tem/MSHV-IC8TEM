@@ -7,6 +7,13 @@
  * https://retrieve.pskreporter.info/query. The decode lists underline (fluorescent yellow by
  * default, Text Highlight) the calls of the stations that received me on the band in use.
  *
+ * Every MSHV band (135 kHz ... 248 GHz). The band of a report comes from its frequency; when
+ * the frequency is missing or in no band (programs that send it in 4 bytes cannot go above
+ * 4.29 GHz) it is the band I was transmitting on at the time of the report, and when the
+ * frequency is the IF of a transverter (28, 144, 432, 1296, 2320 MHz) the report counts also
+ * for the band I was transmitting on. The answers are added together (PSKReporter gives only
+ * the last 100 records): a report counts for 35 minutes.
+ *
  * May be used under the terms of the GNU General Public License (GPL)
  */
 #ifndef HVPSKHEARD_H
@@ -15,6 +22,7 @@
 #include <QObject>
 #include <QString>
 #include <QHash>
+#include <QList>
 #include <QProcess>
 
 class QNetworkAccessManager;
@@ -37,10 +45,23 @@ public:
     void NoteTx(bool on);
 
     // helpers, public for the tests
+    struct Report
+    {
+        QString call;   // receiver
+        qint64 hz;      // 0 = not given
+        qint64 t;       // UTC s
+    };
+    typedef QList<Report> Reports;
+    typedef QHash<QString, QHash<int, qint64> > HeardMap;   // call -> band -> last report (UTC s)
     static QString BaseCall(const QString &call);
     static int BandIndex(qint64 hz);     // index in lst_bands, -1 = no band
-    typedef QHash<QString, QHash<int, qint64> > HeardMap;   // call -> band -> last report (UTC s)
-    static bool Parse(const QByteArray &xml, HeardMap &exact, QString &err);
+    static int BandOfName(const QString &band);
+    static bool IsIfBand(int band);      // usual IF of transverters
+    static bool Parse(const QByteArray &xml, Reports &out, QString &err);
+    int TxBandAt(qint64 t) const;        // band I was transmitting on at t (UTC s), -1 = none
+    QList<int> BandsOf(qint64 hz, qint64 t) const;
+    void Merge(const Reports &reps);
+    int CountOnBand() const;
 
 public slots:
     void SetEnabled(bool);
@@ -56,6 +77,13 @@ private slots:
     void TimedOut();
 
 private:
+    struct TxSeg
+    {
+        qint64 start;        // UTC s
+        qint64 end;          // UTC s, -1 = still transmitting
+        int band;
+    };
+    QList<TxSeg> tx_hist;    // my transmissions of the last 45 minutes, with their band
     QNetworkAccessManager *nam;
     QNetworkReply *reply;
     QProcess *proc;

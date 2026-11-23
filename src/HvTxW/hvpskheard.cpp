@@ -26,6 +26,11 @@
 #define PSKH_WINDOW_S 1800                      // reports of the last 30 minutes
 #define PSKH_PERIOD_MS (300*1000)               // PSKReporter: at most one request every 5 minutes
 #define PSKH_FIRST_MS (60*1000)                 // first request about one minute after the start
+#define PSKH_VALID_S (PSKH_WINDOW_S + PSKH_PERIOD_MS/1000)  // a report counts for 35 minutes
+// a station decodes me from the start of my transmission (some programs give the time of the
+// period) to some time after its end (slow modes, averaging); clocks can be some seconds off
+#define PSKH_TX_BEFORE_S 30
+#define PSKH_TX_AFTER_S 150
 
 namespace
 {
@@ -53,6 +58,30 @@ void Put(HvPskHeard::HeardMap &m,const QString &call,int band,qint64 t)
 {
     QHash<int, qint64> &b = m[call];
     if (b.value(band, 0) < t) b[band] = t;
+}
+void Prune(HvPskHeard::HeardMap &m,qint64 oldest)
+{
+    for (HvPskHeard::HeardMap::iterator it = m.begin(); it != m.end();)
+    {
+        for (QHash<int, qint64>::iterator b = it->begin(); b != it->end();)
+        {
+            if (b.value() < oldest) b = it->erase(b);
+            else ++b;
+        }
+        if (it->isEmpty()) it = m.erase(it);
+        else ++it;
+    }
+}
+void RebuildMatch()
+{
+    g_match = g_exact;
+    for (HvPskHeard::HeardMap::const_iterator it = g_exact.constBegin(); it != g_exact.constEnd(); ++it)
+    {
+        QString base = HvPskHeard::BaseCall(it.key());
+        if (base == it.key()) continue;
+        for (QHash<int, qint64>::const_iterator b = it->constBegin(); b != it->constEnd(); ++b)
+            Put(g_match, base, b.key(), b.value());
+    }
 }
 }
 
@@ -96,7 +125,7 @@ bool HvPskHeard::IsHeard(const QString &call)
         if (it == g_match.constEnd()) continue;
         QHash<int, qint64>::const_iterator b = it->constFind(g_band);
         // a report stays valid for the window plus one period (no new answer while not transmitting)
-        if (b != it->constEnd() && now - b.value() <= PSKH_WINDOW_S + PSKH_PERIOD_MS/1000) return true;
+        if (b != it->constEnd() && now - b.value() <= PSKH_VALID_S) return true;
     }
     return false;
 }
@@ -130,7 +159,81 @@ int HvPskHeard::BandIndex(qint64 hz)
     }
     return -1;
 }
-bool HvPskHeard::Parse(const QByteArray &xml,HeardMap &exact,QString &err)
+int HvPskHeard::BandOfName(const QString &band)
+{
+    for (int i = 0; i < COUNT_BANDS; ++i)
+    {
+        if (lst_bands[i] == band) return i;
+    }
+    return -1;
+}
+bool HvPskHeard::IsIfBand(int band)
+{
+    static const char *ifs[] = {"28 MHz","144 MHz","432 MHz","1296 MHz","2320 MHz"};
+    if (band < 0 || band >= COUNT_BANDS) return false;
+    for (unsigned i = 0; i < sizeof(ifs)/sizeof(ifs[0]); ++i)
+    {
+        if (lst_bands[band] == QLatin1String(ifs[i])) return true;
+    }
+    return false;
+}
+int HvPskHeard::TxBandAt(qint64 t) const
+{
+    const qint64 now = NowMs()/1000;
+    int best = -1;
+    qint64 best_d = 0;
+    for (int i = 0; i < tx_hist.count(); ++i)
+    {
+        const TxSeg &s = tx_hist.at(i);
+        if (s.band < 0) continue;
+        const qint64 end = (s.end < 0) ? now : s.end;
+        if (t < s.start - PSKH_TX_BEFORE_S || t > end + PSKH_TX_AFTER_S) continue;
+        const qint64 d = (t < s.start) ? s.start - t : ((t > end) ? t - end : 0);
+        if (best < 0 || d < best_d)
+        {
+            best = s.band;
+            best_d = d;
+        }
+    }
+    return best;
+}
+QList<int> HvPskHeard::BandsOf(qint64 hz,qint64 t) const
+{
+    QList<int> res;
+    const int bf = BandIndex(hz);
+    const int bt = TxBandAt(t);
+    if (bf >= 0) res << bf;
+    if (bt >= 0 && bt != bf)
+    {
+        // no frequency, or in no band (4 bytes: nothing above 4.29 GHz): the band I was transmitting on
+        if (bf < 0) res << bt;
+        // one of the two is the IF of a transverter (the other station's or mine without LO offset)
+        else if ((IsIfBand(bf) && bt > bf) || (IsIfBand(bt) && bf > bt)) res << bt;
+    }
+    return res;
+}
+void HvPskHeard::Merge(const Reports &reps)
+{
+    for (int i = 0; i < reps.count(); ++i)
+    {
+        const Report &r = reps.at(i);
+        QList<int> bl = BandsOf(r.hz, r.t);
+        for (int j = 0; j < bl.count(); ++j) Put(g_exact, r.call, bl.at(j), r.t);
+    }
+    Prune(g_exact, NowMs()/1000 - PSKH_VALID_S);
+    RebuildMatch();
+}
+int HvPskHeard::CountOnBand() const
+{
+    const qint64 oldest = NowMs()/1000 - PSKH_VALID_S;
+    int n = 0;
+    for (HeardMap::const_iterator it = g_exact.constBegin(); it != g_exact.constEnd(); ++it)
+    {
+        if (it->value(g_band, 0) >= oldest) n++;
+    }
+    return n;
+}
+bool HvPskHeard::Parse(const QByteArray &xml,Reports &out,QString &err)
 {
     QXmlStreamReader r(xml);
     bool root = false;
@@ -145,25 +248,25 @@ bool HvPskHeard::Parse(const QByteArray &xml,HeardMap &exact,QString &err)
         }
         if (r.name() != QLatin1String("receptionReport")) continue;
         QXmlStreamAttributes a = r.attributes();
-        QString rc = a.value(QLatin1String("receiverCallsign")).toString().trimmed().toUpper();
-        qint64 hz = a.value(QLatin1String("frequency")).toString().toLongLong();
-        qint64 t = a.value(QLatin1String("flowStartSeconds")).toString().toLongLong();
-        if (rc.isEmpty() || t <= 0) continue;
-        int b = BandIndex(hz);
-        if (b < 0) continue;
-        Put(exact, rc, b, t);
+        Report rep;
+        rep.call = a.value(QLatin1String("receiverCallsign")).toString().trimmed().toUpper();
+        rep.hz = a.value(QLatin1String("frequency")).toString().trimmed().toLongLong();
+        rep.t = a.value(QLatin1String("flowStartSeconds")).toString().trimmed().toLongLong();
+        if (rep.call.isEmpty() || rep.t <= 0) continue;
+        if (rep.hz < 0) rep.hz = 0;
+        out.append(rep);
     }
-    if (r.hasError())
+    if (!root)
+    {
+        err = r.hasError() ? r.errorString() : QString("no reception reports in the answer");
+        return false;
+    }
+    if (r.hasError() && out.isEmpty())
     {
         err = r.errorString();
         return false;
     }
-    if (!root)
-    {
-        err = "no reception reports in the answer";
-        return false;
-    }
-    return true;
+    return true;// an answer cut short: the reports read are good
 }
 void HvPskHeard::SetEnabled(bool f)
 {
@@ -189,24 +292,40 @@ void HvPskHeard::SetMyCall(const QString &call)
 }
 void HvPskHeard::SetBand(const QString &band)
 {
-    int b = -1;
-    for (int i = 0; i < COUNT_BANDS; ++i)
-    {
-        if (lst_bands[i] == band)
-        {
-            b = i;
-            break;
-        }
-    }
+    const int b = BandOfName(band);
     if (b == g_band) return;
     g_band = b;
+    if (f_tx && !tx_hist.isEmpty() && tx_hist.last().end < 0)// band changed while transmitting
+    {
+        const qint64 now = NowMs()/1000;
+        tx_hist.last().end = now;
+        TxSeg sg;
+        sg.start = now;
+        sg.end = -1;
+        sg.band = b;
+        tx_hist.append(sg);
+    }
     SendStatus();
     emit Updated();
 }
 void HvPskHeard::NoteTx(bool on)
 {
-    if (on || f_tx) t_last_tx = NowMs();   // start and end of a transmission
+    const qint64 now = NowMs();
+    if (on || f_tx) t_last_tx = now;   // start and end of a transmission
+    if (on && !f_tx)
+    {
+        TxSeg sg;
+        sg.start = now/1000;
+        sg.end = -1;
+        sg.band = g_band;
+        tx_hist.append(sg);
+    }
+    else if (!on && f_tx && !tx_hist.isEmpty() && tx_hist.last().end < 0) tx_hist.last().end = now/1000;
     f_tx = on;
+    // only the transmissions the reports can be about (30 minutes asked + margins)
+    while (!tx_hist.isEmpty() && tx_hist.first().end >= 0 &&
+            now/1000 - tx_hist.first().end > PSKH_VALID_S + PSKH_TX_AFTER_S + 600) tx_hist.removeFirst();
+    while (tx_hist.count() > 5000) tx_hist.removeFirst();
 }
 void HvPskHeard::Tick()
 {
@@ -310,8 +429,8 @@ void HvPskHeard::Done(const QByteArray &body,int http,const QString &err)
 {
     QString e = err;
     if (e.isEmpty() && http != 200) e = "HTTP "+QString::number(http);
-    HeardMap exact;
-    if (e.isEmpty()) Parse(body,exact,e);
+    Reports reps;
+    if (e.isEmpty()) Parse(body,reps,e);
     if (!e.isEmpty())
     {
         // the reports already read stay valid (they expire with their time)
@@ -322,15 +441,7 @@ void HvPskHeard::Done(const QByteArray &body,int http,const QString &err)
         return;
     }
     s_error.clear();
-    g_exact = exact;
-    g_match = exact;
-    for (HeardMap::const_iterator it = exact.constBegin(); it != exact.constEnd(); ++it)
-    {
-        QString base = BaseCall(it.key());
-        if (base == it.key()) continue;
-        for (QHash<int, qint64>::const_iterator b = it->constBegin(); b != it->constEnd(); ++b)
-            Put(g_match, base, b.key(), b.value());
-    }
+    Merge(reps);// added to the answers before (PSKReporter gives only the last 100 records)
     s_updated = QDateTime::currentDateTimeUtc().toString("HH:mm");
     SendStatus();
     emit Updated();
@@ -344,9 +455,7 @@ void HvPskHeard::SendStatus()
     else if (s_updated.isEmpty()) s = tr("PSKReporter: first request about one minute after the start, then every 5 minutes while you transmit");
     else
     {
-        int n = 0;
-        for (HeardMap::const_iterator it = g_exact.constBegin(); it != g_exact.constEnd(); ++it)
-            if (it->contains(g_band)) n++;
+        const int n = CountOnBand();
         QString band = (g_band >= 0 && g_band < COUNT_BANDS) ? lst_bands[g_band] : QString("-");
         s = tr("Stations that heard you on %2: %1 (PSKReporter, %3 UTC)").arg(n).arg(band).arg(s_updated);
     }

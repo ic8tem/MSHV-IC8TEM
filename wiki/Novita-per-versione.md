@@ -1,5 +1,12 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.33
+* **Chi ti ha ricevuto (PSKReporter) su tutte le bande**, da 135 kHz a 248 GHz: HF, VHF, UHF e microonde. Vedi [[Chi ti ha ricevuto|Chi-ti-ha-ricevuto]].
+* Correzione: in **70 MHz** (la banda con cui MSHV parte) la sottolineatura non si attivava dopo un riavvio, finché non si cambiava banda.
+* Un rapporto **senza frequenza**, o con una frequenza fuori da ogni banda (succede sopra i 4,29 GHz con i programmi che inviano la frequenza in 4 byte: 5,7 - 10 - 24 GHz…), conta per la banda su cui stavi trasmettendo in quel momento.
+* Un rapporto sulla **media frequenza di un transverter** (28, 144, 432, 1296, 2320 MHz) mentre trasmetti su un'altra banda conta per tutte e due.
+* Le risposte di PSKReporter (al massimo gli ultimi 100 rapporti) vengono sommate: su una banda HF affollata nessuno sparisce prima dei 35 minuti.
+
 ## 2.76.7-ic8tem.32
 * **Chi ti ha ricevuto (PSKReporter)**: nelle liste delle decodifiche i nominativi delle stazioni che ti hanno ricevuto sulla banda in uso negli ultimi 30 minuti, secondo PSKReporter, sono **sottolineati in giallo fluo**. Vedi [[Chi ti ha ricevuto|Chi-ti-ha-ricevuto]].
 * *Options › Text Highlight*, riquadro **PSKReporter**: casella per accenderlo o spegnerlo (acceso di serie), tasto **COLOR** per il colore della sottolineatura, stato (quante stazioni ti hanno ricevuto e ora dell'ultimo aggiornamento).

@@ -1094,6 +1094,7 @@ HvTxW::HvTxW(QString inst,QString path,int lid,bool f,int x,int y,QWidget * pare
     //1.61= CAT
     //s_mode = -1;//2.71 stop s_mode = -1; <- crash ,old ->? ot tuk se refre6va CAT only ont time
     s_band = "70 MHz";
+    TPskHeard->SetBand(s_band);//IC8TEM v33 the band is known from the start
     //end 1.61= CAT
     ReadSettings();
 }
@@ -3467,10 +3468,10 @@ void HvTxW::ModeChanget(int mode,bool f)
 void HvTxW::SetBand(QString s,int id)
 {
     //qDebug()<<"SetBand"<<s<<s_band<<id;
+    TPskHeard->SetBand(s);//IC8TEM v32 (v33 before the return: also when the band is the starting one, 70 MHz)
     if (s_band==s) return;//only once because is radio buttons
 
     s_band = s;
-    TPskHeard->SetBand(s_band);//IC8TEM v32
     if (s_mode==11 || s_mode==13 || s_mode==18 || allq65) fpsk_restrict = true; //only ft8 ft4  || allq65
 
     //l_mycall_loc->setText(list_macros.at(0)+" "+list_macros.at(1)+"   Band "+s_band);
