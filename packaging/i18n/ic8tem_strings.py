@@ -17,6 +17,7 @@ C = "HvTxtColor"
 LS = "HvLocSrc"
 LW = "HvLocSrcW"
 H = "HvPskHeard"
+PW = "HvQ65PileupW"
 
 def T(bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz):
     return dict(zip(LANGS, [bg, ru, zh, zhhk, eses, caes, ptpt, roro, dadk, plpl, frfr, ptbr, nbno, itit, cscz]))
@@ -817,4 +818,114 @@ MESSAGES = [
 (H, "no answer", T(
     "няма отговор", "нет ответа", "无应答", "無回應", "sin respuesta", "sense resposta", "sem resposta", "niciun răspuns",
     "intet svar", "brak odpowiedzi", "pas de réponse", "sem resposta", "ikke svar", "nessuna risposta", "žádná odpověď")),
+# IC8TEM v34: Q65 Pileup (WSJT-X 2.7 / 3.2)
+(PW, "Q65 Pileup - Callers", T(
+    "Q65 Pileup - викащи станции", "Q65 Pileup - вызывающие станции", "Q65 Pileup - 呼叫者", "Q65 Pileup - 呼叫者",
+    "Q65 Pileup - Llamantes", "Q65 Pileup - Estacions que criden", "Q65 Pileup - Chamadores", "Q65 Pileup - Stații care cheamă",
+    "Q65 Pileup - Kaldende", "Q65 Pileup - Wołający", "Q65 Pileup - Appelants", "Q65 Pileup - Chamadores",
+    "Q65 Pileup - Anropere", "Q65 Pileup - Chiamanti", "Q65 Pileup - Volající")),
+(PW, "Freq", T("Чест.", "Част.", "频率", "頻率", "Frec.", "Freq.", "Freq.", "Frecv.", "Frekv.", "Częst.", "Fréq.", "Freq.", "Frekv.", "Freq", "Frekv.")),
+(PW, "Call", T("Позивна", "Позывной", "呼号", "呼號", "Indicativo", "Indicatiu", "Indicativo", "Indicativ", "Call", "Znak", "Indicatif", "Indicativo", "Call", "Nominativo", "Značka")),
+(PW, "Grid", T("Локатор", "Локатор", "网格", "網格", "Locator", "Locator", "Loc", "Locator", "Locator", "Lokator", "Locator", "Locator", "Lokator", "Locatore", "Lokátor")),
+(PW, "El", T("Елев.", "Возв.", "仰角", "仰角", "Elev.", "Elev.", "Elev.", "Elev.", "Elev.", "Elew.", "Élév.", "Elev.", "Elev.", "El", "Elev.")),
+(PW, "Age (h)", T("Преди (ч)", "Давность (ч)", "时长（小时）", "時長（小時）", "Hace (h)", "Fa (h)", "Há (h)", "Vechime (h)", "Alder (t)", "Wiek (h)", "Âge (h)", "Há (h)", "Alder (t)", "Età (h)", "Stáří (h)")),
+(PW, "Audio frequency of the last decode (Hz)", T(
+    "Аудио честота на последното декодиране (Hz)", "Звуковая частота последнего декодирования (Гц)", "最后一次解码的音频频率（Hz）",
+    "最後一次解碼的音頻頻率（Hz）", "Frecuencia de audio de la última decodificación (Hz)", "Freqüència d'àudio de l'última descodificació (Hz)",
+    "Frequência de áudio da última descodificação (Hz)", "Frecvența audio a ultimei decodări (Hz)", "Lydfrekvens for sidste afkodning (Hz)",
+    "Częstotliwość audio ostatniego dekodowania (Hz)", "Fréquence audio du dernier décodage (Hz)", "Frequência de áudio da última decodificação (Hz)",
+    "Lydfrekvens for siste dekoding (Hz)", "Frequenza audio dell'ultima decodifica (Hz)", "Zvuková frekvence posledního dekódování (Hz)")),
+(PW, "Moon elevation at the caller's locator (degrees)", T(
+    "Елевация на Луната в локатора на викащия (градуси)", "Высота Луны в локаторе вызывающего (градусы)", "呼叫者网格处的月亮仰角（度）",
+    "呼叫者網格處的月亮仰角（度）", "Elevación de la Luna en el locator del llamante (grados)", "Elevació de la Lluna al locator de qui crida (graus)",
+    "Elevação da Lua no locator do chamador (graus)", "Elevația Lunii la locatorul celui care cheamă (grade)", "Månens højde ved den kaldendes locator (grader)",
+    "Wysokość Księżyca w lokatorze wołającego (stopnie)", "Élévation de la Lune au locator de l'appelant (degrés)", "Elevação da Lua no locator do chamador (graus)",
+    "Månens høyde ved anroperens lokator (grader)", "Elevazione della Luna nel locatore del chiamante (gradi)", "Výška Měsíce v lokátoru volajícího (stupně)")),
+(PW, "Hours since the last decode", T(
+    "Часове от последното декодиране", "Часы с последнего декодирования", "距最后一次解码的小时数", "距最後一次解碼的小時數",
+    "Horas desde la última decodificación", "Hores des de l'última descodificació", "Horas desde a última descodificação",
+    "Ore de la ultima decodare", "Timer siden sidste afkodning", "Godziny od ostatniego dekodowania", "Heures depuis le dernier décodage",
+    "Horas desde a última decodificação", "Timer siden siste dekoding", "Ore dall'ultima decodifica", "Hodiny od posledního dekódování")),
+(PW, "# = the caller copied our last transmission", T(
+    "# = викащият е приел последното ни предаване", "# = вызывающий принял нашу последнюю передачу", "# = 呼叫者已收到我们上一次的发射",
+    "# = 呼叫者已收到我們上一次的發射", "# = el llamante copió nuestra última transmisión", "# = qui crida ha copiat la nostra última transmissió",
+    "# = o chamador copiou a nossa última transmissão", "# = cel care cheamă a recepționat ultima noastră emisie", "# = den kaldende har modtaget vores sidste udsendelse",
+    "# = wołający odebrał naszą ostatnią transmisję", "# = l'appelant a copié notre dernière émission", "# = o chamador copiou nossa última transmissão",
+    "# = anroperen har mottatt vår siste sending", "# = il chiamante ha ricevuto la nostra ultima trasmissione", "# = volající přijal naše poslední vysílání")),
+(PW, "Refresh", T("Обнови", "Обновить", "刷新", "重新整理", "Actualizar", "Actualitza", "Atualizar", "Reîmprospătare", "Opdater", "Odśwież", "Actualiser", "Atualizar", "Oppdater", "Aggiorna", "Obnovit")),
+(PW, "Erase list", T("Изтрий списъка", "Очистить список", "清除列表", "清除列表", "Borrar lista", "Esborra la llista", "Apagar lista", "Șterge lista", "Slet listen", "Wyczyść listę", "Effacer la liste", "Apagar lista", "Slett listen", "Cancella elenco", "Smazat seznam")),
+(PW, "Click: answer with Tx3 (R + locator). Ctrl+click: remove the caller.", T(
+    "Щракване: отговор с Tx3 (R + локатор). Ctrl+щракване: премахва викащия.", "Щелчок: ответ Tx3 (R + локатор). Ctrl+щелчок: удалить вызывающего.",
+    "单击：用 Tx3 回答（R + 网格）。Ctrl+单击：删除该呼叫者。", "單擊：用 Tx3 回答（R + 網格）。Ctrl+單擊：刪除該呼叫者。",
+    "Clic: responder con Tx3 (R + locator). Ctrl+clic: quitar el llamante.", "Clic: respon amb Tx3 (R + locator). Ctrl+clic: treu qui crida.",
+    "Clique: responder com Tx3 (R + locator). Ctrl+clique: remover o chamador.", "Clic: răspunde cu Tx3 (R + locator). Ctrl+clic: elimină pe cel care cheamă.",
+    "Klik: svar med Tx3 (R + locator). Ctrl+klik: fjern den kaldende.", "Kliknięcie: odpowiedź Tx3 (R + lokator). Ctrl+kliknięcie: usuń wołającego.",
+    "Clic : répondre avec Tx3 (R + locator). Ctrl+clic : retirer l'appelant.", "Clique: responder com Tx3 (R + locator). Ctrl+clique: remover o chamador.",
+    "Klikk: svar med Tx3 (R + lokator). Ctrl+klikk: fjern anroperen.", "Clic: risponde con Tx3 (R + locatore). Ctrl+clic: toglie il chiamante.",
+    "Klik: odpověď Tx3 (R + lokátor). Ctrl+klik: odebrat volajícího.")),
+(PW, "Up to 40 callers, kept 24 hours; removed when their Moon is more than 5 degrees below the horizon or when the QSO is logged.", T(
+    "До 40 викащи, пазят се 24 часа; премахват се, когато Луната им е повече от 5 градуса под хоризонта или когато QSO-то е записано в дневника.",
+    "До 40 вызывающих, хранятся 24 часа; удаляются, когда их Луна более чем на 5 градусов ниже горизонта или когда QSO записано в журнал.",
+    "最多 40 个呼叫者，保留 24 小时；当其月亮低于地平线 5 度以上或 QSO 已记录时删除。",
+    "最多 40 個呼叫者，保留 24 小時；當其月亮低於地平線 5 度以上或 QSO 已記錄時刪除。",
+    "Hasta 40 llamantes, se guardan 24 horas; se quitan cuando su Luna está más de 5 grados bajo el horizonte o cuando el QSO se registra.",
+    "Fins a 40 estacions, es guarden 24 hores; es treuen quan la seva Lluna és més de 5 graus sota l'horitzó o quan el QSO es registra.",
+    "Até 40 chamadores, guardados 24 horas; removidos quando a sua Lua está mais de 5 graus abaixo do horizonte ou quando o QSO é registado.",
+    "Până la 40 de stații, păstrate 24 de ore; eliminate când Luna lor este cu peste 5 grade sub orizont sau când QSO-ul este trecut în log.",
+    "Op til 40 kaldende, gemmes i 24 timer; fjernes når deres Måne er mere end 5 grader under horisonten, eller når QSO'en er logget.",
+    "Do 40 wołających, przechowywani 24 godziny; usuwani, gdy ich Księżyc jest ponad 5 stopni pod horyzontem lub gdy QSO zostanie zapisane w logu.",
+    "Jusqu'à 40 appelants, gardés 24 heures ; retirés quand leur Lune est à plus de 5 degrés sous l'horizon ou quand le QSO est enregistré.",
+    "Até 40 chamadores, mantidos 24 horas; removidos quando a Lua deles está mais de 5 graus abaixo do horizonte ou quando o QSO é registrado.",
+    "Opptil 40 anropere, lagres i 24 timer; fjernes når Månen deres er mer enn 5 grader under horisonten, eller når QSO-en er logget.",
+    "Fino a 40 chiamanti, tenuti 24 ore; tolti quando la loro Luna è più di 5 gradi sotto l'orizzonte o quando il QSO è registrato nel log.",
+    "Až 40 volajících, uchovávají se 24 hodin; odebírají se, když je jejich Měsíc více než 5 stupňů pod obzorem nebo když je QSO zapsáno do deníku.")),
+(PW, "Up to 40 callers, kept 24 hours, used for a priori decoding in the activities with locator exchange.", T(
+    "До 40 викащи, пазят се 24 часа, използват се за априорно декодиране в дейностите с размяна на локатори.",
+    "До 40 вызывающих, хранятся 24 часа, используются для априорного декодирования в активностях с обменом локаторами.",
+    "最多 40 个呼叫者，保留 24 小时，用于交换网格的活动中的先验解码。",
+    "最多 40 個呼叫者，保留 24 小時，用於交換網格的活動中的先驗解碼。",
+    "Hasta 40 llamantes, se guardan 24 horas, se usan para la decodificación a priori en las actividades con intercambio de locator.",
+    "Fins a 40 estacions, es guarden 24 hores, s'usen per a la descodificació a priori en les activitats amb intercanvi de locator.",
+    "Até 40 chamadores, guardados 24 horas, usados na descodificação a priori nas atividades com troca de locator.",
+    "Până la 40 de stații, păstrate 24 de ore, folosite pentru decodarea a priori în activitățile cu schimb de locator.",
+    "Op til 40 kaldende, gemmes i 24 timer, bruges til a priori-afkodning i aktiviteterne med udveksling af locator.",
+    "Do 40 wołających, przechowywani 24 godziny, używani do dekodowania a priori w aktywnościach z wymianą lokatorów.",
+    "Jusqu'à 40 appelants, gardés 24 heures, utilisés pour le décodage a priori dans les activités avec échange de locator.",
+    "Até 40 chamadores, mantidos 24 horas, usados na decodificação a priori nas atividades com troca de locator.",
+    "Opptil 40 anropere, lagres i 24 timer, brukes til a priori-dekoding i aktivitetene med utveksling av lokator.",
+    "Fino a 40 chiamanti, tenuti 24 ore, usati per la decodifica a priori nelle attività con scambio di locatore.",
+    "Až 40 volajících, uchovávají se 24 hodin, používají se pro dekódování a priori v aktivitách s výměnou lokátorů.")),
+(PW, "The list is used in Q65 mode.", T(
+    "Списъкът се използва в режим Q65.", "Список используется в режиме Q65.", "该列表用于 Q65 模式。", "該列表用於 Q65 模式。",
+    "La lista se usa en el modo Q65.", "La llista s'usa en el mode Q65.", "A lista é usada no modo Q65.", "Lista este folosită în modul Q65.",
+    "Listen bruges i Q65-tilstand.", "Lista jest używana w trybie Q65.", "La liste sert en mode Q65.", "A lista é usada no modo Q65.",
+    "Listen brukes i Q65-modus.", "L'elenco è usato nel modo Q65.", "Seznam se používá v režimu Q65.")),
+(PW, "Q65 Pileup is off: Q65 menu, or right-click on a Q65 mode button.", T(
+    "Q65 Pileup е изключен: меню Q65 или десен бутон върху бутон на режим Q65.", "Q65 Pileup выключен: меню Q65 или правый щелчок по кнопке режима Q65.",
+    "Q65 Pileup 已关闭：Q65 菜单，或右键单击 Q65 模式按钮。", "Q65 Pileup 已關閉：Q65 選單，或右鍵單擊 Q65 模式按鈕。",
+    "Q65 Pileup está desactivado: menú Q65, o clic derecho en un botón de modo Q65.", "Q65 Pileup està desactivat: menú Q65, o clic dret en un botó de mode Q65.",
+    "Q65 Pileup está desligado: menu Q65, ou clique direito num botão de modo Q65.", "Q65 Pileup este oprit: meniul Q65 sau clic dreapta pe un buton de mod Q65.",
+    "Q65 Pileup er slået fra: menuen Q65, eller højreklik på en Q65-tilstandsknap.", "Q65 Pileup jest wyłączony: menu Q65 lub prawy klik na przycisku trybu Q65.",
+    "Q65 Pileup est désactivé : menu Q65, ou clic droit sur un bouton de mode Q65.", "Q65 Pileup está desligado: menu Q65, ou clique direito em um botão de modo Q65.",
+    "Q65 Pileup er slått av: Q65-menyen, eller høyreklikk på en Q65-modusknapp.", "Q65 Pileup è spento: menu Q65, o clic destro su un pulsante di modo Q65.",
+    "Q65 Pileup je vypnutý: nabídka Q65 nebo pravé tlačítko na tlačítku režimu Q65.")),
+(PW, "Callers: %1", T("Викащи: %1", "Вызывающих: %1", "呼叫者：%1", "呼叫者：%1", "Llamantes: %1", "Estacions: %1", "Chamadores: %1", "Stații: %1",
+    "Kaldende: %1", "Wołający: %1", "Appelants : %1", "Chamadores: %1", "Anropere: %1", "Chiamanti: %1", "Volající: %1")),
+(PW, "Erase the list of Q65 callers?", T(
+    "Да се изтрие ли списъкът с викащите станции Q65?", "Очистить список вызывающих станций Q65?", "清除 Q65 呼叫者列表？", "清除 Q65 呼叫者列表？",
+    "¿Borrar la lista de llamantes Q65?", "Voleu esborrar la llista d'estacions Q65 que criden?", "Apagar a lista de chamadores Q65?",
+    "Ștergeți lista stațiilor Q65 care cheamă?", "Slet listen over Q65-kaldende?", "Wyczyścić listę wołających Q65?", "Effacer la liste des appelants Q65 ?",
+    "Apagar a lista de chamadores Q65?", "Slette listen over Q65-anropere?", "Cancellare l'elenco dei chiamanti Q65?", "Smazat seznam volajících Q65?")),
+("Main_Ms", "Q65 Pileup", T("Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup",
+    "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup", "Q65 Pileup")),
+("Main_Ms", "right-click on a Q65 button", T(
+    "десен бутон върху бутон Q65", "правый щелчок по кнопке Q65", "右键单击 Q65 按钮", "右鍵單擊 Q65 按鈕", "clic derecho en un botón Q65",
+    "clic dret en un botó Q65", "clique direito num botão Q65", "clic dreapta pe un buton Q65", "højreklik på en Q65-knap", "prawy klik na przycisku Q65",
+    "clic droit sur un bouton Q65", "clique direito em um botão Q65", "høyreklikk på en Q65-knapp", "clic destro su un pulsante Q65",
+    "pravé tlačítko na tlačítku Q65")),
+("Main_Ms", "Q65 Pileup - Callers", T(
+    "Q65 Pileup - викащи станции", "Q65 Pileup - вызывающие станции", "Q65 Pileup - 呼叫者", "Q65 Pileup - 呼叫者",
+    "Q65 Pileup - Llamantes", "Q65 Pileup - Estacions que criden", "Q65 Pileup - Chamadores", "Q65 Pileup - Stații care cheamă",
+    "Q65 Pileup - Kaldende", "Q65 Pileup - Wołający", "Q65 Pileup - Appelants", "Q65 Pileup - Chamadores",
+    "Q65 Pileup - Anropere", "Q65 Pileup - Chiamanti", "Q65 Pileup - Volající")),
 ]

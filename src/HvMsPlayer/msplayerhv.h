@@ -52,6 +52,10 @@ public:
     void SetTxFreq(double);// ft8 for the moment 1.43
     void SetMsf(bool);
     void SetOffsetDt(int dt);//2.76.5
+    void SetQ65Flag78(bool f)//IC8TEM v34 Q65 Pileup: "I copied your last transmission" in the next Q65 transmission
+    {
+        s_q65flag78 = f;
+    };
 
 signals:
     //void SendTxRx(bool);
@@ -109,6 +113,7 @@ private:
     int s_period_time_sec;
     void Restart();
     bool s_msf;
+    bool s_q65flag78;//IC8TEM v34
     QString sfma_tx_all;
     QString otp_tx_key;
     void GetSsMsAndOffset(int &,int &);

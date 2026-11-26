@@ -2400,7 +2400,7 @@ int q65subs::q65_intrinsics_fastfading(q65_codec_ds *pCodec,
 }
 
 // Max codeword list size in q65_decode_fullaplist
-#define Q65_FULLAPLIST_SIZE	256
+#define Q65_FULLAPLIST_SIZE	411 //IC8TEM v34 (WSJT-X 3.2): MAX_NCW of q65_set_list2, 41 calls x 5 kinds x 2 values of bit 78
 // Minimum codeword loglikelihood for decoding
 #define Q65_LLH_THRESHOLD -260.0f
 // Full AP decoding from a list of codewords
@@ -2409,6 +2409,7 @@ int q65subs::q65_check_llh(float *llh, const int* ydec, const int nN, const int 
 {
     int k;
     float t = 0;
+    if (llh!=NULL) *llh = -1.0e30f;//IC8TEM v34 (WSJT-X 3.2)
 
     /*for (k=0;k<nN;k++)
     {
@@ -2417,6 +2418,7 @@ int q65subs::q65_check_llh(float *llh, const int* ydec, const int nN, const int 
     }*/
 	for (k=0;k<nN;k++)//2.57 
 	{
+	  if (ydec[k] < 0 || ydec[k] >= nM) return 0;//IC8TEM v34 (WSJT-X 3.2) symbol out of the alphabet
 	  float x=pIntrin[ydec[k]];
 	  if(x < 1.0e-36) x = 1.0e-36; 
 	  t+=logf(x);

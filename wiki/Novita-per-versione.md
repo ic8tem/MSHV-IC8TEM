@@ -1,5 +1,12 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.34
+* **Q65 Pileup** come in WSJT-X 2.7 e 3.2, per le DXpedition EME con tanti chiamanti deboli: **Mode › Q65 › Q65 Pileup**, oppure **clic destro su un pulsante Q65**. Vedi [[Q65 Pileup|Q65-Pileup]].
+* Finestra **Q65 Pileup - Callers**: gli ultimi 40 chiamanti (24 ore) con frequenza, nominativo, locatore, **elevazione della Luna** al loro locatore ed età; **clic = risposta con Tx3**, Ctrl+clic = togli dall'elenco.
+* L'elenco alimenta la decodifica a priori; escono i chiamanti con la Luna più di 5° sotto l'orizzonte e le stazioni appena registrate nel log.
+* Segno **`#`** (WSJT-X 3.2): una decodifica `Q0#` viene da una stazione che ha ricevuto la tua trasmissione precedente; con il Pileup acceso MSHV manda lo stesso segno alla stazione in TO RADIO quando l'ha decodificata nel periodo appena finito. Con due liste delle decodifiche la colonna *Type* compare durante il Pileup.
+* I messaggi con `#` dei chiamanti in elenco ora si decodificano anche con l'elenco: nelle prove 8 su 8 fino a −28 dB (con la .33: 0 su 8 a −28 dB).
+
 ## 2.76.7-ic8tem.33
 * **Chi ti ha ricevuto (PSKReporter) su tutte le bande**, da 135 kHz a 248 GHz: HF, VHF, UHF e microonde. Vedi [[Chi ti ha ricevuto|Chi-ti-ha-ricevuto]].
 * Correzione: in **70 MHz** (la banda con cui MSHV parte) la sottolineatura non si attivava dopo un riavvio, finché non si cambiava banda.

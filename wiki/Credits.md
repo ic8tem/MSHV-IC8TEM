@@ -4,6 +4,7 @@
 |---|---|---|---|
 | MSHV, the whole program | Hrisimir Hristov, LZ2HV — <https://sourceforge.net/projects/mshv/> | GPLv3 | base of this version |
 | Decoders/encoders (JT6M, JT65, JTMS, ISCAT, MSK144, FT8, FT4, Q65, QRA64) and `astro()` used by Doppler tracking | Joe Taylor K1JT and the WSJT Development Group — <https://wsjt.sourceforge.io> | GPLv3 | already in MSHV |
+| Q65 Pileup: callers list with Moon elevation (`get_q3list.f90`), list of codewords with both values of the spare bit 78 (`q65_set_list2`), `#` marks and the bit sent to the station being worked (WSJT-X 3.2.0-rc1); a priori list decoding fixes in `q65_check_llh()` | Joe Taylor K1JT and the WSJT Development Group — WSJT-X 2.7.0 and 3.2.0-rc1 — <https://wsjt.sourceforge.io> | GPLv3 | ported to C++ on top of the Pileup activity ported by LZ2HV in MSHV 2.72; callers window, Moon elevation from MSHV's own Moon routine, menu and right click are new |
 | TCI client | Expert Electronics, modified by LZ2HV | MIT | already in MSHV |
 | FlexRadio native VITA-49 backend | Manoj Kumar R, VU2CPL | GPLv3 | already in MSHV 2.76.7 |
 | macOS port: PortAudio audio, menus/keys, CPU meter, fonts, `mac_complex_shim.h`, `mshv_thread_helper.h`, `mshv_txtrace.h`, Boost `clang.hpp`; fixes for FFT pointers and Flex tuner | Manoj Kumar R, VU2CPL — <https://github.com/vu2cpl/mshv-macos-port> | GPLv3 (Boost files: Boost Software License 1.0) | code merged |

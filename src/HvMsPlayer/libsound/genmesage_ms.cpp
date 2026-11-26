@@ -467,7 +467,7 @@ tune:
     	else if (mod_ident==16) mq65 = 4;
     	else if (mod_ident==17) mq65 = 8;
     	QString tstr = format_msg(msg,max_len);//2.65
-        nwave = TGenQ65->genq65(tstr,iwave,GEN_SAMPLE_RATE,tx_freq,mq65,period_t);//,i3b 
+        nwave = TGenQ65->genq65(tstr,iwave,GEN_SAMPLE_RATE,tx_freq,mq65,period_t,s_q65flag78);//,i3b IC8TEM v34 Q65 Pileup flag
         goto end;
     }                
     else if (mod_ident==4)

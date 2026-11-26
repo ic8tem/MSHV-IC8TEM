@@ -67,6 +67,7 @@ public:
     //void SetEditRow(int);
     void SetMode(int,bool,bool,bool,bool,bool); 
     void SetShowMskWidth(bool);//IC8TEM
+    void SetQ65PileupCol(bool);//IC8TEM v34 Q65 Pileup: the Type column (Q code and '#') also with two decode lists
     /*int GetListCount()
     {
         return 	model.rowCount();
@@ -186,6 +187,7 @@ private:
     //QColor ActiveRowText;
     //QColor ActiveRowBackg;
     bool allq65;
+    bool s_q65pileup_col;//IC8TEM v34
     bool coded_mods;
     int s_mode;
     QClipboard *clipboard;

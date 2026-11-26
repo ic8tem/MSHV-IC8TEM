@@ -200,6 +200,16 @@ public:
         //return le_his_call->text();
         return list_macros.at(0);
     };
+    QString GetHisCall()//IC8TEM v34
+    {
+        return le_his_call->getText();
+    };
+    int GetActivityId()//IC8TEM v34 activity of the Macros window (14 = Q65 Pileup)
+    {
+        return s_cont_id;
+    };
+    void SetActivityId(int id);//IC8TEM v34
+    bool TakeQ65Flag78();//IC8TEM v34 Q65 Pileup: bit 78 of the next transmission (single use)
     QString getsigndb()
     {
         QString s;
@@ -313,6 +323,8 @@ public slots:
     void Set2ClickDecListAutoOn(bool f);
     void SetAutoRestartTx(bool f);//IC8TEM v28
     void SetTxBlockedSwr(bool f);//IC8TEM v28 SWR protection of the Power & SWR window
+    void SetQ65CopiedDx(QString);//IC8TEM v34 Q65 Pileup: his call decoded in the last period
+    void Q65PileupStartQso(QString call,QString grid,QString period,int freq);//IC8TEM v34 click in the callers list
 
     void SetButClrQueuedCall(); 
     void SetDoQRG(QString,QString);
@@ -411,6 +423,9 @@ signals:
     void EmitOtpVerif(QString,uint8_t);//2.76
     void EmitOffsetDt(int);//2.76.5
     void EmitUpdateFlexMeter(bool,bool,double,double);
+    void EmitActivityId(int);//IC8TEM v34
+    void EmitQ65PileupLogged(QString);//IC8TEM v34 call logged in Q65 Pileup: out of the callers list
+    void EmitHisCallChanged(QString);//IC8TEM v34
  
 private slots:
     void SetRptRsq(bool);
@@ -452,6 +467,11 @@ private slots:
 private:
     HvLocSrc *TLocSrc;//IC8TEM v28 locator lookup: decodes, CALL3, grid_data.bin, online
     HvPskHeard *TPskHeard;//IC8TEM v32 calls that heard me (PSKReporter)
+    QString q65_copied_call;//IC8TEM v34 Q65 Pileup: his call (base) decoded in the last period
+    qint64 q65_copied_ms;
+    bool q65_last_flag;//IC8TEM v34 decision of the transmission in progress
+    qint64 q65_last_flag_ms;
+    QString q65_last_flag_call;
     QTimer *t_loc_web;
     QString s_loc_web_call;
     void LocFromOtherSources(bool start_web);

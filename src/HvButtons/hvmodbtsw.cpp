@@ -24,12 +24,18 @@ HvButton_ID::HvButton_ID(int id, QString n, QWidget * parent)
     sid = id;
     setText(n);
     connect(this,SIGNAL(clicked(bool)),this,SLOT(sclicked()));
+    setContextMenuPolicy(Qt::CustomContextMenu);//IC8TEM v34
+    connect(this,SIGNAL(customContextMenuRequested(const QPoint &)),this,SLOT(srclicked(const QPoint &)));
 }
 HvButton_ID::~HvButton_ID()
 {}
 void HvButton_ID::sclicked()
 {
     emit btclicked(sid);
+}
+void HvButton_ID::srclicked(const QPoint &)//IC8TEM v34
+{
+    emit btrclicked(sid);
 }
 HvDialogBtSw::HvDialogBtSw(int c_bt,QString *str_bt,QString tit,QString gbt,QString buse,QWidget *parent)//int cl2,
         : QDialog(parent)
@@ -95,6 +101,7 @@ HvWBtSw::HvWBtSw(QWidget *dp,int c_bt,int *btid,QString *str_bt,QString tit,QStr
         bt->setHidden(true);//default
         H_bt_->addWidget(bt);
         connect(bt,SIGNAL(btclicked(int)),this,SIGNAL(clicked(int)));
+        connect(bt,SIGNAL(btrclicked(int)),this,SIGNAL(rclicked(int)));//IC8TEM v34
     }
     setHidden(true);//default
     setLayout(H_bt_);

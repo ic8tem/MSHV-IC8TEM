@@ -263,6 +263,11 @@ HvTxW::HvTxW(QString inst,QString path,int lid,bool f,int x,int y,QWidget * pare
     l_mam_hiscals_.clear();
     id_mshf = 10;//2.76
     TPskHeard = new HvPskHeard(this);//IC8TEM v32 calls that heard me (PSKReporter), before the macros
+    q65_copied_call = "";//IC8TEM v34 Q65 Pileup
+    q65_copied_ms = 0;
+    q65_last_flag = false;
+    q65_last_flag_ms = 0;
+    q65_last_flag_call = "";
 
     THvMakros = new HvMakros(AppPath,dsty,this);
     connect(THvMakros,SIGNAL(EmitRptRsq(bool)),this,SLOT(SetRptRsq(bool)));
@@ -1937,6 +1942,7 @@ void HvTxW::AddToLog_p(bool direct_save_to_log)//false direct save to log off;  
         s_last_call_for_log = "NO_CALL"; //for reset time
         s_last_bccall_tolog_excp = MultiAnswerMod->FindBaseFullCallRemAllSlash(lst.at(4));//2.02 from Queued exception
         MultiAnswerMod->SetLastBcCallToLog(s_last_bccall_tolog_excp);
+        if (allq65 && s_cont_id==14) emit EmitQ65PileupLogged(lst.at(4));//IC8TEM v34 worked: out of the callers list (WSJT-X)
 
         if ((s_cont_type==3 || f_cont5_ru_dx) && (s_mode==0 || s_mode==11 || s_mode==13 || s_mode==18 || allq65))//ft4 f_cont5_ru_dx
         {
@@ -2228,6 +2234,62 @@ void HvTxW::CheckAutoRestartTx(const QString &t,const QString &msg)
     f_in_auto_restart = true;
     auto_on();
     f_in_auto_restart = false;
+}
+//IC8TEM v34 ------------------------------------------------ Q65 Pileup (WSJT-X 2.7 / 3.2)
+void HvTxW::SetActivityId(int id)
+{
+    THvMakros->SetActivityId(id);
+}
+void HvTxW::SetQ65CopiedDx(QString c)
+{
+    // From the decoder at the end of a period: his call (base) decoded in it, "" = not decoded
+    q65_copied_call = c.trimmed().toUpper();
+    q65_copied_ms = QDateTime::currentMSecsSinceEpoch();
+}
+bool HvTxW::TakeQ65Flag78()
+{
+    // WSJT-X 3.2: in Q65 Pileup the transmission to the station we are working carries bit 78
+    // ("I copied your last transmission") when the period just ended decoded it. Single use.
+    bool f = false;
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const qint64 per = (qint64)(SB_PeriodTime->get_period_time()*1000.0);
+    QString hb = MultiAnswerMod->FindBaseFullCallRemAllSlash(le_his_call->getText()).toUpper();
+    // the same transmission made again (message changed while transmitting): a flag already set is kept;
+    // otherwise a decode that ended after the start of the transmission can still set it (as WSJT-X)
+    if (q65_last_flag && q65_last_flag_ms > 0 && now - q65_last_flag_ms >= 0 && now - q65_last_flag_ms < per &&
+            hb == q65_last_flag_call)
+        return true;
+    if (allq65 && s_cont_id==14 && !f_multi_answer_mod && !q65_copied_call.isEmpty())
+    {
+        qint64 age = now - q65_copied_ms;
+        if (!hb.isEmpty() && hb == q65_copied_call && age >= 0 && age < per) f = true;
+    }
+    q65_copied_call.clear();
+    q65_last_flag = f;
+    q65_last_flag_ms = now;
+    q65_last_flag_call = hb;
+    return f;
+}
+void HvTxW::Q65PileupStartQso(QString call,QString grid,QString period,int freq)
+{
+    // WSJT-X: click on a caller of the list = Tx3 (call mycall R grid) to that station
+    if (!allq65 || f_multi_answer_mod) return;
+    call = call.trimmed().toUpper();
+    if (!THvQthLoc.isValidCallsign(call)) return;
+    if (info_dupe_qso)
+    {
+        if (MultiAnswerMod->DialogIsCallDupeInLog(call)) return;
+    }
+    RefreshBackupDB();
+    s_last_call_for_BDB = "_";
+    if (TQueuedCall->isLastFromQueued()) TQueuedCall->ClrQueuedCall(false);
+    le_his_call->SetText(call);
+    if (THvQthLoc.isValidLocator(grid)) LeHisLoc->SetText(grid);
+    gen_msg();
+    SetTxRaportToRB(2,true);//Tx3 = %T %M R %G4 in the Pileup and locator activities
+    if (f_recognize_tp2 && !period.isEmpty()) SetTimePeriod_p(period,1);//TX in the other period
+    if (freq > 0) SetFreqTxW((double)freq);
+    SetDoubleClickFromAllAutoOn();
 }
 void HvTxW::SetDoubleClickFromAllAutoOn()//2.45
 {
@@ -3683,6 +3745,7 @@ void HvTxW::SetMacros(QStringList list,int id_c0,QString cont_exch,QString trmN)
     THvAstroDataW->SetMyLocHisLocBand(list_macros.at(1),LeHisLoc->getText(),s_band);
     //qDebug()<<"TX RX ====="<<s_my_base_call;
     MshfChanget(false);//2.76
+    emit EmitActivityId(s_cont_id);//IC8TEM v34 Q65 Pileup menu, decoder and callers window
 }
 bool HvTxW::DetectCallSufix(QString &call, bool f_sep_n)
 {
@@ -4583,6 +4646,7 @@ void HvTxW::Check(QString s_type)
             LocFromOtherSources(true);
         }
         emit EmitFileNameChenged();
+        emit EmitHisCallChanged(le_his_call->getText());//IC8TEM v34
         RfreshDxParm();//2.66
     }
 

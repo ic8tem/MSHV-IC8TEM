@@ -18,6 +18,7 @@
 #include "HvSMeter/hvsmeter_h.h"
 #include "HvMsPlayer/msplayerhv.h"
 #include "HvTxW/hvtxw.h"
+#include "HvTxW/hvq65pileupw.h"//IC8TEM v34 Q65 Pileup callers
 #include "HvDecodeList/decodelist.h"
 #include "HvDecoderMs/decoderms.h"
 #include "HvRigControl/hvrigcontrol.h"
@@ -151,6 +152,10 @@ private slots:
     void LangChanged(bool);
     void StyleChanged(bool);
     void ModBtSwClicked(int);
+    void ModBtSwRClicked(int);//IC8TEM v34 right click on a Q65 button: Q65 Pileup on/off
+    void Q65PileupToggled(bool);//IC8TEM v34
+    void ShowQ65PileupW();//IC8TEM v34
+    void ActivityIdChanged(int);//IC8TEM v34
     void BandBtSwClicked(int);
     void SetMshf(uint8_t);//2.76
     void SetOffsetDt(int);//2.76.5
@@ -351,6 +356,11 @@ private:
     QAction *ac_two_dec_list; 
     QAction *ac_2click_list_autu_on;
     QAction *ac_auto_restart_tx;//IC8TEM v28  
+    HvQ65PileupW *TQ65PileupW;//IC8TEM v34 Q65 Pileup callers
+    QAction *ac_q65_pileup;
+    QAction *ac_q65_pileup_list;
+    int s_prev_activity_id;
+    bool s_q65flag78_sent;
     QAction *ac_start_qso_from_tx2_or_tx1; 
     QAction *ac_use_queue_cont; 
     QAction *ac_new_dec_clr_msg_list; 

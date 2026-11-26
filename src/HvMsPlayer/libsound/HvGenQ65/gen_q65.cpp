@@ -78,7 +78,7 @@ int GenQ65::BinToInt32(bool*a,int b_a,int bits_sz)
     }
     return k;
 }
-void GenQ65::genq65itone(QString msg0,int *itone,bool unpck)
+void GenQ65::genq65itone(QString msg0,int *itone,bool unpck,int iflag)
 {
     int i3 = 0;
     int n3 = 0;
@@ -112,7 +112,7 @@ void GenQ65::genq65itone(QString msg0,int *itone,bool unpck)
         z += 6;
     }
     dgen[12] = BinToInt32(c77,72,77);
-    dgen[12]=2*dgen[12];//dgen(13)=2*dgen(13) !Convert 77-bit to 78-bit payload
+    dgen[12]=2*dgen[12]+(iflag & 1);//dgen(13)=2*dgen(13)+iflag !Convert 77-bit to 78-bit payload; IC8TEM v34 iflag = spare 78th bit (WSJT-X 3.2)
     //if(ichk.eq.1) go to 999  !Return if checking only ??
     q65S.q65_enc(dgen,sent);    //!Encode message, dgen(1:13) ==> sent(1:63)
 
@@ -147,7 +147,7 @@ void GenQ65::genq65itone(QString msg0,int *itone,bool unpck)
     qDebug()<<"22="<<z<<"63="<<x;*/
 }
 int GenQ65::genq65(QString message_in,int *t_iwave,double GEN_SAMPLE_RATE,double f_tx,
-                   int mq65,int period_t)
+                   int mq65,int period_t,int iflag)
 {
 	//qDebug()<<f_tx;
     int k1 = 0;
@@ -156,7 +156,7 @@ int GenQ65::genq65(QString message_in,int *t_iwave,double GEN_SAMPLE_RATE,double
     QString msg0 = message_in;//format_msg(message_in,cmsg);
 
     TPackUnpackMsg77.reset_save_hash_calls_gen();//2.76.2
-    genq65itone(msg0,itone,true);
+    genq65itone(msg0,itone,true,iflag);//IC8TEM v34 Q65 Pileup flag
 
     ///////////////// generator wave //////////////////////////////////c++   ==.EQ. !=.NE. >.GT. <.LT. >=.GE. <=.LE.
     int nsps=1800;

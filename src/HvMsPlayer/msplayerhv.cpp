@@ -15,6 +15,7 @@ MsPlayerHV::MsPlayerHV(QString path)
     otp_tx_key  = "0#000000#0#0#0#0";
     sfma_tx_all = "#0#0#0#0#0#0#0#0";
     s_msf = false;
+    s_q65flag78 = false;//IC8TEM v34
     s_mode=2;   //2.12
     filenamehv=(char*)"none"; //2.12
     s_period_time_sec = 30;
@@ -305,6 +306,7 @@ void MsPlayerHV::xplaymessage(char *message,Rawplayer *player)
         return;
     }
     //qDebug()<<"1 initialize="<<(QString)message<<ttt.elapsed();
+    server->SetQ65Flag78(s_q65flag78 ? 1 : 0);//IC8TEM v34 Q65 Pileup flag, before the waveform is made
     server->initialize(message,s_mode,s_tx_freq,s_period_time_sec,s_bitpersample,s_msf,sfma_tx_all,otp_tx_key);
     //qDebug()<<"2 initialize="<<(QString)message<<ttt.elapsed();
     QString new_tx_msg;

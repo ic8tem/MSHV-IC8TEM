@@ -14,6 +14,9 @@
 #define DECODERQ65_H
 
 #include <QObject>
+#include <QMutex>//IC8TEM v34 the Q65 Pileup callers list is shared with the GUI thread
+#include <QDateTime>
+#include <QStringList>
 #include <complex.h>
 #define complex		_Complex
 #include "../mac_complex_shim.h"//macOS: complex shim (VU2CPL)
@@ -22,7 +25,7 @@
 #include "../HvMsPlayer/libsound/HvGenQ65/q65_subs.h"
 #include "decoderpom.h"
 
-#define MAX_NCW 206
+#define MAX_NCW 411 //IC8TEM v34 (WSJT-X 3.2): 41 calls (40 callers + his call) x 5 kinds x 2 values of bit 78
 #define MAX_CALLERS 40 //(40+hiscall)=41 41*5=205 ??? 
 
 class DecoderQ65 : public QObject
@@ -49,11 +52,20 @@ public:
     void q65_decode(double *dd,double f0a,double f0b,double fqso,int,bool &hdec);
     void SetStApDecode(bool);
     void SetMaxDrift(bool);
+    // IC8TEM v34 Q65 Pileup (WSJT-X 2.7 / 3.2): GUI thread
+    void SetStQ65Pileup(bool);
+    void RequestPileupList();
+    void RemovePileupCaller(QString);
+    void ErasePileupCallers();
+    static int MoonElGrid(const QString &grid4,const QDateTime &utc);// -99 = no valid grid
+    static QString SenderBaseCall(const QString &msg);
 
 signals:
     void EmitDecodetText(QStringList);//bool
     void EmitBackColor();
     void EmitAvgSavesQ65(int,int);
+    void EmitPileupList(QStringList);//IC8TEM v34 call|grid|freq|moonel|age_h|copied|period|snr, sorted by freq
+    void EmitQ65CopiedDx(QString);//IC8TEM v34 his call (base) decoded in this period, "" = not decoded
 
 private:
 	bool s_fopen65;
@@ -106,16 +118,24 @@ private:
      	unsigned int nsec;
      	int nfreq;
      	int moonel;
+     	bool copied;//IC8TEM v34 last decode had bit 78 set ('#'), not saved
+     	QString tp; //IC8TEM v34 period of the last decode (hhmmss), not saved
+     	int snr;    //IC8TEM v34 not saved
     }
     q3list;
     q3list callers[MAX_CALLERS+20];  //MAX_CALLERS+10=50 
     int is_chist2;
     int nhist2;
-    void q65_hist2(int nfreq,QString msg0);  
+    void q65_hist2(int nfreq,QString msg0,int iflag,int snr);
+    QMutex callers_mx;//IC8TEM v34 callers[], nhist2, is_chist2, tsil.3q
+    bool s_q65pileup;//IC8TEM v34 activity Q65 Pileup
+    bool dx_copied_pass;//IC8TEM v34 his call decoded in this period
+    QStringList PileupListLocked();
+    void CheckDxCopied(const QString &dec);
     void q65_hist(int if0,QString msg0,QString &dxcall,QString &dxgrid);//,bool f   
     int ncw; 
     int codewords_[MAX_NCW+5][86];//63   integer codewords(63,MAX_NCW)  
-    int codewords_1da[14000];//MAX_NCW*63=12978 
+    int codewords_1da[MAX_NCW*63+100];//IC8TEM v34 was 14000 (206*63=12978)
     void q65_set_list2(QString,QString,QString);         
     void q65_set_list(QString,QString,QString);   
     void smo121(double *x,int beg,int nz); // from jt65  
@@ -151,7 +171,7 @@ private:
     bool apsymbols1[80];//78
     int ncontest0;
     int mcq_q65[30];//29
-    void q65_ap(int nQSOprogress,int ipass,int,int,bool lapcqonly,int &iaptype,int *,bool *,bool *);
+    void q65_ap(int nQSOprogress,int ipass,int,int,bool lq65pileup,bool lapcqonly,int &iaptype,int *,bool *,bool *);
     void q65_dec_q012(float *s3_1fa,double &snr2,int *dat4,int &idec,int,int,int);
         
     void ana64(double *iwave,int,double complex *c0);

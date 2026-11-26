@@ -66,6 +66,7 @@ GenMessage::GenMessage(Soundplayer *player)
     //////////////////////////////////////////////////////
     s_mode = 2;//HV important set to default mode fsk441
     s_msf = false;
+    s_q65flag78 = 0;//IC8TEM v34
     GEN_SAMPLE_RATE = OUT_SAMPLE_RATE_44100;//HV important set to default mode fsk441 sample rate
     koef_srate = GEN_SAMPLE_RATE/ORG_SAMPLE_RATE_11025;//HV important set to default mode fsk441 sample rate
     //////////////////////////////////////////////////////

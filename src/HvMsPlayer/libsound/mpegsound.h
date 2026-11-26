@@ -576,6 +576,10 @@ public:
     GenFt4 *TGenFt4;
     GenFt2 *TGenFt2;
     GenQ65 *TGenQ65;
+    void SetQ65Flag78(int f)//IC8TEM v34 Q65 Pileup: spare 78th bit of the next Q65 transmission
+    {
+        s_q65flag78 = f;
+    };
       
     static int  setvolume_all(int volume);
     void mute_hv(bool);//hv
@@ -592,6 +596,7 @@ private:
     QString s_MyGridLoc; //for " R " in msg 1.31   
     int s_mode;
     bool s_msf;//2.76
+    int s_q65flag78;//IC8TEM v34
     double twopi;
     int  __errorcode;
     void seterrorcode(int errorcode)

@@ -286,6 +286,18 @@
         <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
         <translation>Indicatiu d'A RÀDIO descodificat de nou: Auto està activat</translation>
     </message>
+    <message>
+        <source>Q65 Pileup</source>
+        <translation>Q65 Pileup</translation>
+    </message>
+    <message>
+        <source>right-click on a Q65 button</source>
+        <translation>clic dret en un botó Q65</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Estacions que criden</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -546,6 +558,85 @@
     <message>
         <source>no answer</source>
         <translation>sense resposta</translation>
+    </message>
+</context>
+<context>
+    <name>HvQ65PileupW</name>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Estacions que criden</translation>
+    </message>
+    <message>
+        <source>Freq</source>
+        <translation>Freq.</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Indicatiu</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Locator</translation>
+    </message>
+    <message>
+        <source>El</source>
+        <translation>Elev.</translation>
+    </message>
+    <message>
+        <source>Age (h)</source>
+        <translation>Fa (h)</translation>
+    </message>
+    <message>
+        <source>Audio frequency of the last decode (Hz)</source>
+        <translation>Freqüència d'àudio de l'última descodificació (Hz)</translation>
+    </message>
+    <message>
+        <source>Moon elevation at the caller's locator (degrees)</source>
+        <translation>Elevació de la Lluna al locator de qui crida (graus)</translation>
+    </message>
+    <message>
+        <source>Hours since the last decode</source>
+        <translation>Hores des de l'última descodificació</translation>
+    </message>
+    <message>
+        <source># = the caller copied our last transmission</source>
+        <translation># = qui crida ha copiat la nostra última transmissió</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Actualitza</translation>
+    </message>
+    <message>
+        <source>Erase list</source>
+        <translation>Esborra la llista</translation>
+    </message>
+    <message>
+        <source>Click: answer with Tx3 (R + locator). Ctrl+click: remove the caller.</source>
+        <translation>Clic: respon amb Tx3 (R + locator). Ctrl+clic: treu qui crida.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours; removed when their Moon is more than 5 degrees below the horizon or when the QSO is logged.</source>
+        <translation>Fins a 40 estacions, es guarden 24 hores; es treuen quan la seva Lluna és més de 5 graus sota l'horitzó o quan el QSO es registra.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours, used for a priori decoding in the activities with locator exchange.</source>
+        <translation>Fins a 40 estacions, es guarden 24 hores, s'usen per a la descodificació a priori en les activitats amb intercanvi de locator.</translation>
+    </message>
+    <message>
+        <source>The list is used in Q65 mode.</source>
+        <translation>La llista s'usa en el mode Q65.</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup is off: Q65 menu, or right-click on a Q65 mode button.</source>
+        <translation>Q65 Pileup està desactivat: menú Q65, o clic dret en un botó de mode Q65.</translation>
+    </message>
+    <message>
+        <source>Callers: %1</source>
+        <translation>Estacions: %1</translation>
+    </message>
+    <message>
+        <source>Erase the list of Q65 callers?</source>
+        <translation>Voleu esborrar la llista d'estacions Q65 que criden?</translation>
     </message>
 </context>
 </TS>

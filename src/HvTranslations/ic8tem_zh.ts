@@ -286,6 +286,18 @@
         <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
         <translation>再次解码到呼号框中的呼号时自动呼叫</translation>
     </message>
+    <message>
+        <source>Q65 Pileup</source>
+        <translation>Q65 Pileup</translation>
+    </message>
+    <message>
+        <source>right-click on a Q65 button</source>
+        <translation>右键单击 Q65 按钮</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - 呼叫者</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -546,6 +558,85 @@
     <message>
         <source>no answer</source>
         <translation>无应答</translation>
+    </message>
+</context>
+<context>
+    <name>HvQ65PileupW</name>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - 呼叫者</translation>
+    </message>
+    <message>
+        <source>Freq</source>
+        <translation>频率</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>呼号</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>网格</translation>
+    </message>
+    <message>
+        <source>El</source>
+        <translation>仰角</translation>
+    </message>
+    <message>
+        <source>Age (h)</source>
+        <translation>时长（小时）</translation>
+    </message>
+    <message>
+        <source>Audio frequency of the last decode (Hz)</source>
+        <translation>最后一次解码的音频频率（Hz）</translation>
+    </message>
+    <message>
+        <source>Moon elevation at the caller's locator (degrees)</source>
+        <translation>呼叫者网格处的月亮仰角（度）</translation>
+    </message>
+    <message>
+        <source>Hours since the last decode</source>
+        <translation>距最后一次解码的小时数</translation>
+    </message>
+    <message>
+        <source># = the caller copied our last transmission</source>
+        <translation># = 呼叫者已收到我们上一次的发射</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <source>Erase list</source>
+        <translation>清除列表</translation>
+    </message>
+    <message>
+        <source>Click: answer with Tx3 (R + locator). Ctrl+click: remove the caller.</source>
+        <translation>单击：用 Tx3 回答（R + 网格）。Ctrl+单击：删除该呼叫者。</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours; removed when their Moon is more than 5 degrees below the horizon or when the QSO is logged.</source>
+        <translation>最多 40 个呼叫者，保留 24 小时；当其月亮低于地平线 5 度以上或 QSO 已记录时删除。</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours, used for a priori decoding in the activities with locator exchange.</source>
+        <translation>最多 40 个呼叫者，保留 24 小时，用于交换网格的活动中的先验解码。</translation>
+    </message>
+    <message>
+        <source>The list is used in Q65 mode.</source>
+        <translation>该列表用于 Q65 模式。</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup is off: Q65 menu, or right-click on a Q65 mode button.</source>
+        <translation>Q65 Pileup 已关闭：Q65 菜单，或右键单击 Q65 模式按钮。</translation>
+    </message>
+    <message>
+        <source>Callers: %1</source>
+        <translation>呼叫者：%1</translation>
+    </message>
+    <message>
+        <source>Erase the list of Q65 callers?</source>
+        <translation>清除 Q65 呼叫者列表？</translation>
     </message>
 </context>
 </TS>

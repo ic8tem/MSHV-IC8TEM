@@ -56,6 +56,7 @@ public:
     virtual ~HvMakros();
 
     void SetMacros();
+    void SetActivityId(int id);//IC8TEM v34 Q65 Pileup on/off from the Q65 menu and the mode buttons
     void ModeChanget(int mode);
     void SetFont(QFont);
     

@@ -167,6 +167,8 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
         : QWidget(parent)
 {
     THvPowerSwrW = 0;//IC8TEM Power & SWR
+    TQ65PileupW = 0;//IC8TEM v34 Q65 Pileup callers, made with the Q65 menu
+    ac_q65_pileup = 0;
     //printf("--");
     InstName = inst0;
     s_id_set_to_rig = 0;//0<-from App 1<-from Rig
@@ -1036,6 +1038,29 @@ Main_Ms::Main_Ms(QString inst0,QWidget * parent)
         connect(rb_mode[i], SIGNAL(toggled(bool)), this, SLOT(ModeChanged(bool)));
     }
     connect(W_mod_bt_sw,SIGNAL(clicked(int)),this,SLOT(ModBtSwClicked(int)));//2.74
+
+    //IC8TEM v34 Q65 Pileup (WSJT-X 2.7 / 3.2): Q65 menu, right click on a Q65 button, callers window
+    s_prev_activity_id = 0;
+    s_q65flag78_sent = false;
+    TQ65PileupW = new HvQ65PileupW(this);
+    MQ65->addSeparator();
+    ac_q65_pileup = new QAction(tr("Q65 Pileup")+"   ("+tr("right-click on a Q65 button")+")",this);
+    ac_q65_pileup->setCheckable(true);
+    MQ65->addAction(ac_q65_pileup);
+    ac_q65_pileup_list = new QAction(tr("Q65 Pileup - Callers")+"...",this);
+    MQ65->addAction(ac_q65_pileup_list);
+    connect(ac_q65_pileup, SIGNAL(triggered(bool)), this, SLOT(Q65PileupToggled(bool)));
+    connect(ac_q65_pileup_list, SIGNAL(triggered()), this, SLOT(ShowQ65PileupW()));
+    connect(W_mod_bt_sw, SIGNAL(rclicked(int)), this, SLOT(ModBtSwRClicked(int)));
+    connect(TDecoderMs, SIGNAL(EmitQ65PileupList(QStringList)), TQ65PileupW, SLOT(SetList(QStringList)));
+    connect(TDecoderMs, SIGNAL(EmitQ65CopiedDx(QString)), THvTxW, SLOT(SetQ65CopiedDx(QString)));
+    connect(TQ65PileupW, SIGNAL(StartQso(QString,QString,QString,int)), THvTxW, SLOT(Q65PileupStartQso(QString,QString,QString,int)));
+    connect(TQ65PileupW, SIGNAL(RemoveCaller(QString)), TDecoderMs, SLOT(RemoveQ65PileupCaller(QString)));
+    connect(TQ65PileupW, SIGNAL(EraseList()), TDecoderMs, SLOT(EraseQ65PileupCallers()));
+    connect(TQ65PileupW, SIGNAL(RefreshList()), TDecoderMs, SLOT(RequestQ65PileupList()));
+    connect(THvTxW, SIGNAL(EmitActivityId(int)), this, SLOT(ActivityIdChanged(int)));
+    connect(THvTxW, SIGNAL(EmitQ65PileupLogged(QString)), TDecoderMs, SLOT(RemoveQ65PileupCaller(QString)));
+    connect(THvTxW, SIGNAL(EmitHisCallChanged(QString)), TQ65PileupW, SLOT(SetDxCall(QString)));
 
     Band_m = new QMenu(tr("Band"));// HF/VHF 1.8-50MHz, VHF/UHF 70-2300MHz SHF/EHF 3.3-228G
     QMenu *B0_m = new QMenu("VLF      ");
@@ -2229,6 +2254,7 @@ void Main_Ms::SetFont(QFont f)
     //THvRigControl->SetFont(f);
     FilterDialog->SetFont(f);
     W_mod_bt_sw->SetFont(f);
+    if (TQ65PileupW) TQ65PileupW->SetFont(f);//IC8TEM v34
     W_band_bt_sw->SetFont(f);
 }
 void Main_Ms::setTuneDsp(int,int)//1.55=
@@ -3539,7 +3565,7 @@ void Main_Ms::SetTxMsgAllTxt(QString str,double tx_freq)
             int itx_freq = (int)tx_freq;
             if (f_static_tx) itx_freq = (int)s_v_disp_tx_frq;
             TDecodeList2->SetBackColorTxQsy(false);
-            ltxx<<tx_time_ss<<"TX"<<""<<""<<str<<""<<""<<QString("%1").arg(itx_freq);
+            ltxx<<tx_time_ss<<"TX"<<""<<""<<str<<(s_q65flag78_sent ? "#" : "")<<""<<QString("%1").arg(itx_freq);//IC8TEM v34 '#' = sent with bit 78
             TDecodeList2->InsertItem_hv(ltxx,true,true);
         }
         TDecodeList2->SetBackColor(true);
@@ -3552,6 +3578,9 @@ void Main_Ms::SetFilePlay()//hv inportent start play only from here
     //TMsPlayerHV->setfile_play(q-strdup(qPrintable(s_msg)),true,s_mode);//2.47 s_gen removed
     static char c_msg_sent[430];//2.50 same is in genmesage_ms.cpp
     strncpy(c_msg_sent,s_msg.toUtf8(),420);
+    s_q65flag78_sent = false;//IC8TEM v34 Q65 Pileup: bit 78 = "I copied your last transmission" (WSJT-X 3.2)
+    if (allq65 && !s_msg.startsWith("@")) s_q65flag78_sent = THvTxW->TakeQ65Flag78();
+    TMsPlayerHV->SetQ65Flag78(s_q65flag78_sent);
     TMsPlayerHV->setfile_play(c_msg_sent,true,s_mode,period_time_sec);
 
     if (!s_msg.contains("@")) THvTxW->SetStartQsoDateTime(); //EmitForStartQsoDateTime();
@@ -3829,6 +3858,52 @@ void Main_Ms::ModBtSwClicked(int i)
     //StopRxGlobal(); // is not a good idea
     //if (!TMsPlayerHV->Is_RealStop() || THvTxW->GetAutoIsOn()) StopTxGlobal();
     rb_mode[i]->setChecked(true);
+}
+//IC8TEM v34 ------------------------------------------------ Q65 Pileup (WSJT-X 2.7 / 3.2)
+void Main_Ms::ModBtSwRClicked(int i)
+{
+    // WSJT-X: right click on the Q65 button = Q65 Pileup; here on/off, on any Q65 button
+    if (i < 14 || i > 17) return;
+    const bool was_q65 = allq65;
+    if (s_mode != i) rb_mode[i]->setChecked(true);
+    // from another mode always on (the activity is kept from the last session); in Q65 on/off
+    if (!was_q65) Q65PileupToggled(true);
+    else Q65PileupToggled(THvTxW->GetActivityId() != 14);
+}
+void Main_Ms::Q65PileupToggled(bool on)
+{
+    if (on)
+    {
+        if (!allq65) rb_mode[14]->setChecked(true);
+        int cur = THvTxW->GetActivityId();
+        if (cur != 14) s_prev_activity_id = cur;
+        THvTxW->SetActivityId(14);
+        ShowQ65PileupW();
+    }
+    else
+    {
+        int back = s_prev_activity_id;
+        if (back == 14) back = 0;
+        THvTxW->SetActivityId(back);
+    }
+    ActivityIdChanged(THvTxW->GetActivityId());
+}
+void Main_Ms::ShowQ65PileupW()
+{
+    TQ65PileupW->SetState(allq65,THvTxW->GetActivityId());
+    TQ65PileupW->SetDxCall(THvTxW->GetHisCall());
+    TQ65PileupW->show();
+    TQ65PileupW->raise();
+    TQ65PileupW->activateWindow();
+}
+void Main_Ms::ActivityIdChanged(int id)
+{
+    if (id != 14) s_prev_activity_id = id;//the activity to go back to
+    if (ac_q65_pileup) ac_q65_pileup->setChecked(id == 14);
+    TDecoderMs->SetQ65Pileup(id == 14);
+    TDecodeList1->SetQ65PileupCol(id == 14);//'#' visible also with two decode lists
+    TDecodeList2->SetQ65PileupCol(id == 14);
+    if (TQ65PileupW) TQ65PileupW->SetState(allq65,id);
 }
 void Main_Ms::BandBtSwClicked(int i)
 {
@@ -4331,6 +4406,7 @@ void Main_Ms::ModeChanged(bool fg)
     RefreshCbCfm73();
     TSettingsMs->SetMode(s_mode);//tci
     W_mod_bt_sw->SetActiveBt(s_mode);//2.74
+    if (TQ65PileupW) TQ65PileupW->SetState(allq65,THvTxW->GetActivityId());//IC8TEM v34
 }
 void Main_Ms::PaletteChanged(bool) //2.65
 {
@@ -4382,7 +4458,7 @@ void Main_Ms::SetQActionCb(QString s, bool idp, QAction *ac)//idp priority of pr
 }
 void Main_Ms::Read_Settings(QString path)
 {
-    const int c_st_id = 115;//dopalva se tuk v kraia  IC8TEM 111=def_msk_nb_zap 112=def_dl_colw 113=def_nodec_lines 114=def_auto_restart_tx
+    const int c_st_id = 116;//dopalva se tuk v kraia  IC8TEM 111=def_msk_nb_zap 112=def_dl_colw 113=def_nodec_lines 114=def_auto_restart_tx 115=def_q65_pileup_w
     const QString st_id[c_st_id]=
         {
             "default_w","default_h","default_device_alsa","default_bitpersample","default_card_latency",
@@ -4408,7 +4484,8 @@ void Main_Ms::Read_Settings(QString path)
             "def_filter_list4","def_filter_list5","def_adle_vdsp","def_areset_qso","def_1_dec_sig_q65",
             "def_auto_clr_avg_afdec","def_dec_aft_eme_delay","def_max_drift","def_use_queue_cont","def_filter_list6",
             "use_aseq_max_dist","def_mod_bt_sw","def_show_lcols","vd_bw_lines_draw","def_band_bt_sw",
-            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col","def_msk_nb_zap","def_dl_colw","def_nodec_lines","def_auto_restart_tx"
+            "def_show_hide_wf_tx","def_var_dec_parr","def_msk_width_col","def_msk_nb_zap","def_dl_colw","def_nodec_lines","def_auto_restart_tx",
+            "def_q65_pileup_w"
         };
 
     QString st_res[c_st_id];
@@ -4885,6 +4962,8 @@ void Main_Ms::Read_Settings(QString path)
     SetQActionCb(st_res[113], false, ac_nodec_lines);//IC8TEM v27 def true
     TDecodeList1->SetShowNoDecLines(ac_nodec_lines->isChecked());
     SetQActionCb(st_res[114], true, ac_auto_restart_tx);//IC8TEM v28 def false
+    if (!st_res[115].isEmpty()) TQ65PileupW->SetPosXYWH(st_res[115]);//IC8TEM v34 Q65 Pileup callers window
+    ActivityIdChanged(THvTxW->GetActivityId());//IC8TEM v34 Q65 Pileup menu and decoder
 
     THvTxW->SetBlockEmitFreqToRig(false);
 
@@ -5116,6 +5195,7 @@ void Main_Ms::Save_Settings(QString path)
     out << "def_dl_colw=" << TDecodeList1->GetUserColWidths() << "|" << TDecodeList2->GetUserColWidths() << "\n";//IC8TEM v27
     out << "def_nodec_lines=" << QString("%1").arg(ac_nodec_lines->isChecked()) << "\n";//IC8TEM v27
     out << "def_auto_restart_tx=" << QString("%1").arg(ac_auto_restart_tx->isChecked()) << "\n";//IC8TEM v28
+    if (TQ65PileupW) out << "def_q65_pileup_w=" << TQ65PileupW->GetPosXYWH() << "\n";//IC8TEM v34
 
     file.close();
 }

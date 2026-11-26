@@ -809,6 +809,11 @@ public slots:
     void SetClearAvgQ65();
     void SetDecAftEMEDelay(bool);
     void SetMaxDrift(bool);
+    // IC8TEM v34 Q65 Pileup
+    void SetQ65Pileup(bool);
+    void RequestQ65PileupList();
+    void RemoveQ65PileupCaller(QString);
+    void EraseQ65PileupCallers();
     //void SetSFoxRxMsg(bool);
     //void SetMultiAnswerMod(bool);//for AP MAM ft8 2.03
     ///  END FT8  ////////////////////////
@@ -822,6 +827,8 @@ signals:
     void EmitAvgSaves(int,int,int,int);
     void EmitAvgSavesPi4(int,int);
     void EmitAvgSavesQ65(int,int);
+    void EmitQ65PileupList(QStringList);//IC8TEM v34
+    void EmitQ65CopiedDx(QString);//IC8TEM v34
     void EmitDecodetTextRxFreq(QStringList,bool,bool);
     void EmitTimeElapsed(float);//2.33
 

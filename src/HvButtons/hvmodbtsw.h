@@ -41,9 +41,11 @@ private:
 
 signals:
     void btclicked(int);
+    void btrclicked(int);//IC8TEM v34 right click (Q65 Pileup on the Q65 buttons)
 
 public slots:
     void sclicked();
+    void srclicked(const QPoint &);
 
 };
 class HvDialogBtSw : public QDialog
@@ -78,6 +80,7 @@ public:
 
 signals:
     void clicked(int);
+    void rclicked(int);//IC8TEM v34
 
 public slots:
     void SetHidden(int,bool);

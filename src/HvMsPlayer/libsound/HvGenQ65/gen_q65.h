@@ -25,8 +25,9 @@ public:
     explicit GenQ65(bool fl);//f_dec_gen = dec=true gen=false
     ~GenQ65();
 
- 	void genq65itone(QString msg0,int *itone,bool);
-    int genq65(QString,int *t_iwave,double samp_rate,double f0,int mq65,int period_t);//,int i3b ,int &ntxslot 
+ 	// IC8TEM v34: iflag = spare 78th bit of the payload (WSJT-X 3.2 Q65 Pileup: 1 = I copied your last transmission)
+ 	void genq65itone(QString msg0,int *itone,bool,int iflag = 0);
+    int genq65(QString,int *t_iwave,double samp_rate,double f0,int mq65,int period_t,int iflag = 0);//,int i3b ,int &ntxslot 
     QString GetUnpackMsg(){return s_unpack_msg;}; 
     QString unpack77(bool *c77,bool &unpk77_success);  
     void pack77(QString msgs,int &i3,int n3,bool *c77);          

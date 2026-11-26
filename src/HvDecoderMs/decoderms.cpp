@@ -117,6 +117,8 @@ DecoderMs::DecoderMs(QString p)//QObject *parent
     connect(DecQ65, SIGNAL(EmitDecodetText(QStringList)), this, SLOT(SetDecodetTextFtQ65(QStringList)));
     connect(DecQ65, SIGNAL(EmitBackColor()), this, SLOT(SetBackColorQ65()));
     connect(DecQ65, SIGNAL(EmitAvgSavesQ65(int,int)), this, SIGNAL(EmitAvgSavesQ65(int,int)));
+    connect(DecQ65, SIGNAL(EmitPileupList(QStringList)), this, SIGNAL(EmitQ65PileupList(QStringList)));//IC8TEM v34
+    connect(DecQ65, SIGNAL(EmitQ65CopiedDx(QString)), this, SIGNAL(EmitQ65CopiedDx(QString)));//IC8TEM v34
 
     id_mshf = 0;
     f_dec_sfox = false;
@@ -312,6 +314,22 @@ void DecoderMs::AutoClrAvgChanged(bool f)
 void DecoderMs::SetClearAvgQ65()
 {
     DecQ65->SetClearAvgQ65();
+}
+void DecoderMs::SetQ65Pileup(bool f)//IC8TEM v34
+{
+    DecQ65->SetStQ65Pileup(f);
+}
+void DecoderMs::RequestQ65PileupList()//IC8TEM v34
+{
+    DecQ65->RequestPileupList();
+}
+void DecoderMs::RemoveQ65PileupCaller(QString c)//IC8TEM v34
+{
+    DecQ65->RemovePileupCaller(c);
+}
+void DecoderMs::EraseQ65PileupCallers()//IC8TEM v34
+{
+    DecQ65->ErasePileupCallers();
 }
 void DecoderMs::SetPerodTime(int i)
 {

@@ -286,6 +286,7 @@ DecodeList::DecodeList(int ident,bool f,QWidget *parent)
     //THvHeader->setSectionsClickable(true);
 
     allq65 = false;
+    s_q65pileup_col = false;//IC8TEM v34
     coded_mods = false;
     s_mode = 222;//2.10 202 <-for start refresh    HV important set to default mode fsk441
     msg_column = 6;//HV important set to default mode fsk441
@@ -864,6 +865,19 @@ void DecodeList::SetShowMskWidth(bool f)//IC8TEM MSK144 ping duration (Width) co
     else THvHeader->hideSection(2);
     f_block_colw = blk;
 }
+void DecodeList::SetQ65PileupCol(bool f)//IC8TEM v34 Q65 Pileup: '#' = the sender copied our last transmission
+{
+    if (s_q65pileup_col == f) return;
+    s_q65pileup_col = f;
+    if (!allq65 || !s_flag_two) return;//one list: the column is always shown
+    bool blk = f_block_colw;
+    f_block_colw = true;
+    if (f) THvHeader->showSection(7);
+    else THvHeader->hideSection(7);
+    CorrListSize();
+    f_block_colw = blk;
+    viewport()->update();
+}
 void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3) //,bool ftc,bool fdc,bool ffc,bool fcc
 {
     //qDebug()<<fc[0]<<fc[1]<<fc[2]<<fc[3];
@@ -1152,6 +1166,7 @@ void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3)
             THvHeader->hideSection(3);
             THvHeader->hideSection(7);//2.73 Dist Country
             THvHeader->hideSection(8);//2.73 Dist Country
+            if (allq65 && s_q65pileup_col) THvHeader->showSection(7);//IC8TEM v34 Q65 Pileup: Q code and '#'
         }
         else list_A <<tr("Time")<<"dB"<<"DT"<<"DF Of TX"<<tr("Message")<<tr("Country")<<tr("Dist")<<tr("Type")<<qdc<<"Freq";//9 Flags
 
@@ -1176,6 +1191,7 @@ void DecodeList::SetMode(int mode,bool flag_two,bool f0,bool f1,bool f2,bool f3)
         def_section_sizes[7] = 70;//THvHeader->resizeSection(5, 70);//Type
         def_section_sizes[8] = 50;//THvHeader->resizeSection(6, 50);//Q
         def_section_sizes[9] = 55;//THvHeader->resizeSection(7, 55);//freq
+        if (allq65 && flag_two) def_section_sizes[7] = 50;//IC8TEM v34 Q code and '#' (Q65 Pileup), narrow
 
         //THvHeader->setSectionResizeMode(0, QHeaderView::Interactive);//1.81 for font
         THvHeader->setSectionResizeMode(4, QHeaderView::Stretch);//qt5
@@ -2389,6 +2405,7 @@ void DecodeList::paintEvent(QPaintEvent *event)
                 if (s_show_freqc) c_col++;
             }
             else if (s_show_counc) c_col=7;
+            if (allq65 && s_q65pileup_col) c_col=9;//IC8TEM v34 Type column shown: line also before Freq
         }
         else c_col=10;//2.73 Dist Country
     }

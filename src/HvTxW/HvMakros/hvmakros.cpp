@@ -368,6 +368,25 @@ void HvMakros::CheckAllowedModesActivity()//2.51
     	cb_contests->setCurrentIndex(0);
     }*/
 }
+void HvMakros::SetActivityId(int id)//IC8TEM v34
+{
+    // the inverse of CbContNameChanged(): item 0 = Standard, item k = pos_cont[k+1]
+    int k = 0;
+    if (id != 0)
+    {
+        for (int i = 2; i < COUNT_CONTEST; ++i)
+        {
+            if (pos_cont[i] == id)
+            {
+                k = i - 1;
+                break;
+            }
+        }
+        if (k == 0) return;
+    }
+    if (k >= cb_contests->count()) return;
+    if (cb_contests->currentIndex() != k) cb_contests->setCurrentIndex(k);//macros of the activity, sent and saved
+}
 void HvMakros::CbContNameChanged(int i)
 {
     if (i==0) id_boption = 0;

@@ -286,6 +286,18 @@
         <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
         <translation>Call i TIL RADIO dekodet igen sætter Auto til On</translation>
     </message>
+    <message>
+        <source>Q65 Pileup</source>
+        <translation>Q65 Pileup</translation>
+    </message>
+    <message>
+        <source>right-click on a Q65 button</source>
+        <translation>højreklik på en Q65-knap</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Kaldende</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -546,6 +558,85 @@
     <message>
         <source>no answer</source>
         <translation>intet svar</translation>
+    </message>
+</context>
+<context>
+    <name>HvQ65PileupW</name>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Kaldende</translation>
+    </message>
+    <message>
+        <source>Freq</source>
+        <translation>Frekv.</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Locator</translation>
+    </message>
+    <message>
+        <source>El</source>
+        <translation>Elev.</translation>
+    </message>
+    <message>
+        <source>Age (h)</source>
+        <translation>Alder (t)</translation>
+    </message>
+    <message>
+        <source>Audio frequency of the last decode (Hz)</source>
+        <translation>Lydfrekvens for sidste afkodning (Hz)</translation>
+    </message>
+    <message>
+        <source>Moon elevation at the caller's locator (degrees)</source>
+        <translation>Månens højde ved den kaldendes locator (grader)</translation>
+    </message>
+    <message>
+        <source>Hours since the last decode</source>
+        <translation>Timer siden sidste afkodning</translation>
+    </message>
+    <message>
+        <source># = the caller copied our last transmission</source>
+        <translation># = den kaldende har modtaget vores sidste udsendelse</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Opdater</translation>
+    </message>
+    <message>
+        <source>Erase list</source>
+        <translation>Slet listen</translation>
+    </message>
+    <message>
+        <source>Click: answer with Tx3 (R + locator). Ctrl+click: remove the caller.</source>
+        <translation>Klik: svar med Tx3 (R + locator). Ctrl+klik: fjern den kaldende.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours; removed when their Moon is more than 5 degrees below the horizon or when the QSO is logged.</source>
+        <translation>Op til 40 kaldende, gemmes i 24 timer; fjernes når deres Måne er mere end 5 grader under horisonten, eller når QSO'en er logget.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours, used for a priori decoding in the activities with locator exchange.</source>
+        <translation>Op til 40 kaldende, gemmes i 24 timer, bruges til a priori-afkodning i aktiviteterne med udveksling af locator.</translation>
+    </message>
+    <message>
+        <source>The list is used in Q65 mode.</source>
+        <translation>Listen bruges i Q65-tilstand.</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup is off: Q65 menu, or right-click on a Q65 mode button.</source>
+        <translation>Q65 Pileup er slået fra: menuen Q65, eller højreklik på en Q65-tilstandsknap.</translation>
+    </message>
+    <message>
+        <source>Callers: %1</source>
+        <translation>Kaldende: %1</translation>
+    </message>
+    <message>
+        <source>Erase the list of Q65 callers?</source>
+        <translation>Slet listen over Q65-kaldende?</translation>
     </message>
 </context>
 </TS>

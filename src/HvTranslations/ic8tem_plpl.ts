@@ -286,6 +286,18 @@
         <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
         <translation>Ponowne zdekodowanie znaku z pola ZNAK włącza tryb Automatyczny</translation>
     </message>
+    <message>
+        <source>Q65 Pileup</source>
+        <translation>Q65 Pileup</translation>
+    </message>
+    <message>
+        <source>right-click on a Q65 button</source>
+        <translation>prawy klik na przycisku Q65</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Wołający</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -546,6 +558,85 @@
     <message>
         <source>no answer</source>
         <translation>brak odpowiedzi</translation>
+    </message>
+</context>
+<context>
+    <name>HvQ65PileupW</name>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Wołający</translation>
+    </message>
+    <message>
+        <source>Freq</source>
+        <translation>Częst.</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Znak</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Lokator</translation>
+    </message>
+    <message>
+        <source>El</source>
+        <translation>Elew.</translation>
+    </message>
+    <message>
+        <source>Age (h)</source>
+        <translation>Wiek (h)</translation>
+    </message>
+    <message>
+        <source>Audio frequency of the last decode (Hz)</source>
+        <translation>Częstotliwość audio ostatniego dekodowania (Hz)</translation>
+    </message>
+    <message>
+        <source>Moon elevation at the caller's locator (degrees)</source>
+        <translation>Wysokość Księżyca w lokatorze wołającego (stopnie)</translation>
+    </message>
+    <message>
+        <source>Hours since the last decode</source>
+        <translation>Godziny od ostatniego dekodowania</translation>
+    </message>
+    <message>
+        <source># = the caller copied our last transmission</source>
+        <translation># = wołający odebrał naszą ostatnią transmisję</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Odśwież</translation>
+    </message>
+    <message>
+        <source>Erase list</source>
+        <translation>Wyczyść listę</translation>
+    </message>
+    <message>
+        <source>Click: answer with Tx3 (R + locator). Ctrl+click: remove the caller.</source>
+        <translation>Kliknięcie: odpowiedź Tx3 (R + lokator). Ctrl+kliknięcie: usuń wołającego.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours; removed when their Moon is more than 5 degrees below the horizon or when the QSO is logged.</source>
+        <translation>Do 40 wołających, przechowywani 24 godziny; usuwani, gdy ich Księżyc jest ponad 5 stopni pod horyzontem lub gdy QSO zostanie zapisane w logu.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours, used for a priori decoding in the activities with locator exchange.</source>
+        <translation>Do 40 wołających, przechowywani 24 godziny, używani do dekodowania a priori w aktywnościach z wymianą lokatorów.</translation>
+    </message>
+    <message>
+        <source>The list is used in Q65 mode.</source>
+        <translation>Lista jest używana w trybie Q65.</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup is off: Q65 menu, or right-click on a Q65 mode button.</source>
+        <translation>Q65 Pileup jest wyłączony: menu Q65 lub prawy klik na przycisku trybu Q65.</translation>
+    </message>
+    <message>
+        <source>Callers: %1</source>
+        <translation>Wołający: %1</translation>
+    </message>
+    <message>
+        <source>Erase the list of Q65 callers?</source>
+        <translation>Wyczyścić listę wołających Q65?</translation>
     </message>
 </context>
 </TS>

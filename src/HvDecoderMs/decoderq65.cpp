@@ -68,14 +68,19 @@ DecoderQ65::DecoderQ65(QString p)
     s_mousebutton = 0;
     nhist2 = 0;
     is_chist2 = 1;
-    for (int i = 0; i < MAX_CALLERS; ++i)//270rc1
+    for (int i = 0; i < MAX_CALLERS+20; ++i)//270rc1  IC8TEM v34 all of the array
     {
         callers[i].call="";
         callers[i].grid="";
         callers[i].nsec=0;
         callers[i].nfreq=0;
         callers[i].moonel=0;
+        callers[i].copied=false;
+        callers[i].tp="";
+        callers[i].snr=0;
     }
+    s_q65pileup = false;//IC8TEM v34
+    dx_copied_pass = false;
     App_Path = p;
     ReadList();
 }
@@ -89,6 +94,7 @@ void DecoderQ65::ReadList()
     if (!file.open(QIODevice::ReadOnly)) return;
     QByteArray data = file.readAll();
     file.close();
+    if (data.size()<8) return;//IC8TEM v34 empty or cut file
     int cs = 0;
     uint8_t a[4];
     QByteArray ba;
@@ -99,6 +105,9 @@ void DecoderQ65::ReadList()
     for (int j = 0; j < 4; ++j) a[j] = data[j+4];
     nhist2 = a[0] + (a[1] <<  8) + (a[2] << 16) + (a[3] << 24);
     if (nhist2>MAX_CALLERS) nhist2 = MAX_CALLERS;  //qDebug()<<nhist2;
+    if (nhist2<0) nhist2 = 0;//IC8TEM v34
+    if (data.size() < 16 + nhist2*22) nhist2 = (data.size() > 16) ? (data.size()-16)/22 : 0;//IC8TEM v34 cut file
+    if (nhist2<=0) return;
     //for (int i = 16; i < data.count(); i+=22)//6*22=132
     for (int i = 16; i < (16 + nhist2*22); i+=22)//6*22=132
     {
@@ -276,6 +285,156 @@ void DecoderQ65::SetStApDecode(bool f)
 {
     s_lapon = f; //qDebug()<<"s_lapon"<<s_lapon;
 }
+//////////////////////// IC8TEM v34 Q65 Pileup (WSJT-X 2.7 get_q3list, 3.2 bit 78) ////////////////////////
+// Moon routines of the Astronomical Data window (hvastrodataw.cpp): Meeus truncated series,
+// a couple of arcminutes, topocentric on a spherical Earth
+double days(int y, int m, int d, double h);
+void tmoonsub_(double *day, double *glat, double *glong, double *moonalt,
+               double *mrv, double *l, double *b, double *paxis);
+int DecoderQ65::MoonElGrid(const QString &grid4,const QDateTime &utc)
+{
+    QString g = grid4.trimmed().toUpper();
+    if (g.count()<4) return -99;
+    QChar a = g.at(0), b = g.at(1), c = g.at(2), d = g.at(3);
+    if (a<'A' || a>'R' || b<'A' || b>'R' || !c.isDigit() || !d.isDigit()) return -99;
+    // centre of the 4-character square (WSJT-X: grid//'mm')
+    double lon = -180.0 + 20.0*(a.unicode()-'A') + 2.0*(c.unicode()-'0') + 1.0;
+    double lat =  -90.0 + 10.0*(b.unicode()-'A') + 1.0*(d.unicode()-'0') + 0.5;
+    QDateTime u = utc.toUTC();
+    QDate dt = u.date();
+    QTime tm = u.time();
+    double h = tm.hour() + tm.minute()/60.0 + (tm.second() + tm.msec()/1000.0)/3600.0;
+    double day = days(dt.year(),dt.month(),dt.day(),h);
+    const double rad = 57.29577951308232;
+    double glat = lat/rad;
+    double glong = lon/rad;//east positive: LST = GST + longitude
+    double el = 0.0, rv = 0.0, xl = 0.0, bb = 0.0, pax = 0.0;
+    tmoonsub_(&day,&glat,&glong,&el,&rv,&xl,&bb,&pax);
+    return (int)floor(el*rad + 0.5);
+}
+static QString BaseOfCallQ65(const QString &call0)
+{
+    QString c = call0.trimmed().toUpper();
+    c.remove('<');
+    c.remove('>');
+    if (!c.contains('/')) return c;
+    QStringList parts = c.split('/');
+    QString best;
+    for (int i = 0; i < parts.count(); ++i)
+    {
+        const QString &p = parts.at(i);
+        bool dig = false, let = false;
+        for (int j = 0; j < p.count(); ++j)
+        {
+            if (p.at(j).isDigit()) dig = true;
+            else if (p.at(j).isLetter()) let = true;
+        }
+        if (dig && let && p.count() > best.count()) best = p;
+    }
+    return best.isEmpty() ? c : best;
+}
+static bool IsCallLikeQ65(const QString &w)
+{
+    bool dig = false, let = false;
+    for (int j = 0; j < w.count(); ++j)
+    {
+        if (w.at(j).isDigit()) dig = true;
+        else if (w.at(j).isLetter()) let = true;
+    }
+    return dig && let && w.count()>=3;
+}
+QString DecoderQ65::SenderBaseCall(const QString &msg0)
+{
+    // "W1ABC K1JT R FN20" -> K1JT, "CQ K1JT FN20" -> K1JT, "CQ DX K1JT FN20" -> K1JT
+    QString m = msg0.trimmed().toUpper();
+    m.remove('<');
+    m.remove('>');
+    QStringList w = m.split(' ',QString::SkipEmptyParts);
+    if (w.count()<2) return "";
+    int k = 1;
+    if ((w.at(0)=="CQ" || w.at(0)=="QRZ" || w.at(0)=="DE") && w.count()>2 && !IsCallLikeQ65(w.at(1))) k = 2;
+    if (!IsCallLikeQ65(w.at(k))) return "";
+    return BaseOfCallQ65(w.at(k));
+}
+void DecoderQ65::CheckDxCopied(const QString &dec)
+{
+    if (dx_copied_pass || !s_q65pileup) return;
+    QString hb = BaseOfCallQ65(s_hiscall);
+    if (!hb.isEmpty() && SenderBaseCall(dec)==hb) dx_copied_pass = true;
+}
+void DecoderQ65::SetStQ65Pileup(bool f)
+{
+    if (s_q65pileup == f) return;
+    s_q65pileup = f;
+    is_chist2 = 1;//rebuild the list of codewords
+}
+QStringList DecoderQ65::PileupListLocked()
+{
+    // call|grid|freq|moonel|age_h|copied|period|snr, sorted by frequency (WSJT-X Active Stations)
+    QStringList out;
+    QDateTime utc = QDateTime::currentDateTimeUtc();
+    unsigned int now = utc.toTime_t();
+    int idx[MAX_CALLERS+20];
+    int n = 0;
+    for (int i = 0; i < nhist2 && i < MAX_CALLERS; ++i) idx[n++] = i;
+    for (int i = 1; i < n; ++i)// insertion sort by frequency
+    {
+        int v = idx[i];
+        int j = i - 1;
+        while (j >= 0 && callers[idx[j]].nfreq > callers[v].nfreq)
+        {
+            idx[j+1] = idx[j];
+            --j;
+        }
+        idx[j+1] = v;
+    }
+    for (int k = 0; k < n; ++k)
+    {
+        const q3list &q = callers[idx[k]];
+        int el = MoonElGrid(q.grid,utc);
+        double age = (now >= q.nsec) ? (double)(now - q.nsec)/3600.0 : 0.0;
+        out << q.call+"|"+q.grid+"|"+QString::number(q.nfreq)+"|"+QString::number(el)+"|"+
+        QString::number(age,'f',1)+"|"+(q.copied ? "1" : "0")+"|"+q.tp+"|"+QString::number(q.snr);
+    }
+    return out;
+}
+void DecoderQ65::RequestPileupList()
+{
+    QStringList l;
+    callers_mx.lock();
+    l = PileupListLocked();
+    callers_mx.unlock();
+    emit EmitPileupList(l);
+}
+void DecoderQ65::RemovePileupCaller(QString call)
+{
+    QString c = BaseOfCallQ65(call);
+    if (c.isEmpty()) return;
+    callers_mx.lock();
+    for (int i = 0; i < nhist2; ++i)
+    {
+        if (callers[i].call == c || callers[i].call == call.trimmed().toUpper())
+        {
+            for (int x = i; x < nhist2-1; ++x) callers[x]=callers[x+1];
+            nhist2--;
+            is_chist2 = 2;//rebuild the codewords and save at the next decode
+            break;
+        }
+    }
+    if (is_chist2>1) SaveList();
+    callers_mx.unlock();
+    RequestPileupList();
+}
+void DecoderQ65::ErasePileupCallers()
+{
+    callers_mx.lock();
+    nhist2 = 0;
+    is_chist2 = 2;
+    QFile::remove(App_Path+"/settings/database/tsil.3q");
+    callers_mx.unlock();
+    RequestPileupList();
+}
+//////////////////////// END IC8TEM v34 ////////////////////////
 void DecoderQ65::q65_snr(int *dat4,double dtdec,double f0dec,int mode_q65,double &snr2)//int nused,
 {
     //! Estimate SNR of a decoded transmission by aligning the spectra of
@@ -385,7 +544,7 @@ bool DecoderQ65::isgrid4_rr73(QString s)
     return res;
 }
 #include <QDateTime>
-void DecoderQ65::q65_hist2(int nfreq,QString msg0)
+void DecoderQ65::q65_hist2(int nfreq,QString msg0,int iflag,int snr)//IC8TEM v34 iflag = bit 78 ('#'), snr
 {
     //msg0="LZ2FF LZ"+QString("%1").arg(yy)+"FG R KN23"; yy++;
     //qDebug()<<"1111="<<msg0;
@@ -405,6 +564,7 @@ void DecoderQ65::q65_hist2(int nfreq,QString msg0)
         g4=msg.mid(i2+1,4); //g4=msg(i2+1:i2+4)                     //!Extract DX grid
     }
     if (c6.isEmpty() || c6.count()>6) return; //LZ2HVV
+    QMutexLocker lk(&callers_mx);//IC8TEM v34
     bool newcall=true;
     for (int i = 0; i < nhist2; ++i)
     {
@@ -413,6 +573,9 @@ void DecoderQ65::q65_hist2(int nfreq,QString msg0)
             newcall=false; //refresh time and freq for this user
             callers[i].nsec=QDateTime::currentDateTimeUtc().toTime_t();
             callers[i].nfreq=nfreq;
+            callers[i].copied=(iflag==1);//IC8TEM v34 a later decode without '#' removes it (as WSJT-X 3.2)
+            callers[i].tp=s_time;
+            callers[i].snr=snr;
             is_chist2 = 1; //qDebug()<<"update"<<callers[i].call<<callers[i].nfreq<<callers[i].nsec;
             break;
         }
@@ -429,6 +592,10 @@ void DecoderQ65::q65_hist2(int nfreq,QString msg0)
         callers[nhist2].nsec=QDateTime::currentDateTimeUtc().toTime_t();
         callers[nhist2].nfreq=nfreq;
         callers[nhist2].moonel=0;
+        if (s_q65pileup) callers[nhist2].moonel=MoonElGrid(g4,QDateTime::currentDateTimeUtc());//IC8TEM v34
+        callers[nhist2].copied=(iflag==1);
+        callers[nhist2].tp=s_time;
+        callers[nhist2].snr=snr;
         nhist2++;
         is_chist2 = 1;
     } //qDebug()<<"Save="<<newcall<<c6<<g4<<nfreq;
@@ -488,7 +655,7 @@ void DecoderQ65::q65_set_list2(QString mycall,QString hiscall,QString hisgrid)
     int jmax=nhist2;
     if (std && isgrid4_rr73(hisgrid.mid(0,4)))//if(std .and. isgrid(hisgrid(1:4))) then
     {
-        jmax=fmin(MAX_CALLERS,nhist2+1);//jmax=fmin(MAX_CALLERS,nhist2+1)
+        jmax=fmin(MAX_CALLERS+1,nhist2+1);//jmax=fmin(MAX_CALLERS,nhist2+1)  IC8TEM v34 his call also with 40 callers (WSJT-X 3.2 MAX_CALLERS=50)
         for (int j = 0; j < nhist2; ++j)
         {
             if (callers[j].call == hiscall)//if(callers(j)%call .eq. hiscall(1:6)) then
@@ -519,25 +686,31 @@ void DecoderQ65::q65_set_list2(QString mycall,QString hiscall,QString hisgrid)
             if (k==3) msg.append(" RR73");
             if (k==4) msg.append(" 73");
 
-            int itone[90];
-            TGenQ65->genq65itone(msg,itone,false);
-            int i0 = 0;
-            int jj = 0;
-            for (int kk = 0; kk < 85; ++kk)
-            {//do k=1,85
-                if (kk==isync[i0]-1)
-                {
-                    i0++;
-                    continue;
+            // IC8TEM v34 (WSJT-X 3.2): both values of bit 78, a caller may or may not have
+            // set it (copied our last transmission), both must be exact candidates
+            for (int iflag = 0; iflag < 2; ++iflag)
+            {
+                if (i>=MAX_NCW) break;
+                int itone[90];
+                TGenQ65->genq65itone(msg,itone,false,iflag);
+                int i0 = 0;
+                int jj = 0;
+                for (int kk = 0; kk < 85; ++kk)
+                {//do k=1,85
+                    if (kk==isync[i0]-1)
+                    {
+                        i0++;
+                        continue;
+                    }
+                    codewords_[i][jj]=itone[kk];
+                    jj++;
                 }
-                codewords_[i][jj]=itone[kk];
-                jj++;
+                codewords_[i][jj]=0;
+                //QString sss;
+                //for (int x = 0; x < 63; ++x) sss.append(QString("%1").arg((int)codewords_[i][x]));
+                //qDebug()<<"msg"<<sss;
+                i++;
             }
-            codewords_[i][jj]=0;
-            //QString sss;
-            //for (int x = 0; x < 63; ++x) sss.append(QString("%1").arg((int)codewords_[i][x]));
-            //qDebug()<<"msg"<<sss;
-            i++;
         }
     }
     ncw = i;
@@ -1542,7 +1715,7 @@ static const int naptypes_q65[6][4]=
     {//gjhghghj
         {1,2,0,0},{2,3,0,0},{2,3,0,0},{3,4,5,6},{3,4,5,6},{3,1,2,0}
     };
-void DecoderQ65::q65_ap(int nQSOprogresst,int ipass,int cont_id,int cont_type,bool lapcqonly,
+void DecoderQ65::q65_ap(int nQSOprogresst,int ipass,int cont_id,int cont_type,bool lq65pileup,bool lapcqonly,
                         int &iaptypet,int *apsym0t,bool *apmaskt,bool *apsymbolst)
 {
     /*! nQSOprogress
@@ -1731,11 +1904,16 @@ void DecoderQ65::q65_ap(int nQSOprogresst,int ipass,int cont_id,int cont_type,bo
             apmaskt[74]=1;
             apmaskt[75]=1;
             apmaskt[76]=1;
-            apmaskt[77]=1;
             apsymbolst[74]=0;
             apsymbolst[75]=0;
             apsymbolst[76]=1;
-            apsymbolst[77]=0;
+            // IC8TEM v34 (WSJT-X 3.2): Q65 Pileup uses bit 78 for "copied the last transmission",
+            // the other activities keep the known-zero bit
+            if (!lq65pileup)
+            {
+                apmaskt[77]=1;
+                apsymbolst[77]=0;
+            }
         }
         else if (cont_type==3) //then ! Field Day
         {
@@ -1890,7 +2068,7 @@ void DecoderQ65::q65_dec_q012(float *s3_1fa,double &snr2,int *dat4,int &idec, in
         if (ipass>=1)//if(ipass.ge.1) then
         {
             //! Subsequent passes use AP information appropiate for nQSOprogress
-            q65_ap(nQSOprogress,ipass,cont_id,cont_type,lapcqonly,iaptype,apsym0,apmask1,apsymbols1);
+            q65_ap(nQSOprogress,ipass,cont_id,cont_type,false,lapcqonly,iaptype,apsym0,apmask1,apsymbols1);//IC8TEM v34 false as WSJT-X q65.f90
             /*write(c78,1050) apmask1
             1050    format(78i1)
             read(c78,1060) apmask
@@ -2580,6 +2758,7 @@ void DecoderQ65::q65_decode0(double *iwave,double nfa0,double nfb0,double fqso,i
         cont_id = s_cont_id;
         cont_type = s_cont_type;
     }
+    const bool lq65pileup = (s_q65pileup && !f_multi_answer_modq65);//IC8TEM v34 activity Q65 Pileup
 
     bool real_dec = false;
     QString hv_dec = "?";
@@ -2729,15 +2908,29 @@ void DecoderQ65::q65_decode0(double *iwave,double nfa0,double nfb0,double fqso,i
         sl_hisgrid=hisgrid;
     }
 
+    callers_mx.lock();//IC8TEM v34 the GUI can remove callers
     if (cont_type==1) //int nhist2=0; 270rc1
     {
         if (nhist2>0 && nhist2<=MAX_CALLERS)
         {
-            unsigned int now = QDateTime::currentDateTimeUtc().toTime_t();
+            QDateTime utcnow = QDateTime::currentDateTimeUtc();
+            unsigned int now = utcnow.toTime_t();
             for (int i = 0 ; i < nhist2; ++i)
             {
                 float hours=(float)(now - callers[i].nsec)/3600.0; //qDebug()<<now<<i<<nhist2<<callers[i].call;
-                if (hours>24.0)
+                bool drop = (hours>24.0);
+                // IC8TEM v34 (WSJT-X get_q3list): Q65 Pileup drops the callers whose Moon is more
+                // than 5 degrees below the horizon, not when decoding files
+                if (!drop && lq65pileup && !s_fopen65)
+                {
+                    int el = MoonElGrid(callers[i].grid,utcnow);
+                    if (el>-99)
+                    {
+                        callers[i].moonel = el;
+                        if (el < -5) drop = true;
+                    }
+                }
+                if (drop)
                 {
                     for (int x = i; x < nhist2-1; ++x) callers[x]=callers[x+1];
                     nhist2--;
@@ -2770,6 +2963,7 @@ void DecoderQ65::q65_decode0(double *iwave,double nfa0,double nfb0,double fqso,i
         qDebug()<<"Call or Loc Cahnged"<<mycall<<hiscall<<hisgrid;*/
         //qDebug()<<"set_list ncw="<<ncw;
     }
+    callers_mx.unlock();//IC8TEM v34
     /*static bool fff = false;
     static unsigned int ttry_now = 0;
     if (!fff) ttry_now = QDateTime::currentDateTimeUtc().toTime_t();
@@ -2836,7 +3030,7 @@ void DecoderQ65::q65_decode0(double *iwave,double nfa0,double nfb0,double fqso,i
         if (ipass>=1)
         {
             //! Subsequent passes use AP information appropiate for nQSOprogress
-            q65_ap(nQSOprogress,ipass,cont_id,cont_type,lapcqonly,iaptype,apsym0,apmask1,apsymbols1);
+            q65_ap(nQSOprogress,ipass,cont_id,cont_type,lq65pileup,lapcqonly,iaptype,apsym0,apmask1,apsymbols1);
             int z = 0;
             for (int i = 0; i < 13; ++i)
             {
@@ -2930,14 +3124,17 @@ c100:
             f0decodes[ndecodes]=f0dec;
             if (ndecodes<MSX_DEC-1) ndecodes++;
             int df_hv = (f0dec-nftx);
+            const int iflagdec = (dat4[12] & 1);//IC8TEM v34 recover the spare 78th bit (WSJT-X 3.2)
             if (idec >= 0) sidec = "Q"+QString("%1").arg(idec);
             if (nused>= 2) sidec.append(QString("%1").arg(nused));
             sidec.append(drft);
+            if (iflagdec==1) sidec.append("#");//IC8TEM v34 the sender copied our last transmission
             PrintMsg(s_time,snr2,dtdec,df_hv,decoded,(int)f0dec,sidec,hv_dec,f_only_one_color,have_dec);
             real_dec = true;
+            CheckDxCopied(decoded);//IC8TEM v34
             QString cc = "";
             QString gg = "";
-            if (cont_type==1) q65_hist2((int)f0dec,decoded);
+            if (cont_type==1) q65_hist2((int)f0dec,decoded,iflagdec,(int)snr2);
             else q65_hist((int)f0dec,decoded,cc,gg);//2.55 rtue=write false=find
         }
     }
@@ -3025,7 +3222,7 @@ c100:
             if (ipass>=1)
             {
                 //! Subsequent passes use AP information appropiate for nQSOprogress
-                q65_ap(nQSOprogress,ipass,cont_id,cont_type,lapcqonly,iaptype,apsym0,apmask1,apsymbols1);
+                q65_ap(nQSOprogress,ipass,cont_id,cont_type,lq65pileup,lapcqonly,iaptype,apsym0,apmask1,apsymbols1);
                 int z = 0;
                 for (int i = 0; i < 13; ++i)
                 {
@@ -3090,15 +3287,18 @@ c200://270rc1
                 //f0dec=f1;
                 q65_snr(dat4,dtdec,f0dec,mode_q65,snr2);//nused,
                 int df_hv = (f0dec-nftx);
+                const int iflagdec = (dat4[12] & 1);//IC8TEM v34 recover the spare 78th bit (WSJT-X 3.2)
                 //hv_dec = "StdM";
                 //if (ipass>=1) hv_dec = "ApM"+QString("%1").arg(iaptype);
                 if (idec >= 0) sidec = "Q"+QString("%1").arg(idec);
                 if (nused>= 2) sidec.append(QString("%1").arg(nused));
+                if (iflagdec==1) sidec.append("#");//IC8TEM v34 the sender copied our last transmission
                 PrintMsg(s_time,snr2,dtdec,df_hv,decoded,(int)f0dec,sidec,hv_dec,f_only_one_color,have_dec);//!Successful decode, were done
                 real_dec = true;
+                CheckDxCopied(decoded);//IC8TEM v34
                 QString cc = "";
                 QString gg = "";
-                if (cont_type==1) q65_hist2((int)f0dec,decoded);//nint(f0dec),
+                if (cont_type==1) q65_hist2((int)f0dec,decoded,iflagdec,(int)snr2);//nint(f0dec),
                 else q65_hist((int)f0dec,decoded,cc,gg);//2.55 rtue=write false=find
                 //break; // next candidate
             }
@@ -3159,6 +3359,7 @@ void DecoderQ65::q65_decode(double *iwave,double nfa0,double nfb0,double fqso,in
     if (s_mousebutton==3) lagain = true;
     for (int i = 0; i < MSX_NQF ; ++i) nqf[i] = 0;
     lnewdat = true;
+    dx_copied_pass = false;//IC8TEM v34
     //double ntol = ftol;
     //ftol = (nfb-nfa)/2.0;
 
@@ -3192,5 +3393,21 @@ void DecoderQ65::q65_decode(double *iwave,double nfa0,double nfb0,double fqso,in
             	double xxmax = fmax(10*mode_q65,(int)(100.0/df)); //ORG->ia2=max(ia,10*mode_q65,nint(100.0/df))
             	ia2=fmax(ia,xxmax);*/
         }
+    }
+    // IC8TEM v34 Q65 Pileup (WSJT-X 3.2): did this period copy his call? The next transmission
+    // to him then carries bit 78. A manual decode can only set it, a new period also clears it.
+    if (s_q65pileup && !f_multi_answer_modq65 && !s_fopen65)
+    {
+        QString hb = BaseOfCallQ65(s_hiscall);
+        if (s_mousebutton!=1 && s_mousebutton!=3) emit EmitQ65CopiedDx(dx_copied_pass ? hb : QString(""));
+        else if (dx_copied_pass) emit EmitQ65CopiedDx(hb);
+    }
+    if (s_cont_type==1 && !f_multi_answer_modq65)//IC8TEM v34 the callers list window
+    {
+        QStringList l;
+        callers_mx.lock();
+        l = PileupListLocked();
+        callers_mx.unlock();
+        emit EmitPileupList(l);
     }
 }

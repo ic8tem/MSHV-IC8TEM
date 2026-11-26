@@ -286,6 +286,18 @@
         <source>TO RADIO Call Decoded Again Sets Auto Is On</source>
         <translation>Indicativul din Catre RADIO decodat din nou seteaza auto Pornit</translation>
     </message>
+    <message>
+        <source>Q65 Pileup</source>
+        <translation>Q65 Pileup</translation>
+    </message>
+    <message>
+        <source>right-click on a Q65 button</source>
+        <translation>clic dreapta pe un buton Q65</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Stații care cheamă</translation>
+    </message>
 </context>
 <context>
     <name>HvPwrLink</name>
@@ -546,6 +558,85 @@
     <message>
         <source>no answer</source>
         <translation>niciun răspuns</translation>
+    </message>
+</context>
+<context>
+    <name>HvQ65PileupW</name>
+    <message>
+        <source>Q65 Pileup - Callers</source>
+        <translation>Q65 Pileup - Stații care cheamă</translation>
+    </message>
+    <message>
+        <source>Freq</source>
+        <translation>Frecv.</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Indicativ</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Locator</translation>
+    </message>
+    <message>
+        <source>El</source>
+        <translation>Elev.</translation>
+    </message>
+    <message>
+        <source>Age (h)</source>
+        <translation>Vechime (h)</translation>
+    </message>
+    <message>
+        <source>Audio frequency of the last decode (Hz)</source>
+        <translation>Frecvența audio a ultimei decodări (Hz)</translation>
+    </message>
+    <message>
+        <source>Moon elevation at the caller's locator (degrees)</source>
+        <translation>Elevația Lunii la locatorul celui care cheamă (grade)</translation>
+    </message>
+    <message>
+        <source>Hours since the last decode</source>
+        <translation>Ore de la ultima decodare</translation>
+    </message>
+    <message>
+        <source># = the caller copied our last transmission</source>
+        <translation># = cel care cheamă a recepționat ultima noastră emisie</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Reîmprospătare</translation>
+    </message>
+    <message>
+        <source>Erase list</source>
+        <translation>Șterge lista</translation>
+    </message>
+    <message>
+        <source>Click: answer with Tx3 (R + locator). Ctrl+click: remove the caller.</source>
+        <translation>Clic: răspunde cu Tx3 (R + locator). Ctrl+clic: elimină pe cel care cheamă.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours; removed when their Moon is more than 5 degrees below the horizon or when the QSO is logged.</source>
+        <translation>Până la 40 de stații, păstrate 24 de ore; eliminate când Luna lor este cu peste 5 grade sub orizont sau când QSO-ul este trecut în log.</translation>
+    </message>
+    <message>
+        <source>Up to 40 callers, kept 24 hours, used for a priori decoding in the activities with locator exchange.</source>
+        <translation>Până la 40 de stații, păstrate 24 de ore, folosite pentru decodarea a priori în activitățile cu schimb de locator.</translation>
+    </message>
+    <message>
+        <source>The list is used in Q65 mode.</source>
+        <translation>Lista este folosită în modul Q65.</translation>
+    </message>
+    <message>
+        <source>Q65 Pileup is off: Q65 menu, or right-click on a Q65 mode button.</source>
+        <translation>Q65 Pileup este oprit: meniul Q65 sau clic dreapta pe un buton de mod Q65.</translation>
+    </message>
+    <message>
+        <source>Callers: %1</source>
+        <translation>Stații: %1</translation>
+    </message>
+    <message>
+        <source>Erase the list of Q65 callers?</source>
+        <translation>Ștergeți lista stațiilor Q65 care cheamă?</translation>
     </message>
 </context>
 </TS>
