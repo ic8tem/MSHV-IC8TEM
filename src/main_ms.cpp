@@ -5756,7 +5756,7 @@ void Main_Ms::keyPressEvent(QKeyEvent* event)
     //qDebug()<<"KeyHex="<<QString::number(event->key(),16);
 }
 //IC8TEM: the "Txing" bar fills from left to right as the T/R period goes by:
-//green while receiving, red while transmitting
+//grey while receiving (v35, was green: it looked like a transmission), red while transmitting
 void Main_Ms::UpdateTxBar()
 {
     if (!l_tx_text) return;
@@ -5769,9 +5769,10 @@ void Main_Ms::UpdateTxBar()
     if (p > 1.0) p = 1.0;
     QString fill;
     if (f_tx_busy) fill = dsty ? "rgb(170,0,0)" : "rgb(255,70,70)";
-    else fill = dsty ? "rgb(0,110,40)" : "rgb(120,220,120)";
+    else fill = dsty ? "rgb(105,105,105)" : "rgb(178,178,178)";
     QString rest = f_tx_busy ? (dsty ? QString("rgb(90,20,20)") : QString("rgb(255,200,200)"))
-                   : l_tx_text->palette().color(QPalette::Button).name();
+                   : palette().color(QPalette::Button).name();//v35 window palette: the label one, after the
+                                                              //first gradient, gave black
     double p2 = p + 0.001;
     if (p2 > 1.0) p2 = 1.0;
     l_tx_text->setStyleSheet(QString("QLabel{background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"

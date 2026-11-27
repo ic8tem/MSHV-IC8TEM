@@ -224,6 +224,7 @@ public slots:
     void SetDopplerFreqs(bool active,double rx_hz,double tx_hz);//Doppler tracking (IC8TEM mod)
 private slots:
     void DopResendRx();//Doppler tracking (IC8TEM mod)
+    void ReopenSerialAfterNet();//IC8TEM v35
     
 private:
 	bool f_msf;//2.76sf
@@ -245,6 +246,8 @@ private:
     QComboBox *cb_baud2;
     bool block_save_net;
 	bool net_active;
+    bool rig_is_net;//IC8TEM v35 the selected radio is a network/Hamlib/Icom LAN one
+    int reopen_tries;//IC8TEM v35
     bool hamlib_active;//IC8TEM Icom IC-7300 (Hamlib): MSHV Port and Baud Rate, no MSHV serial port
     bool hamlib_block;
     void HamlibApply();

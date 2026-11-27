@@ -1,5 +1,9 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.35
+* *Rig Control*: dopo una prova con una radio di rete o Hamlib, la radio normale su porta seriale (per esempio **Icom IC-9700**) parte pulita: la riga rossa della radio precedente (per esempio *Hamlib: COM3 115200: Access denied*) torna a *Disconnected*, il test PTT segue la porta e MSHV riapre da solo la porta indicata in *Port*. Prima, scegliendo di nuovo la stessa porta, non si riapriva.
+* La barra **Txing** è **grigia in ricezione** e rossa solo in trasmissione: verde sembrava una trasmissione in corso. Il resto della barra ha di nuovo il colore dei pulsanti (era nero).
+
 ## 2.76.7-ic8tem.34
 * **Q65 Pileup** come in WSJT-X 2.7 e 3.2, per le DXpedition EME con tanti chiamanti deboli: **Mode › Q65 › Q65 Pileup**, oppure **clic destro su un pulsante Q65**. Vedi [[Q65 Pileup|Q65-Pileup]].
 * Finestra **Q65 Pileup - Callers**: gli ultimi 40 chiamanti (24 ore) con frequenza, nominativo, locatore, **elevazione della Luna** al loro locatore ed età; **clic = risposta con Tx3**, Ctrl+clic = togli dall'elenco.

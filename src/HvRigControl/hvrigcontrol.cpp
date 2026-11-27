@@ -252,6 +252,8 @@ HvRigControl::HvRigControl( QWidget *parent )
     s_rig_full_name = "None";//2.76.1
     block_save_net = false;
     net_active = false;
+    rig_is_net = false;//IC8TEM v35
+    reopen_tries = 0;
     hamlib_active = false;//IC8TEM
     hamlib_block = false;
     netServPort[0].serv="127.0.0.1";
@@ -1223,6 +1225,9 @@ void HvRigControl::SetLanFieldsEnabled(bool f)//IC8TEM Icom LAN
 }
 void HvRigControl::SetNetConnInfo(QString s,bool f1,bool f2)
 {
+    //IC8TEM v35: a late message of a network radio no longer selected (its object is deleted later)
+    //must not change the label, the PTT test and the polling of the serial radio chosen now
+    if (!rig_is_net) return;
     l_con_info->setText(s);
     if (f1 && f2)
     {
@@ -1720,6 +1725,8 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
 
     s_net_model_id = net_model_id;
     s_rig_name = sett.name;
+    const bool was_net_rig = rig_is_net;//IC8TEM v35
+    rig_is_net = (sett.port_type==RIG_PORT_NETWORK);//IC8TEM v35
     ////// net //////////
     block_save_net = true;
     l_tcisrate->setHidden(true);
@@ -1826,6 +1833,18 @@ void HvRigControl::SetRigSet(RigSet sett, int have_read_data_rts_on,int net_mode
         TCPServer->setEnabled(true);
         TCPPort->setEnabled(true);
         gb_net->setEnabled(false);
+        //IC8TEM v35: the message of the network radio used before (e.g. "Hamlib: COM3 115200: Access denied")
+        //does not stay: as at the start of MSHV
+        l_con_info->setText("<font color='red'>"+tr("Disconnected")+"</font>");
+        if (was_net_rig)
+        {
+            //IC8TEM v35: after a network radio the serial port of MSHV is closed. With Icom (Hamlib) the port
+            //shown in Port was opened by Hamlib: choosing it again does not reopen it. MSHV opens it now,
+            //when Hamlib has freed it (Windows needs a moment), and the PTT test follows the port.
+            pb_test_port->setEnabled(false);
+            reopen_tries = 0;
+            QTimer::singleShot(1500, this, SLOT(ReopenSerialAfterNet()));
+        }
     }
     block_save_net = false;
     ////// end net //////////
@@ -2293,6 +2312,18 @@ void HvRigControl::SetDopplerFreqs(bool active,double rx_hz,double tx_hz)
         SetFreq(QString("%1").arg(want),3);//3=frq,no mod
         dop_last_set = want;
     }
+}
+void HvRigControl::ReopenSerialAfterNet()//IC8TEM v35: see SetRigSet()
+{
+    if (rig_is_net || hamlib_active || omnirig_active || port->isOpen())
+    {
+        reopen_tries = 0;
+        return;
+    }
+    PortNameChanged(cb_port->currentText());
+    if (!port->isOpen() && cb_port->currentText()!="None" && ++reopen_tries < 5)
+        QTimer::singleShot(1500, this, SLOT(ReopenSerialAfterNet()));// the port may still be busy
+    else reopen_tries = 0;
 }
 void HvRigControl::DopResendRx()
 {
