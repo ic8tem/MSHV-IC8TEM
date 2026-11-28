@@ -1,6 +1,6 @@
 QT += widgets axcontainer network websockets
 QMAKE_CXXFLAGS += -std=gnu++11 -pedantic-errors
-CONFIG += release warn_on exceptions_off
+CONFIG += release warn_on exceptions_off optimize_full
 DESTDIR = bin
 OBJECTS_DIR = build
 MOC_DIR = build

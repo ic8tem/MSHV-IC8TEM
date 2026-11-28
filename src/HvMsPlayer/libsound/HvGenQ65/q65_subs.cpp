@@ -501,7 +501,7 @@ static float pd_norm_tab(float *ppd,int c0)
     	ppd[0] = 1.f;
     	return t;		
 	}
-	c1 = pow(2,c0);
+	c1 = 1 << c0;//IC8TEM v36: exact 2^c0 without the pow() call, same value
 	//if	  (c0==1) c1=2;
 	//else if (c0==2) c1=4;
 	//else if (c0==3) c1=8;

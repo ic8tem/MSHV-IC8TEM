@@ -25,8 +25,9 @@
 #include "../HvMsPlayer/libsound/HvGenQ65/q65_subs.h"
 #include "decoderpom.h"
 
-#define MAX_NCW 411 //IC8TEM v34 (WSJT-X 3.2): 41 calls (40 callers + his call) x 5 kinds x 2 values of bit 78
-#define MAX_CALLERS 40 //(40+hiscall)=41 41*5=205 ??? 
+#define MAX_CALLERS 50 //IC8TEM v36 (WSJT-X 3.3 Q65_CALLER_CAPACITY) was 40
+#define MAX_NCW 511 //IC8TEM v36 (WSJT-X 3.3 Q65_AP_LIST_CAPACITY): 1 + 10 x (50 callers + his call); v34 was 411
+#define Q65_SETLIST_NCW 206 //IC8TEM v36 list for the DX call (q65_set_list), 411 for a standard call with /R or /P
 
 class DecoderQ65 : public QObject
 {
@@ -138,6 +139,7 @@ private:
     int codewords_1da[MAX_NCW*63+100];//IC8TEM v34 was 14000 (206*63=12978)
     void q65_set_list2(QString,QString,QString);         
     void q65_set_list(QString,QString,QString);   
+    bool q65_stdcall(QString c);//IC8TEM v36 (WSJT-X 3.3) a standard call with /R or /P counts as standard
     void smo121(double *x,int beg,int nz); // from jt65  
     void q65_symspec(double *iwave,int iz,int jz,double s1_[800][7000]);
     void q65_ccf_85(double s1_[800][7000],int iz,int jz,double nfqso,int ia,int ia2,

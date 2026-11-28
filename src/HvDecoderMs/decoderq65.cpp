@@ -503,11 +503,16 @@ void DecoderQ65::q65_snr(int *dat4,double dtdec,double f0dec,int mode_q65,double
 void DecoderQ65::SetClearAvgQ65all()
 {
     //qDebug()<<"Clear ALL";
+    //IC8TEM v36: only the part in use, jz0 x iz0, can hold data: q65_dec0 clears the new part before any
+    //use when the size changes. Writing zeros over the whole 2x800x7000 array (89 MB) when leaving Q65 put
+    //all of it in RAM for nothing. The values read afterwards are the same.
+    const int jc = (jz0 < 798) ? jz0 : 798;
+    const int zc = (iz0 < 6998) ? iz0 : 6998;
     for (int i = 0; i < 2; ++i)
     {
-        for (int j = 0; j < 798 ; ++j)
+        for (int j = 0; j < jc ; ++j)
         {
-            for (int z = 0; z < 6998 ; ++z) s1a_[i][j][z]=0.0;//s1a=0.
+            for (int z = 0; z < zc ; ++z) s1a_[i][j][z]=0.0;//s1a=0.
         }
     }
     navg[0]=0;
@@ -518,9 +523,11 @@ void DecoderQ65::q65_clravg()
 {
     //! Clear the averaging array to start a new average.
     //s1a_[2][800][7000] = 0.0;   //if(allocated(s1a)) s1a(:,:,iseq)=0.
-    for (int j = 0; j < 798 ; ++j)
+    const int jc = (jz0 < 798) ? jz0 : 798;//IC8TEM v36: only the part in use (see SetClearAvgQ65all)
+    const int zc = (iz0 < 6998) ? iz0 : 6998;
+    for (int j = 0; j < jc ; ++j)
     {
-        for (int z = 0; z < 6998 ; ++z) s1a_[iseq][j][z]=0.0;//s1a=0.
+        for (int z = 0; z < zc ; ++z) s1a_[iseq][j][z]=0.0;//s1a=0.
     }
     navg[iseq]=0;
     emit EmitAvgSavesQ65(navg[0],navg[1]);
@@ -584,7 +591,13 @@ void DecoderQ65::q65_hist2(int nfreq,QString msg0,int iflag,int snr)//IC8TEM v34
     {
         if (nhist2>MAX_CALLERS-1)
         {
-            for (int i = 0; i < MAX_CALLERS-1; ++i) callers[i]=callers[i+1];
+            // IC8TEM v36 (WSJT-X 3.3): drop the caller heard least recently, not the first of the list
+            int oldest = 0;
+            for (int i = 1; i < nhist2; ++i)
+            {
+                if (callers[i].nsec < callers[oldest].nsec) oldest = i;
+            }
+            for (int i = oldest; i < nhist2-1; ++i) callers[i]=callers[i+1];
             nhist2--;
         }
         callers[nhist2].call=c6;
@@ -650,12 +663,13 @@ void DecoderQ65::q65_hist(int if0,QString msg0,QString &dxcall,QString &dxgrid)/
 void DecoderQ65::q65_set_list2(QString mycall,QString hiscall,QString hisgrid)
 {
     ncw = 0;
+    if (nhist2<0 || nhist2>MAX_CALLERS) return;//IC8TEM v36 (WSJT-X 3.3)
     QString c6,g4;
     bool std = pomAll.isStandardCall(hiscall.trimmed());//call stdcall(hiscall,std)
     int jmax=nhist2;
     if (std && isgrid4_rr73(hisgrid.mid(0,4)))//if(std .and. isgrid(hisgrid(1:4))) then
     {
-        jmax=fmin(MAX_CALLERS+1,nhist2+1);//jmax=fmin(MAX_CALLERS,nhist2+1)  IC8TEM v34 his call also with 40 callers (WSJT-X 3.2 MAX_CALLERS=50)
+        jmax=nhist2+1;//IC8TEM v36 (WSJT-X 3.3) all 50 callers plus his call, 511-codeword list
         for (int j = 0; j < nhist2; ++j)
         {
             if (callers[j].call == hiscall)//if(callers(j)%call .eq. hiscall(1:6)) then
@@ -724,14 +738,33 @@ void DecoderQ65::q65_set_list2(QString mycall,QString hiscall,QString hisgrid)
         }
     }
 }
+bool DecoderQ65::q65_stdcall(QString c)//IC8TEM v36 (WSJT-X 3.3 q65_stdcall)
+{
+    // like stdcall, but a trailing /R or /P does not make a standard call nonstandard: such a call
+    // is still sent as a Type 1 message with the ipa/ipb flag set
+    c = c.trimmed();
+    if (c.count()>3 && (c.endsWith("/R") || c.endsWith("/P"))) c.chop(2);
+    return pomAll.isStandardCall(c);
+}
 void DecoderQ65::q65_set_list(QString mycall,QString hiscall,QString hisgrid)//2.61
 {
     ncw = 0;
     if (hiscall.isEmpty()) return;
-    ncw = MAX_NCW;
-
-    bool my_std  = pomAll.isStandardCall(mycall.trimmed());
-    bool his_std = pomAll.isStandardCall(hiscall.trimmed());
+    // IC8TEM v36: 206 candidates as WSJT-X (v34 had moved this list to MAX_NCW=411 by mistake: the
+    // last 205 were copies of "MyCall HisCall"). WSJT-X 3.3: a standard DX call with /R or /P also
+    // keeps the candidates of the former nonstandard path: CQ <call> without grid (207) and, with a
+    // standard MyCall, <MyCall> HisCall with nothing, RRR, RR73, 73 (208-211) and MyCall <HisCall>
+    // with a report or R-report (212-411).
+    bool my_std  = q65_stdcall(mycall);
+    bool his_std = q65_stdcall(hiscall);
+    ncw = Q65_SETLIST_NCW;
+    QString hc = hiscall.trimmed();
+    if (his_std && hc.count()>3 && (hc.endsWith("/R") || hc.endsWith("/P")))
+    {
+        ncw = Q65_SETLIST_NCW + 1;
+        if (my_std) ncw = 2*Q65_SETLIST_NCW - 1;//411
+    }
+    if (ncw > MAX_NCW) ncw = MAX_NCW;
 
     //QString msg0=mycall+" "+hiscall+" ";
     for (int i = 0; i < ncw; ++i)
@@ -765,7 +798,7 @@ void DecoderQ65::q65_set_list(QString mycall,QString hiscall,QString hisgrid)//2
         }
         if (i==5 && his_std) msg.append(" "+hisgrid.mid(0,4));
 
-        if (i>=6 && i<206)
+        if (i>=6 && i<Q65_SETLIST_NCW)
         {
             int isnr = -50 + (i-6)/2; //isnr = -50 + (i-7)/2 ss.append(QString("%1").arg(abs(s.toInt()),2,10,QChar('0')));
             if (((i+1) & 1)==1)
@@ -779,6 +812,22 @@ void DecoderQ65::q65_set_list(QString mycall,QString hiscall,QString hisgrid)//2
                 else msg.append(" R-"+QString("%1").arg(abs(isnr),2,10,QChar('0')));
             }
 
+        }
+        if (i==Q65_SETLIST_NCW) msg = "CQ "+hiscall;//IC8TEM v36 (WSJT-X 3.3) 207: CQ <call> without grid
+        if (i>Q65_SETLIST_NCW && i<=Q65_SETLIST_NCW+4)//208-211
+        {
+            msg = "<"+mycall+"> "+hiscall;
+            if (i==Q65_SETLIST_NCW+2) msg.append(" RRR");
+            if (i==Q65_SETLIST_NCW+3) msg.append(" RR73");
+            if (i==Q65_SETLIST_NCW+4) msg.append(" 73");
+        }
+        if (i>Q65_SETLIST_NCW+4)//212-411: MyCall <HisCall> with a report or R-report, as 7-206
+        {
+            msg = mycall+" <"+hiscall+">";
+            int isnr = -50 + (i-(Q65_SETLIST_NCW+5))/2;
+            QString r = (isnr>-1) ? "+" : "-";
+            if (((i-(Q65_SETLIST_NCW+5)) & 1)==0) msg.append(" "+r+QString("%1").arg(abs(isnr),2,10,QChar('0')));
+            else msg.append(" R"+r+QString("%1").arg(abs(isnr),2,10,QChar('0')));
         }
         /*if (i<=9 || i>=200)
         {
@@ -958,6 +1007,7 @@ void DecoderQ65::q65_ccf_85(double s1_[800][7000],int iz,int jz,double nfqso,int
     double (*ccf_)[14000] = new double[310][14000];
     int itone[90];//integer itone(85)
     double best[MAX_NCW+10];//2.59 MAX_NCW 206
+    for (int i = 0; i < MAX_NCW+10; ++i) best[i]=0.0;//IC8TEM v36 was not set beyond ncw and read up to MAX_NCW
 
     ipk=0;
     jpk=0;
@@ -1066,9 +1116,11 @@ void DecoderQ65::q65_ccf_85(double s1_[800][7000],int iz,int jz,double nfqso,int
     if (imsg_best>-1) //if(imsg_best.gt.0) then
     {
         best[imsg_best]=0.0;
-        double tbest = pomAll.maxval_da_beg_to_end(best,0,MAX_NCW);
-        if (tbest == 0.0) tbest = 0.001;
-        better=ccf_best/tbest;//better=ccf_best/maxval(best)
+        int nb = ncw;//IC8TEM v36 maxval(best) over the ncw codewords of the list only
+        if (nb > MAX_NCW) nb = MAX_NCW;
+        double tbest = pomAll.maxval_da_beg_to_end(best,0,nb);
+        if (tbest > 0.0) better=ccf_best/tbest;//better=ccf_best/maxval(best)
+        //IC8TEM v36 (WSJT-X 3.3): if(maxval(best)>0.) better=ccf_best/maxval(best), else no q3 (was /0.001)
         //qDebug()<<"1="<<ccf_best<<tbest<<better;
     }
 
@@ -1180,26 +1232,22 @@ void DecoderQ65::q65_s1_to_s3(double s1_[800][7000],int iz,int jz,int ipk,int jp
     if (i1>0 && i2<iz)
     {
         int j=(j0+jpk-8); //j=j0+jpk-7
-        int n=0; //int nnn =0;
+        int nsym=0; //int nnn =0;
         for (int k = 0; k < 85 ; ++k)
         {//do k=1,85
             j=j+8;
             if (sync[k]>0.0) continue;
-            if (j>0 && j<jz)
+            // IC8TEM v36: as in WSJT-X, n=n+1 for every data symbol and s3(:,n) copied only when the
+            // column exists (j from 0); before, a missing first column moved all the later symbols
+            // to the wrong place (early signals)
+            if (j>=0 && j<jz)
             {
-                //int nn = 0;
-                //QString sss;
                 //s3(-64:LL-65,n)=s1(i1:i2,j)
-                for (int i = 0; i < i3; ++i)
-                {
-                    s3_1fa[n]=(float)s1_[j][i+i1];
-                    n++;
-                    //sss.append(QString("%1").arg((int)s3_1fa[n]));
-                    //nn++;
-                }
-                //nnn++; //qDebug()<<nn<<sss;
+                int n = nsym*i3;
+                for (int i = 0; i < i3; ++i) s3_1fa[n+i]=(float)s1_[j][i+i1];
             }
-        } //qDebug()<<nnn<<n;
+            nsym++;
+        }
     }
     q65_bzap(s3_1fa,LL);                   //!Zap birdies
 }
@@ -1711,6 +1759,12 @@ subroutine q65_write_red(iz,xdt,ccf2_avg,ccf2)
 end subroutine q65_write_red
 */
 #include "ft_all_ap_def.h"
+// IC8TEM v36 (WSJT-X 3.3 PACK77_TYPE1_RR73_TAIL): genq65 sends RR73 as 32403 (not the grid value
+// 32373 of FT8), the AP bits 59:77 must be the same: ir=0, 32403, i3=1
+static const bool mrr73_q65[19]=
+    {
+        0,1,1,1,1,1,1,0,1,0,0,1,0,0,1,1,0,0,1
+    };
 static const int naptypes_q65[6][4]=
     {//gjhghghj
         {1,2,0,0},{2,3,0,0},{2,3,0,0},{3,4,5,6},{3,4,5,6},{3,1,2,0}
@@ -1984,7 +2038,7 @@ void DecoderQ65::q65_ap(int nQSOprogresst,int ipass,int cont_id,int cont_type,bo
                 if (iaptypet==5)
                     apsymbolst[z+58]=m73_ft[z];//apsymbols(59:77)=m73
                 if (iaptypet==6)
-                    apsymbolst[z+58]=mrr73_ft[z];//apsymbols(59:77)=mrr73
+                    apsymbolst[z+58]=mrr73_q65[z];//apsymbols(59:77)=mrr73 IC8TEM v36 32403 (was mrr73_ft 32373)
             }
         }
         //HOUND = MSHV no
@@ -2138,9 +2192,14 @@ void DecoderQ65::q65_dec0(int iavg,double *iwave,double nfqso,
     df=12000.0/(double)nfft;    //!Freq resolution = baud
     istep=nsps/NSTEP;
     int iz=(int)(5000.0/df);                      //!Uppermost frequency bin, at 5000 Hz
-    double txt=85.0*(double)nsps/12000.0;
-    int jz=(int)((txt+1.0)*12000.0/(double)istep);       //!Number of symbol/NSTEP bins
-    if (nsps>=6912) jz=(int)((txt+2.0)*12000.0/(double)istep);  //!For TR 60 s and higher
+    //double txt=85.0*(double)nsps/12000.0;
+    //int jz=(int)((txt+1.0)*12000.0/(double)istep);       //!Number of symbol/NSTEP bins
+    //if (nsps>=6912) jz=(int)((txt+2.0)*12000.0/(double)istep);  //!For TR 60 s and higher
+    // IC8TEM v36 (WSJT-X 3.3): cover every complete symbol FFT window of the T/R period, so the late
+    // symbols of a delayed signal (EME delay) are not lost; jz stays odd, q65_symspec interpolates
+    // the columns in between. 793 for 15-60 s, 713 for 120 s, 687 for 300 s (s1_[800][7000])
+    int jz=(s_ntrperiod*12000-nsps)/istep + 1;
+    if (jz>799) jz=799;
 
     int ia=(int)(nfa/df);//ORG->int ia=(int)(ftol/df); ia=ntol/df
     int ia2=(int)(nfb/df);
@@ -2351,7 +2410,10 @@ void DecoderQ65::q65_dec0(int iavg,double *iwave,double nfqso,
         {//do w3t=1,jz
             for (int w3f = 0; w3f < iz ; ++w3f)
             {//do w3f=1,iz
-                int mm = w3f + int((drift*(double)w3t)/((double)jz*df));//mm=w3f + nint(drift*w3t/(jz*df))
+                //mm=w3f + nint(drift*w3t/(85*NSTEP*df)) IC8TEM v36 (WSJT-X 3.3) the drift is measured over the
+                //85-symbol transmission, was jz*df (and int instead of nint)
+                double zmm = (drift*(double)(w3t+1))/(85.0*(double)NSTEP*df);
+                int mm = w3f + (int)(zmm>=0.0 ? floor(zmm+0.5) : -floor(-zmm+0.5));
                 if (mm>=0 && mm<iz) s1w_[w3t][w3f] = s1_[w3t][mm]; //s1w(w3f,w3t)=s1(mm,w3t)
             }
         }

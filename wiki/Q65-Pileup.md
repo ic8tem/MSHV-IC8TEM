@@ -35,7 +35,7 @@ MSHV aveva già, dalla 2.72, l'attività *Pileup* (in *Options › Macros*, *Act
 
 ## L'elenco
 
-* Al massimo **40 chiamanti**, tenuti **24 ore**; a elenco pieno, per far posto a uno nuovo esce il primo entrato.
+* Al massimo **50 chiamanti** (dalla .36, come WSJT-X 3.3; prima 40), tenuti **24 ore**; a elenco pieno, per far posto a uno nuovo esce quello sentito meno di recente.
 * Entrano le stazioni decodificate mentre chiamano con il locatore (per esempio `IC8TEM K1ABC FN42` oppure `IC8TEM K1ABC R FN42`), solo dalle decodifiche dal vivo, non da un file aperto. Come in WSJT-X non entrano i nominativi composti (`/P`, `/MM`…) né quelli di più di 6 caratteri.
 * L'elenco alimenta la **decodifica a priori** (tipo `Q3` nella colonna *Type*): i messaggi successivi dei chiamanti si decodificano qualche dB più in basso.
 * Con il Pileup acceso, a ogni decodifica escono i chiamanti con la **Luna più di 5° sotto l'orizzonte** al loro locatore: non possono più sentirti. L'elevazione è calcolata per il centro del quadrato con le formule della Luna già presenti in MSHV (scarto di circa mezzo grado rispetto alle effemeridi; WSJT-X usa le effemeridi JPL).
@@ -50,4 +50,4 @@ MSHV aveva già, dalla 2.72, l'attività *Pileup* (in *Options › Macros*, *Act
 
 ## Origine
 
-Funzione e algoritmi di **WSJT-X 2.7.0 e 3.2.0-rc1** di Joe Taylor K1JT e del WSJT Development Group (GPLv3), portati in MSHV; la prima parte (attività *Pileup* ed elenco) è di LZ2HV in MSHV 2.72. Vedi [[Riconoscimenti|Credits]].
+Funzione e algoritmi di **WSJT-X 2.7.0, 3.2.0-rc1 e 3.3.0-beta8** di Joe Taylor K1JT e del WSJT Development Group (GPLv3), portati in MSHV; la prima parte (attività *Pileup* ed elenco) è di LZ2HV in MSHV 2.72. Vedi [[Riconoscimenti|Credits]].

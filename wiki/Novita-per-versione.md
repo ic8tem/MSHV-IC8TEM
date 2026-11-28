@@ -1,5 +1,13 @@
 # Novità per versione
 
+## 2.76.7-ic8tem.36
+* **Decodifica Q65 come in WSJT-X 3.3.0-beta8**: gli spettri coprono tutto il periodo T/R, così gli ultimi simboli di un segnale in ritardo (delay EME) non vanno più persi. Nelle prove, Q65-60A con 2,5–3,5 s di ritardo a −31 dB: 4 decodifiche su 12 (la .35: 1 su 12).
+* Di nuovo decodificati i **segnali in anticipo di 0,8 s o più** (Q65-30): 12 su 12 a −22 dB, la .35 nessuno. Era un difetto del porting: tutti i simboli finivano spostati di un posto.
+* **Q65 Pileup**: l'elenco tiene **50 chiamanti** (erano 40); a elenco pieno esce quello sentito meno di recente. La lista a priori arriva a 511 messaggi. Vedi [[Q65 Pileup|Q65-Pileup]].
+* Con un corrispondente che finisce con **/R o /P** la lista a priori contiene anche i messaggi con il nominativo tra `< >` (per esempio `<IC8TEM> DL3WDG/R RR73`: 3 su 3, la .35 1 su 3).
+* Correzione: dalla .34 la lista a priori del corrispondente conteneva 205 copie dello stesso messaggio; ora sono 206 messaggi diversi come in WSJT-X, e la decodifica Q65 è più veloce.
+* **Decodificatori più veloci, stesse decodifiche**: la versione Windows 64 bit è compilata con più ottimizzazioni (-O3). FT8 circa un quarto più veloce, Q65 e MSK144 dal 5 al 10%. Dopo aver usato Q65 il programma occupa circa 68 MB di RAM in meno. FT8, FT4, MSK144 e JT65B danno le stesse decodifiche della .35.
+
 ## 2.76.7-ic8tem.35
 * *Rig Control*: dopo una prova con una radio di rete o Hamlib, la radio normale su porta seriale (per esempio **Icom IC-9700**) parte pulita: la riga rossa della radio precedente (per esempio *Hamlib: COM3 115200: Access denied*) torna a *Disconnected*, il test PTT segue la porta e MSHV riapre da solo la porta indicata in *Port*. Prima, scegliendo di nuovo la stessa porta, non si riapriva.
 * La barra **Txing** è **grigia in ricezione** e rossa solo in trasmissione: verde sembrava una trasmissione in corso. Il resto della barra ha di nuovo il colore dei pulsanti (era nero).
